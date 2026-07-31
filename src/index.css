@@ -181,29 +181,26 @@ body {
   line-height: 1;
 }
 
-/* Collapsed body: hidden via max-height + visibility (NOT unmounted) so the
-   iframe stays alive and playback continues. Smooth expand/collapse. */
+/* The body is a CLIP WINDOW directly under the pill. The inner drawer slides
+   down out of it (and retracts back up behind the pill) via translateY, giving
+   a "pull-down shade" motion. The iframe is never unmounted — collapsing just
+   translates the drawer up out of view and then removes it from hit-testing —
+   so playback continues while collapsed and across screen navigation.
+
+   Collapsed: the clip window has 0 height (so it occupies no layout space) and
+   the drawer is translated fully up, tucked behind the pill. */
 .spotify-panel__body {
   overflow: hidden;
   max-height: 0;
-  visibility: hidden;
-  opacity: 0;
-  transition:
-    max-height 0.28s ease,
-    opacity 0.2s ease,
-    visibility 0s linear 0.28s;
+  transition: max-height 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .spotify-panel--expanded .spotify-panel__body {
-  max-height: 180px; /* snugly fits the compact 80px embed + link + padding */
-  visibility: visible;
-  opacity: 1;
-  transition:
-    max-height 0.28s ease,
-    opacity 0.2s ease,
-    visibility 0s linear 0s;
+  max-height: 200px; /* clip window tall enough for the drawer + margins */
 }
 
+/* The drawer itself: starts translated up (hidden behind the pill / clipped by
+   the body window) and slides down to rest when expanded. */
 .spotify-panel__inner {
   display: flex;
   flex-direction: column;
@@ -214,6 +211,23 @@ body {
   border: 1px solid var(--color-border);
   border-radius: 1rem;
   box-shadow: 0 4px 16px rgb(47 51 48 / 0.08);
+  transform: translateY(-110%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.24s ease,
+    visibility 0s linear 0.32s;
+}
+
+.spotify-panel--expanded .spotify-panel__inner {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.24s ease,
+    visibility 0s linear 0s;
 }
 
 .spotify-panel__embed {
@@ -245,10 +259,12 @@ body {
   outline-offset: 2px;
 }
 
-/* Reduced motion: no expand/collapse animation. */
+/* Reduced motion: no slide/fold animation — snap open/closed instantly. */
 @media (prefers-reduced-motion: reduce) {
   .spotify-panel__body,
-  .spotify-panel--expanded .spotify-panel__body {
+  .spotify-panel--expanded .spotify-panel__body,
+  .spotify-panel__inner,
+  .spotify-panel--expanded .spotify-panel__inner {
     transition: none;
   }
 }
