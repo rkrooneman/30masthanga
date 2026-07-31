@@ -743,6 +743,45 @@ body {
   color: var(--color-text-muted);
 }
 
+/* Swap control: a calm, minimal ghost button under the drishti, with a subtle
+   muted hint below it for the disabled (fixed / no-alternative) states. */
+.pose-card__swap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.pose-card__swap-button {
+  /* Reset the ghost button's left-optical offset so it centres in the card. */
+  align-self: center;
+  margin-left: 0;
+  min-height: var(--tap-target);
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+}
+
+/* Keep hover feedback only while the control is actionable. */
+.pose-card__swap-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  color: var(--color-text-muted);
+  background-color: transparent;
+}
+
+.pose-card__swap-button:disabled:hover {
+  color: var(--color-text-muted);
+  background-color: transparent;
+}
+
+.pose-card__swap-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
 /* --------------------------------------------------------------------------
    Pose placeholder graphic
    A deliberate "artwork coming" stand-in: a soft surface panel with a subtle

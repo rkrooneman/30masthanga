@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { TouchEvent } from 'react';
 import type { Pose } from '../types/pose';
 import PoseGraphic from '../components/PoseGraphic';
+import { hasSwapCandidate } from '../lib/swapPose';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
 const UNVERIFIED = '__UNVERIFIED__';
@@ -39,6 +40,11 @@ interface PoseCarouselProps {
   onBackToMap: () => void;
   /** Advance to the Guided screen. */
   onStartGuided: () => void;
+  /**
+   * Swap the shown pose out for a valid same-category alternative. The practice
+   * updates upstream and the new `poses` flow back down as props.
+   */
+  onSwapPose: (poseId: string) => void;
 }
 
 function PoseCarousel({
@@ -47,6 +53,7 @@ function PoseCarousel({
   startIndex,
   onBackToMap,
   onStartGuided,
+  onSwapPose,
 }: PoseCarouselProps) {
   const count = poses.length;
 
@@ -119,6 +126,15 @@ function PoseCarousel({
     isFirstRender.current = false;
   }, []);
 
+  // After a swap the practice re-sorts by canonical order, so the array the
+  // carousel pages through changes underneath its local `index`. Keep the user
+  // on the same slot POSITION, clamped to the new bounds (the swapped-in pose
+  // may sit elsewhere by order — expected per the swap spec). `count` shrinking
+  // (defensive; a swap preserves length) can never leave `index` out of range.
+  useEffect(() => {
+    setIndex((i) => Math.max(0, Math.min(count - 1, i)));
+  }, [count]);
+
   const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
     setTouchStartX(e.changedTouches[0]?.clientX ?? null);
   };
@@ -153,6 +169,22 @@ function PoseCarousel({
   }
 
   const verified = pose.drishti !== UNVERIFIED;
+
+  // Swap-control state for the current pose. Three cases:
+  //   - fixed frame (alwaysInclude): can never be swapped — disabled + hint.
+  //   - swappable but no valid same-category alternative fits the budget /
+  //     none remain: disabled + hint.
+  //   - otherwise: enabled.
+  const isFixed = pose.alwaysInclude;
+  const canSwap =
+    !isFixed && hasSwapCandidate(poses, breathSeconds, pose.id);
+  const swapDisabled = isFixed || !canSwap;
+  const swapHint = isFixed
+    ? 'Fixed part of the practice'
+    : !canSwap
+      ? 'No alternative fits'
+      : null;
+  const swapHintId = `pose-swap-hint-${pose.id}`;
 
   // Enter-animation class for the card. On first paint we use a plain fade-in
   // ('--enter-initial'); after that, a directional slide+fade keyed on the last
@@ -215,6 +247,28 @@ function PoseCarousel({
             <span className="pose-card__drishti-value pose-card__drishti-value--muted">
               Gaze — to be confirmed
             </span>
+          )}
+        </div>
+
+        <div className="pose-card__swap">
+          <button
+            type="button"
+            className="button button--ghost pose-card__swap-button"
+            onClick={() => onSwapPose(pose.id)}
+            disabled={swapDisabled}
+            aria-label={
+              swapDisabled
+                ? `Swap ${pose.english} (unavailable: ${swapHint})`
+                : `Swap ${pose.english} for another ${pose.category} pose`
+            }
+            aria-describedby={swapHint ? swapHintId : undefined}
+          >
+            <span aria-hidden="true">⇄</span> Swap pose
+          </button>
+          {swapHint && (
+            <p id={swapHintId} className="pose-card__swap-hint">
+              {swapHint}
+            </p>
           )}
         </div>
       </div>

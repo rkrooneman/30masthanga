@@ -34,6 +34,11 @@ export interface OverviewScreenProps {
   onStartGuided: () => void;
   /** Generate a fresh practice at the same breath pace. */
   onRegenerate: () => void;
+  /**
+   * Swap the given pose out of the practice for a valid same-category
+   * alternative (see swapPose). No-op if the pose is fixed or has no candidate.
+   */
+  onSwapPose: (poseId: string) => void;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */

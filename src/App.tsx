@@ -13,6 +13,7 @@ import type { Screen } from './types/navigation';
 import type { GeneratedPractice } from './lib/generatePractice';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
+import { swapPose } from './lib/swapPose';
 import { loadBreathSeconds, saveBreathSeconds } from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
@@ -56,6 +57,24 @@ function App() {
     setPractice(generatePractice(poses, { breathSeconds }));
   };
 
+  // Swap one pose in the current practice for a valid same-category alternative.
+  // Lives here (the practice owner) so the swapped sequence flows to BOTH the
+  // Overview (map + carousel) and the Guided run. A null result (fixed pose or
+  // no fitting candidate) leaves the practice untouched — the UI disables the
+  // control in those cases, so this is a defensive no-op.
+  const handleSwapPose = (poseId: string) => {
+    setPractice((prev) => {
+      if (!prev) return prev;
+      const result = swapPose(prev.poses, prev.breathSeconds, poseId);
+      if (!result) return prev;
+      return {
+        poses: result.poses,
+        totalSeconds: result.totalSeconds,
+        breathSeconds: prev.breathSeconds,
+      };
+    });
+  };
+
   const handleBackHome = () => setScreen('home');
   const handleBackOverview = () => setScreen('overview');
   const handleStartGuided = () => setScreen('guided');
@@ -86,6 +105,7 @@ function App() {
             onBack={handleBackHome}
             onStartGuided={handleStartGuided}
             onRegenerate={handleRegenerate}
+            onSwapPose={handleSwapPose}
           />
         )}
 

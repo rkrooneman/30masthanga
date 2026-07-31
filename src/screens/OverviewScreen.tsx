@@ -36,6 +36,7 @@ function OverviewScreen({
   onBack,
   onStartGuided,
   onRegenerate,
+  onSwapPose,
 }: OverviewScreenProps) {
   const { poses } = practice;
   const count = poses.length;
@@ -74,6 +75,7 @@ function OverviewScreen({
         startIndex={detailIndex}
         onBackToMap={backToMap}
         onStartGuided={onStartGuided}
+        onSwapPose={onSwapPose}
       />
     );
   }
