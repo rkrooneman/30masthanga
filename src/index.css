@@ -131,49 +131,70 @@ body {
   pointer-events: none; /* let taps fall through the empty gutter... */
 }
 
-/* ...but the interactive pieces themselves remain tappable. */
-.spotify-panel__pill,
-.spotify-panel__body {
+/* The sliding unit is ONE visual entity: the shared surface (background,
+   border, rounded corners, shadow) lives on the drawer, and the player + pill
+   footer sit inside it borderless — so they read as a single connected object.
+   The drawer hugs the pill when collapsed and stretches to the player width
+   when expanded. */
+.spotify-panel__drawer {
   pointer-events: auto;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: fit-content; /* hug the pill when collapsed */
   max-width: var(--container-max-width);
+  margin-top: 0.5rem;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 10px rgb(47 51 48 / 0.08);
+  transition: border-radius 0.2s ease;
 }
 
-/* Collapsed state: a small, minimal pill. Comfortable tap target but visually
-   light so it never blocks screen content (incl. the guided breathing view). */
+.spotify-panel--expanded .spotify-panel__drawer {
+  width: 100%;
+}
+
+/* The pill is the drawer's footer/handle — a borderless, transparent button
+   that fills the drawer width, so it fuses with the surface above it into one
+   object. A subtle top divider appears only when the player is open, marking
+   the footer without splitting it into a separate block. */
 .spotify-panel__pill {
-  align-self: center;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
-  width: auto; /* override the 100% above — the pill is intrinsically small */
+  width: 100%;
   min-height: var(--tap-target);
-  margin-top: 0.5rem;
   padding: 0.4rem 0.9rem;
   font: inherit;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid transparent;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgb(47 51 48 / 0.06);
   transition:
     background-color 0.15s ease,
     color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.2s ease;
 }
 
 .spotify-panel__pill:hover {
   color: var(--color-text);
   background: var(--color-accent-soft);
-  border-color: var(--color-accent-soft);
 }
 
 .spotify-panel__pill:focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+/* When open, a hairline divider separates the footer from the player above. */
+.spotify-panel--expanded .spotify-panel__pill {
+  border-top-color: var(--color-border);
 }
 
 .spotify-panel__note {
@@ -204,35 +225,20 @@ body {
   max-height: 200px; /* tall enough for the compact player + link + margins */
 }
 
-/* The player card: starts nudged up (tucked behind the pill / clipped by the
-   body window) and slides down to rest as the drawer opens. */
+/* The player content sits flush inside the drawer's shared surface — no border
+   or background of its own — so player + footer read as one card. It fades in
+   as the clip window opens. */
 .spotify-panel__inner {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
   padding: 0.75rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 1rem;
-  box-shadow: 0 4px 16px rgb(47 51 48 / 0.08);
-  transform: translateY(-16px);
   opacity: 0;
-  visibility: hidden;
-  transition:
-    transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 0.24s ease,
-    visibility 0s linear 0.32s;
+  transition: opacity 0.24s ease;
 }
 
 .spotify-panel--expanded .spotify-panel__inner {
-  transform: translateY(0);
   opacity: 1;
-  visibility: visible;
-  transition:
-    transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 0.24s ease,
-    visibility 0s linear 0s;
 }
 
 .spotify-panel__embed {
