@@ -347,6 +347,130 @@ body {
   white-space: nowrap;
 }
 
+/* --------------------------------------------------------------------------
+   Overview MAP view (the scannable landing grid)
+   A calm, sectioned grid of pose thumbnails. 3 columns on phone width; each
+   cell is a tap target that opens the DETAIL carousel at that pose. The whole
+   grid carries the sage accent so the pose icons (currentColor) render sage.
+   -------------------------------------------------------------------------- */
+.pose-map__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pose-map__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Lightweight, muted section header: "Standing · 8 poses · 6:30". */
+.pose-map__section-header {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 3-column grid. `minmax(0, 1fr)` lets columns shrink below content width so
+   three cells + two gaps always fit at 375px without horizontal overflow. */
+.pose-map__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  /* Icons stroke with currentColor; set sage once here for every thumbnail. */
+  color: var(--color-accent);
+}
+
+.pose-map__cell {
+  display: flex;
+}
+
+/* The whole cell is a button. Equal-height calm surface cards. */
+.pose-map__thumb {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: var(--tap-target);
+  padding: 0.6rem 0.4rem;
+  font: inherit;
+  text-align: center;
+  color: inherit;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.85rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.pose-map__thumb:hover {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-soft);
+}
+
+.pose-map__thumb:active {
+  transform: translateY(1px);
+}
+
+.pose-map__thumb:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Icon well; relative so the badge can pin to a corner. */
+.pose-map__figure {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Small muted-sage pill badge (×2 / ×N) in the top-right corner of the icon. */
+.pose-map__badge {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.15rem;
+  min-width: 1.15rem;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pose name below the icon: small, may wrap; cells stay equal height because
+   they align to the top and the grid rows size to the tallest cell. */
+.pose-map__name {
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+/* Keep the persistent CTA clear of the home indicator on notched devices. */
+.pose-map__start {
+  margin-top: 0.5rem;
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* The focus of the screen: one calm pose card at a time. */
 .pose-card {
   display: flex;
