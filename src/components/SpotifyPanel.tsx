@@ -8,8 +8,9 @@
  * continues while collapsed and across screen changes.
  *
  * Layout: a small pill button at the top of the shell (collapsed by default).
- * Tapping expands a tidy panel below it containing the embedded player plus an
- * "Open in Spotify" fallback link, then collapses again on the next tap.
+ * Tapping expands a slim panel below it containing the compact (80px) embedded
+ * player — active track + controls only, no track list — plus an "Open in
+ * Spotify" fallback link, then collapses again on the next tap.
  *
  * Playback note: the in-app embed only plays 30-second previews for listeners
  * who are not signed into Spotify Premium. The "Open in Spotify" link hands off
@@ -75,12 +76,18 @@ function SpotifyPanel() {
         inert={!expanded ? true : undefined}
       >
         <div className="spotify-panel__inner">
+          {/*
+            Compact 80px layout: Spotify serves a slim single-row player at this
+            height — cover art, the active track/artist, and the play/pause +
+            progress controls only, with NO track list. (We can't restyle inside
+            the cross-origin iframe, but the height selects this minimal layout.)
+          */}
           <iframe
             className="spotify-panel__embed"
             title={`Spotify ${ACTIVE_PLAYLIST.name} playlist`}
             src={ACTIVE_PLAYLIST.embedUrl}
             width="100%"
-            height="152"
+            height="80"
             style={{ border: 0, borderRadius: 12 }}
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"

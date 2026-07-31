@@ -195,7 +195,7 @@ body {
 }
 
 .spotify-panel--expanded .spotify-panel__body {
-  max-height: 320px; /* comfortably fits the 152px embed + link + padding */
+  max-height: 180px; /* snugly fits the compact 80px embed + link + padding */
   visibility: visible;
   opacity: 1;
   transition:
