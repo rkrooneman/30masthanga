@@ -13,34 +13,46 @@ import type { Screen } from './types/navigation';
 import type { GeneratedPractice } from './lib/generatePractice';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
-import { DEFAULT_BREATH_SECONDS } from './lib/timing';
+import { loadBreathSeconds, saveBreathSeconds } from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
 import GuidedScreen from './screens/GuidedScreen';
-// TEMPORARY (pose-icon contact sheet): remove with PosePilot once the icon set
-// is approved. Reached only via the `?pilot` query string; see below.
+// DEV-ONLY (pose-icon contact sheet): reached via the `?pilot` query string.
+// Gated behind import.meta.env.DEV so it is tree-shaken out of production.
 import PosePilot from './components/poses/PosePilot';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
   const [practice, setPractice] = useState<GeneratedPractice | null>(null);
-  const [breathSeconds, setBreathSeconds] = useState<number>(
-    DEFAULT_BREATH_SECONDS,
-  );
+  // Breath pace is remembered across visits (persisted to localStorage).
+  const [breathSeconds, setBreathSeconds] = useState<number>(loadBreathSeconds);
 
-  // TEMPORARY pilot escape hatch: visiting `/?pilot` renders the pose-icon
+  // DEV-ONLY pilot escape hatch: visiting `/?pilot` renders the pose-icon
   // contact sheet instead of the normal app. Computed after hooks (Rules of
-  // Hooks). Delete this block together with PosePilot once the set is approved.
-  if (window.location.search.includes('pilot')) {
+  // Hooks). `import.meta.env.DEV` is statically false in production builds, so
+  // this branch and the PosePilot import are stripped from the prod bundle.
+  if (import.meta.env.DEV && window.location.search.includes('pilot')) {
     return <PosePilot />;
   }
+
+  // Persist the breath pace whenever it changes (from the Home slider).
+  const handleBreathSecondsChange = (pace: number) => {
+    setBreathSeconds(pace);
+    saveBreathSeconds(pace);
+  };
 
   // Generate a real (randomised) practice and advance to the overview.
   const handleGenerate = (pace: number) => {
     const generated = generatePractice(poses, { breathSeconds: pace });
     setPractice(generated);
     setBreathSeconds(pace);
+    saveBreathSeconds(pace);
     setScreen('overview');
+  };
+
+  // Regenerate a fresh practice at the same breath pace (from the Overview map).
+  const handleRegenerate = () => {
+    setPractice(generatePractice(poses, { breathSeconds }));
   };
 
   const handleBackHome = () => setScreen('home');
@@ -53,7 +65,7 @@ function App() {
         {screen === 'home' && (
           <HomeScreen
             breathSeconds={breathSeconds}
-            onBreathSecondsChange={setBreathSeconds}
+            onBreathSecondsChange={handleBreathSecondsChange}
             onGenerate={handleGenerate}
           />
         )}
@@ -64,6 +76,7 @@ function App() {
             breathSeconds={breathSeconds}
             onBack={handleBackHome}
             onStartGuided={handleStartGuided}
+            onRegenerate={handleRegenerate}
           />
         )}
 

@@ -32,6 +32,8 @@ export interface OverviewScreenProps {
   onBack: () => void;
   /** Advance to the Guided screen. */
   onStartGuided: () => void;
+  /** Generate a fresh practice at the same breath pace. */
+  onRegenerate: () => void;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */

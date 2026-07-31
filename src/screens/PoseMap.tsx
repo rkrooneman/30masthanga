@@ -52,6 +52,8 @@ interface PoseMapProps {
   onBack: () => void;
   /** Advance to the Guided screen. */
   onStartGuided: () => void;
+  /** Generate a fresh practice at the same breath pace. */
+  onRegenerate: () => void;
 }
 
 /** A pose paired with its absolute index in the full practice sequence. */
@@ -88,6 +90,7 @@ function PoseMap({
   onOpenPose,
   onBack,
   onStartGuided,
+  onRegenerate,
 }: PoseMapProps) {
   const { poses, totalSeconds } = practice;
   const count = poses.length;
@@ -110,6 +113,14 @@ function PoseMap({
         <p className="overview__summary">
           {count} poses &middot; {formatDuration(totalSeconds)}
         </p>
+        <button
+          type="button"
+          className="button button--ghost pose-map__regenerate"
+          onClick={onRegenerate}
+          aria-label="Generate a different practice"
+        >
+          &#8635; New
+        </button>
       </header>
 
       <div className="pose-map__sections">

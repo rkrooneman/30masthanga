@@ -330,6 +330,13 @@ body {
   gap: 0.5rem;
 }
 
+/* Push the "New" (regenerate) action to the far right of the header row, so the
+   summary stays next to the back button and the regenerate sits opposite it. */
+.pose-map__regenerate {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
 /* Compact icon-only back button; overrides the ghost self-alignment. */
 .overview__back {
   align-self: auto;

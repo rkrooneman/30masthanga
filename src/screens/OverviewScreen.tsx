@@ -35,6 +35,7 @@ function OverviewScreen({
   breathSeconds,
   onBack,
   onStartGuided,
+  onRegenerate,
 }: OverviewScreenProps) {
   const { poses } = practice;
   const count = poses.length;
@@ -51,6 +52,14 @@ function OverviewScreen({
   };
 
   const backToMap = () => setView('map');
+
+  // Regenerate a fresh practice and return to the map so the new sequence is
+  // shown from the top.
+  const regenerate = () => {
+    onRegenerate();
+    setDetailIndex(0);
+    setView('map');
+  };
 
   if (view === 'detail') {
     return (
@@ -71,6 +80,7 @@ function OverviewScreen({
       onOpenPose={openPose}
       onBack={onBack}
       onStartGuided={onStartGuided}
+      onRegenerate={regenerate}
     />
   );
 }
