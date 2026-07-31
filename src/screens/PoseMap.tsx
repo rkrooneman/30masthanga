@@ -168,7 +168,7 @@ function PoseMap({
       <div className="pose-map__actions">
         <button
           type="button"
-          className="button button--ghost pose-map__regenerate"
+          className="button button--outline pose-map__regenerate"
           onClick={onRegenerate}
           aria-label="Generate a different practice"
         >
