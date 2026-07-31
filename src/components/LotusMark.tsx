@@ -37,14 +37,14 @@ function LotusMark({ size = 64, className }: LotusMarkProps) {
       viewBox="0 0 64 64"
       fill="none"
       stroke="var(--color-accent)"
-      strokeWidth={2}
+      strokeWidth={1.4}
       strokeLinecap="round"
       strokeLinejoin="round"
       role="img"
       aria-label="ashtanga30 lotus mark"
     >
       {/* Soft enclosing circle — keeps the round silhouette shared with RingMark. */}
-      <circle cx="32" cy="32" r="27" strokeWidth="1.5" opacity="0.55" />
+      <circle cx="32" cy="32" r="27" strokeWidth="1" opacity="0.55" />
 
       {/* Centre petal: upright teardrop rising from the base to a rounded tip. */}
       <path d="M32 44 C27 36 27 26 32 19 C37 26 37 36 32 44 Z" />
