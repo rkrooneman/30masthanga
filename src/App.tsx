@@ -17,6 +17,9 @@ import { DEFAULT_BREATH_SECONDS } from './lib/timing';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
 import GuidedScreen from './screens/GuidedScreen';
+// TEMPORARY (pose-icon contact sheet): remove with PosePilot once the icon set
+// is approved. Reached only via the `?pilot` query string; see below.
+import PosePilot from './components/poses/PosePilot';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -24,6 +27,13 @@ function App() {
   const [breathSeconds, setBreathSeconds] = useState<number>(
     DEFAULT_BREATH_SECONDS,
   );
+
+  // TEMPORARY pilot escape hatch: visiting `/?pilot` renders the pose-icon
+  // contact sheet instead of the normal app. Computed after hooks (Rules of
+  // Hooks). Delete this block together with PosePilot once the set is approved.
+  if (window.location.search.includes('pilot')) {
+    return <PosePilot />;
+  }
 
   // Generate a real (randomised) practice and advance to the overview.
   const handleGenerate = (pace: number) => {

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["node"],
     "module": "ESNext",
     "skipLibCheck": true,
@@ -13,6 +13,10 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    /* verify-coverage.ts imports the icon registry, which transitively pulls in
+       the React .tsx icon components, so this Node-side project also needs JSX
+       support (and the DOM lib above) to typecheck them. */
+    "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
@@ -27,6 +31,7 @@
     "src/data/validate-poses.ts",
     "src/lib/preview.ts",
     "src/lib/generatePractice.test.ts",
-    "src/lib/guidedPlan.test.ts"
+    "src/lib/guidedPlan.test.ts",
+    "src/components/poses/verify-coverage.ts"
   ]
 }
