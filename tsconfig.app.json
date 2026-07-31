@@ -27,6 +27,7 @@
   "exclude": [
     "src/data/validate-poses.ts",
     "src/lib/preview.ts",
-    "src/lib/generatePractice.test.ts"
+    "src/lib/generatePractice.test.ts",
+    "src/lib/guidedPlan.test.ts"
   ]
 }

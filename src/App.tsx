@@ -34,6 +34,7 @@ function App() {
   };
 
   const handleBackHome = () => setScreen('home');
+  const handleBackOverview = () => setScreen('overview');
   const handleStartGuided = () => setScreen('guided');
 
   return (
@@ -60,7 +61,8 @@ function App() {
           <GuidedScreen
             practice={practice}
             breathSeconds={breathSeconds}
-            onBack={handleBackHome}
+            onExit={handleBackOverview}
+            onComplete={handleBackHome}
           />
         )}
       </div>

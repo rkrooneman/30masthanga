@@ -599,30 +599,296 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Guided placeholder
+   Guided player (Slice 5b) — the interactive breathing screen.
+   Three vertical zones: a quiet top bar (exit + progress), a centred focal
+   stage (pose name, breathing circle, breath/segment meta), and a calm bottom
+   control bar. The circle is the focal point, so everything else is muted.
    -------------------------------------------------------------------------- */
-.guided {
+.guided-player {
   min-height: calc(100vh - (2 * var(--space-page)));
+  gap: 0;
 }
 
-.guided__body {
+.guided-player__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+}
+
+.guided-player__exit {
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  margin-left: -0.75rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+
+.guided-player__exit:hover {
+  color: var(--color-text);
+  background: var(--color-accent-soft);
+}
+
+.guided-player__exit:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.guided-player__progress {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* The focal stage grows to fill the space between the bars and centres its
+   contents vertically, so the circle sits calmly in the middle of the screen. */
+.guided-player__stage {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 1.75rem;
   text-align: center;
+  padding: 1rem 0;
 }
 
-.guided__message {
+.guided-player__pose {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 3.5rem; /* reserve space so the circle doesn't jump between steps */
+  justify-content: flex-end;
+}
+
+.guided-player__english {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1.375rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   color: var(--color-text);
 }
 
-.guided__first-pose {
+.guided-player__sanskrit {
   margin: 0;
   font-size: 0.9375rem;
   color: var(--color-text-muted);
+}
+
+.guided-player__drishti {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+}
+
+.guided-player__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 3rem; /* reserve space to keep the circle vertically stable */
+}
+
+.guided-player__breath-count {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.guided-player__segment {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.guided-player__cue {
+  margin: 0;
+  font-size: 1.0625rem;
+  color: var(--color-text);
+  letter-spacing: 0.01em;
+}
+
+/* --- the breathing circle ------------------------------------------------- */
+.breathing-circle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* A fixed box sized for the largest (inhaled) state so the layout never
+     reflows as the disc scales. Sized to fit comfortably at 375px. */
+  width: 15rem;
+  height: 15rem;
+}
+
+/* The animated disc. Scale is driven by the state modifier; the transition
+   DURATION is set inline by the component to match the current phase length. */
+.breathing-circle__disc {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 15rem;
+  height: 15rem;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  border: 2px solid var(--color-accent);
+  transform: scale(0.5);
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+  will-change: transform;
+}
+
+/* Full-motion scale targets. Inhale expands, exhale shrinks, rest holds calm. */
+.breathing-circle--inhale {
+  transform: scale(1);
+}
+
+.breathing-circle--exhale {
+  transform: scale(0.5);
+}
+
+/* Rest / pre-start state: the circle sits small, so the very first inhale is a
+   satisfying expansion outward (rather than starting large). */
+.breathing-circle--rest {
+  transform: scale(0.5);
+}
+
+/* Centre label sits above the disc and never scales. */
+.breathing-circle__label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.breathing-circle__phase {
+  font-size: 1.375rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+}
+
+.breathing-circle__count {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.breathing-circle__paused {
+  font-size: 1.125rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* --- control bar ---------------------------------------------------------- */
+.guided-player__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.guided-player__control {
+  flex: 1 1 0;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.guided-player__control:hover:not(:disabled) {
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+
+.guided-player__control:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.guided-player__control:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Pause/Resume is the anchor control — a touch more prominent than the jumps. */
+.guided-player__control--primary {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* --- completion screen ---------------------------------------------------- */
+.guided-complete {
+  min-height: calc(100vh - (2 * var(--space-page)));
+  justify-content: center;
+  gap: 2rem;
+}
+
+.guided-complete__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.guided-complete__mark {
+  display: block;
+}
+
+.guided-complete__heading {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  color: var(--color-text);
+}
+
+.guided-complete__message {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+/* Reduced motion: hold the breathing disc at a calm steady size and never
+   scale it. Only the phase word / countdown changes; a short opacity settle
+   keeps it from feeling frozen without introducing translation or scaling. */
+@media (prefers-reduced-motion: reduce) {
+  .breathing-circle__disc {
+    transition-property: opacity;
+    transition-duration: 400ms !important;
+    transform: scale(0.82) !important;
+  }
+  .breathing-circle--inhale {
+    opacity: 1;
+  }
+  .breathing-circle--exhale {
+    opacity: 0.7;
+  }
+  .breathing-circle--rest {
+    opacity: 0.85;
+  }
 }

@@ -34,12 +34,20 @@ export interface OverviewScreenProps {
   onStartGuided: () => void;
 }
 
-/** Props for the Guided screen (Slice 5 replaces the placeholder body). */
+/** Props for the Guided screen (Slice 5b — the interactive player). */
 export interface GuidedScreenProps {
   /** The generated practice to run. */
   practice: GeneratedPractice;
   /** The breath pace this practice was generated at. */
   breathSeconds: number;
-  /** Return out of the guided run. */
-  onBack: () => void;
+  /**
+   * Exit the guided run mid-practice — returns to the Overview so the
+   * practitioner can review the sequence again (wired to the Exit control).
+   */
+  onExit: () => void;
+  /**
+   * Finish the guided run — returns to Home (wired to the completion screen's
+   * "Return home" button, semantically a fresh start).
+   */
+  onComplete: () => void;
 }
