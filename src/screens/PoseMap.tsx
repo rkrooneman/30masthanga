@@ -113,14 +113,6 @@ function PoseMap({
         <p className="overview__summary">
           {count} poses &middot; {formatDuration(totalSeconds)}
         </p>
-        <button
-          type="button"
-          className="button button--ghost pose-map__regenerate"
-          onClick={onRegenerate}
-          aria-label="Generate a different practice"
-        >
-          &#8635; New
-        </button>
       </header>
 
       <div className="pose-map__sections">
@@ -173,13 +165,23 @@ function PoseMap({
         })}
       </div>
 
-      <button
-        type="button"
-        className="button button--primary pose-map__start"
-        onClick={onStartGuided}
-      >
-        Start practice
-      </button>
+      <div className="pose-map__actions">
+        <button
+          type="button"
+          className="button button--ghost pose-map__regenerate"
+          onClick={onRegenerate}
+          aria-label="Generate a different practice"
+        >
+          &#8635; New sequence
+        </button>
+        <button
+          type="button"
+          className="button button--primary pose-map__start"
+          onClick={onStartGuided}
+        >
+          Start practice
+        </button>
+      </div>
     </section>
   );
 }
