@@ -1,62 +1,34 @@
 /**
- * MusicPanel — a calm, collapsible, self-hosted audio player for ashtanga30.
+ * MusicPanel — a single sticky play/pause button for ashtanga30's background
+ * music.
  *
  * Rendered ONCE at the app-shell level (see App.tsx) so it is present on every
- * screen (Home, Overview, Guided) and — crucially — never unmounts on screen
- * navigation. The single <audio> element is mounted a single time here and stays
- * in the DOM for the life of the app; collapsing only HIDES the controls via
- * CSS, so playback continues while collapsed and across screen changes.
+ * screen (Home, Overview, Guided) and never unmounts on navigation — the single
+ * <audio> element stays in the DOM for the life of the app, so playback (and the
+ * play/pause state) persists across screen changes.
  *
- * Playback is fully self-contained: three bundled CC0 (public-domain) tracks by
- * Ondrosik (see src/lib/music.ts + CREDITS.md) served from `public/music/`. The
- * minimalist controls are previous / play-pause / next, with the active track
- * title + artist and a thin, display-only progress bar.
- *
- * Layout: a small pill button at the top of the shell (collapsed by default).
- * Tapping expands a slim drawer below it holding the controls, then collapses
- * again on the next tap. The drawer shell + fold/slide/seamless-top animation is
- * shared with the CSS via the original `spotify-panel*` class names (kept as-is
- * so the carefully-tuned motion is preserved); the new inner controls use fresh
- * `music-*` classes.
+ * There is one long, looping CC0 (public-domain) ambient track (see
+ * src/lib/music.ts + CREDITS.md) served from `public/music/`. With a single
+ * loop-and-forget track there is nothing to reveal — no playlist, no scrubbing —
+ * so the whole UI is one icon-only button: tap to play, tap to pause.
  *
  * Autoplay policy: browsers only permit audio to start from a user gesture. Play
- * always originates from a control tap (a gesture), but audio.play() still
- * returns a promise that can reject, so every play() call is wrapped in a
- * .catch to swallow that rejection gracefully.
+ * always originates from the button tap (a gesture), but audio.play() still
+ * returns a promise that can reject, so the call is wrapped in a .catch.
  *
- * Accessibility: the pill exposes aria-expanded / aria-controls and a clear
- * label; the collapsed region is marked aria-hidden and made inert to focus so
- * hidden controls aren't reachable while collapsed. Each transport button has an
- * explicit aria-label.
- *
- * Reduced motion: the expand/collapse transition is dropped under
- * `prefers-reduced-motion: reduce` (handled in index.css).
+ * Accessibility: the button carries an explicit, state-aware aria-label
+ * (Play music / Pause music); the icon is aria-hidden.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { TRACKS } from '../lib/music';
-import { loadMusicExpanded, saveMusicExpanded } from '../lib/preferences';
-
-const PANEL_BODY_ID = 'music-panel-body';
 
 function MusicPanel() {
-  // Default collapsed; re-open only if the listener explicitly left it open.
-  const [expanded, setExpanded] = useState<boolean>(loadMusicExpanded);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0); // 0..1 of the track
-
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // A single long ambient track that loops — no playlist/track-change logic.
+  // A single long ambient track that loops — no playlist / track-change logic.
   const currentTrack = TRACKS[0];
-
-  const toggleExpanded = () => {
-    setExpanded((prev) => {
-      const next = !prev;
-      saveMusicExpanded(next);
-      return next;
-    });
-  };
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -70,148 +42,64 @@ function MusicPanel() {
     }
   };
 
-  // Keep isPlaying in sync with the ACTUAL audio state and drive the
-  // display-only progress bar. The track loops natively (audio.loop). Listeners
-  // are attached once to the persistent audio element.
+  // Keep isPlaying in sync with the ACTUAL audio state (so the icon always
+  // reflects reality). The track loops natively via the audio `loop` attribute.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleTimeUpdate = () => {
-      const { currentTime, duration } = audio;
-      setProgress(duration > 0 ? currentTime / duration : 0);
-    };
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, []);
 
   return (
-    <section
-      className={`spotify-panel${expanded ? ' spotify-panel--expanded' : ''}`}
-      aria-label="Music player"
-    >
+    <div className="music-toggle">
       {/*
-        One sliding unit holds BOTH the player and the pill footer, so they read
-        as a single connected surface (the shared background/border/shadow lives
-        on the drawer in CSS). The body/player has flex order -1 so it sits ABOVE
-        the pill; the pill is the always-visible handle at the bottom.
+        The single, persistent audio element. Never rendered conditionally so it
+        survives navigation. Loops the one long ambient track; src is already
+        percent-encoded in TRACKS.
       */}
-      <div className="spotify-panel__drawer">
-        {/*
-          The body is ALWAYS rendered so the <audio> element mounts once and
-          never unmounts. Collapsing hides it via CSS (height), which keeps audio
-          alive so playback continues while collapsed and across screen
-          navigation. `inert` + aria-hidden keep hidden controls out of the
-          focus/AT order when collapsed.
-        */}
-        <div
-          id={PANEL_BODY_ID}
-          className="spotify-panel__body"
-          aria-hidden={!expanded}
-          inert={!expanded ? true : undefined}
-        >
-          <div className="spotify-panel__inner">
-            {/*
-              The single, persistent audio element. Never rendered conditionally
-              so it survives collapse and navigation. Loops the one long ambient
-              track; src is already percent-encoded in TRACKS.
-            */}
-            <audio
-              ref={audioRef}
-              src={currentTrack.src}
-              loop
-              preload="metadata"
+      <audio ref={audioRef} src={currentTrack.src} loop preload="metadata" />
+
+      <button
+        type="button"
+        className="music-toggle__btn"
+        onClick={togglePlay}
+        aria-label={isPlaying ? 'Pause music' : 'Play music'}
+        aria-pressed={isPlaying}
+      >
+        {isPlaying ? (
+          <svg
+            className="music-toggle__icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor" />
+          </svg>
+        ) : (
+          <svg
+            className="music-toggle__icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M8 5.5v13a1 1 0 0 0 1.54.84l10-6.5a1 1 0 0 0 0-1.68l-10-6.5A1 1 0 0 0 8 5.5Z"
+              fill="currentColor"
             />
-
-            <div className="music-player">
-              {/* Centered track title + artist. */}
-              <div className="music-player__meta">
-                <span className="music-player__title">
-                  {currentTrack.title}
-                </span>
-                <span className="music-player__artist">
-                  {currentTrack.artist}
-                </span>
-              </div>
-
-              {/* Thin, display-only progress bar. */}
-              <div
-                className="music-progress"
-                role="progressbar"
-                aria-label="Track progress"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={Math.round(progress * 100)}
-              >
-                <div
-                  className="music-progress__fill"
-                  style={{ width: `${progress * 100}%` }}
-                />
-              </div>
-
-              {/* Centered play/pause control, below the progress bar. A single
-                  long track means no prev/next is needed. */}
-              <div className="music-player__transport">
-                <button
-                  type="button"
-                  className="music-btn music-btn--primary"
-                  onClick={togglePlay}
-                  aria-label={isPlaying ? 'Pause' : 'Play'}
-                >
-                  {isPlaying ? (
-                    <svg
-                      className="music-btn__icon"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path
-                        d="M8 5h3v14H8zM13 5h3v14h-3z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="music-btn__icon"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="M8 5.5v13a1 1 0 0 0 1.54.84l10-6.5a1 1 0 0 0 0-1.68l-10-6.5A1 1 0 0 0 8 5.5Z" fill="currentColor" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* The pill: the always-visible handle at the bottom of the drawer. */}
-        <button
-          type="button"
-          className="spotify-panel__pill"
-          onClick={toggleExpanded}
-          aria-expanded={expanded}
-          aria-controls={PANEL_BODY_ID}
-          aria-label={expanded ? 'Hide music player' : 'Show music player'}
-        >
-          <span className="spotify-panel__note" aria-hidden="true">
-            ♫
-          </span>
-          <span className="spotify-panel__label">Music</span>
-        </button>
-      </div>
-    </section>
+          </svg>
+        )}
+      </button>
+    </div>
   );
 }
 

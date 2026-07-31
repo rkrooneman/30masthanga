@@ -15,7 +15,6 @@ import {
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
-const MUSIC_EXPANDED_KEY = 'ashtanga30.musicExpanded';
 
 /**
  * Load the saved breath pace, clamped to the valid slider range. Returns the
@@ -63,24 +62,3 @@ export function saveSoundEnabled(enabled: boolean): void {
   }
 }
 
-/**
- * Whether the Spotify music panel was left expanded. Defaults to false
- * (collapsed) so the panel is unobtrusive on load; only an explicit stored "1"
- * re-opens it. Safe on storage failure.
- */
-export function loadMusicExpanded(): boolean {
-  try {
-    return window.localStorage.getItem(MUSIC_EXPANDED_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-/** Persist the music-panel expanded state. Silently no-ops on storage failure. */
-export function saveMusicExpanded(expanded: boolean): void {
-  try {
-    window.localStorage.setItem(MUSIC_EXPANDED_KEY, expanded ? '1' : '0');
-  } catch {
-    /* storage unavailable — ignore */
-  }
-}
