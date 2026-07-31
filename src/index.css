@@ -5,6 +5,7 @@
   --color-text: #2f3330; /* soft dark, not pure black */
   --color-text-muted: #6b7169; /* muted stone-grey */
   --color-accent: #8a9a7b; /* muted sage */
+  --color-accent-rgb: 138, 154, 123; /* sage as RGB, for translucent fills */
   --color-accent-strong: #7d8d6f; /* deeper sage, e.g. primary-button hover */
   /* Accessible TEXT variant of the accent: a darker sage that passes WCAG AA
      (>= 4.5:1) for normal text against both --color-bg (5.16:1) and
@@ -23,17 +24,12 @@
   /* Layout */
   --container-max-width: 480px;
   --space-page: 1.5rem;
-  /* Space reserved at the top of the shell for the fixed, collapsed music pill
-     (~44px tap target + 0.5rem margin). Screens that fill the viewport subtract
-     this too, so they never overflow beneath the pill. */
-  --space-music-pill: 3.25rem;
   /* Total vertical padding the app shell adds (top + bottom), including any
-     safe-area insets AND the reserved music-pill space. Screens that want to
-     fill the viewport subtract this so they never overflow into the notch /
-     home-indicator zones or beneath the music pill. */
+     safe-area insets. Screens that want to fill the viewport subtract this so
+     they never overflow into the notch / home-indicator zones. */
   --space-page-vertical: calc(
-    (2 * var(--space-page)) + var(--space-music-pill) +
-      env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px)
+    (2 * var(--space-page)) + env(safe-area-inset-top, 0px) +
+      env(safe-area-inset-bottom, 0px)
   );
   /* Comfortable minimum tap target for controls / dots (~44px). */
   --tap-target: 2.75rem;
@@ -91,9 +87,7 @@ body {
   /* Reserve room at the top for the fixed, collapsed music pill (~44px tap
      target + its 0.5rem margin) so screen content never sits beneath it,
      including on the full-height guided view. */
-  padding-top: calc(
-    var(--space-page) + var(--space-music-pill) + env(safe-area-inset-top, 0px)
-  );
+  padding-top: calc(var(--space-page) + env(safe-area-inset-top, 0px));
   padding-right: calc(var(--space-page) + env(safe-area-inset-right, 0px));
   padding-bottom: calc(var(--space-page) + env(safe-area-inset-bottom, 0px));
   padding-left: calc(var(--space-page) + env(safe-area-inset-left, 0px));
@@ -108,23 +102,19 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Music toggle � a single sticky, icon-only play/pause button.
-   Fixed at the top of the viewport, centered over the container, floating above
-   every screen. The <audio> element is mounted once in the shell and never
+   Music toggle — a single floating, icon-only play/pause button in the
+   bottom-right corner. Fixed above every screen; thumb-reachable and out of the
+   way of content. The <audio> element is mounted once in the shell and never
    unmounts, so playback + state persist across screen navigation. With one
    looping ambient track there is nothing to reveal, so this is the whole UI.
    -------------------------------------------------------------------------- */
 .music-toggle {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   z-index: 20;
-  display: flex;
-  justify-content: center;
-  /* Clear the notch; the button sits just below the safe-area inset. */
-  padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
-  pointer-events: none; /* let taps fall through everywhere except the button */
+  /* Bottom-right, clear of the safe-area insets (home indicator / curved edges). */
+  right: calc(env(safe-area-inset-right, 0px) + 1rem);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  pointer-events: none; /* only the button itself is interactive */
 }
 
 /* Calm, palette-consistent round button. Icon-only. */
@@ -1081,13 +1071,41 @@ body {
   margin: auto;
   width: 15rem;
   height: 15rem;
-  border-radius: 50%;
-  background: var(--color-accent-soft);
-  border: 2px solid var(--color-accent);
+  /* Airy, organic breath: a translucent radial-gradient fill (denser at the
+     centre, fading to fully transparent at the edge) rather than a solid disc,
+     with no hard border. A soft outer glow adds depth and mist. */
+  background: radial-gradient(
+    circle at 50% 48%,
+    rgba(var(--color-accent-rgb), 0.42) 0%,
+    rgba(var(--color-accent-rgb), 0.26) 42%,
+    rgba(var(--color-accent-rgb), 0.1) 70%,
+    rgba(var(--color-accent-rgb), 0) 100%
+  );
+  border: none;
+  /* Slightly imperfect, organic outline (not a perfect circle), gently morphing
+     so it feels alive rather than mechanical. */
+  border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%;
+  box-shadow: 0 0 3.5rem 1rem rgba(var(--color-accent-rgb), 0.14);
   transform: scale(0.5);
   transition-property: transform;
   transition-timing-function: ease-in-out;
   will-change: transform;
+  animation: breathing-blob 14s ease-in-out infinite;
+}
+
+/* Slow, subtle morph of the organic edge — an airy, living wobble that is
+   independent of the breath scaling (which is applied via .--inhale/--exhale). */
+@keyframes breathing-blob {
+  0%,
+  100% {
+    border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%;
+  }
+  33% {
+    border-radius: 54% 46% 48% 52% / 46% 54% 50% 50%;
+  }
+  66% {
+    border-radius: 48% 52% 54% 46% / 54% 48% 46% 52%;
+  }
 }
 
 /* Full-motion scale targets. Inhale expands, exhale shrinks, rest holds calm. */
@@ -1231,6 +1249,7 @@ body {
     transition-property: opacity;
     transition-duration: 400ms !important;
     transform: scale(0.82) !important;
+    animation: none !important; /* no organic morph under reduced motion */
   }
   .breathing-circle--inhale {
     opacity: 1;
