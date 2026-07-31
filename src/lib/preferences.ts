@@ -14,6 +14,7 @@ import {
 } from './timing';
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
+const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
 
 /**
  * Load the saved breath pace, clamped to the valid slider range. Returns the
@@ -37,5 +38,26 @@ export function saveBreathSeconds(value: number): void {
     window.localStorage.setItem(BREATH_SECONDS_KEY, String(value));
   } catch {
     /* storage unavailable — ignore, preference simply won't persist */
+  }
+}
+
+/**
+ * Whether sound cues (currently just the completion bell) are enabled. Defaults
+ * to true; only an explicit stored "0" disables it. Safe on storage failure.
+ */
+export function loadSoundEnabled(): boolean {
+  try {
+    return window.localStorage.getItem(SOUND_ENABLED_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+/** Persist the sound-enabled preference. Silently no-ops on storage failure. */
+export function saveSoundEnabled(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(SOUND_ENABLED_KEY, enabled ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
   }
 }

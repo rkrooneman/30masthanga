@@ -47,6 +47,8 @@ import { buildGuidedPlan } from '../lib/guidedPlan';
 import BreathingCircle from '../components/BreathingCircle';
 import NamasteMark from '../components/NamasteMark';
 import PoseGraphic from '../components/PoseGraphic';
+import { unlockAudio, playCompletionBell } from '../lib/chime';
+import { loadSoundEnabled } from '../lib/preferences';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
 const UNVERIFIED = '__UNVERIFIED__';
@@ -225,6 +227,24 @@ function GuidedScreen({
   // Belt-and-braces: clear any stray timers on unmount (the effect cleanup above
   // already covers this, but this guards against future refactors).
   useEffect(() => clearTimers, [clearTimers]);
+
+  // --- completion bell --------------------------------------------------------
+  // Unlock the AudioContext on mount: this screen only mounts after the user
+  // tapped "Start practice", so we're still within the gesture-enabled window
+  // that mobile browsers require for audio.
+  useEffect(() => {
+    unlockAudio();
+  }, []);
+
+  // Play a single soft bell the moment the practice completes (Namaste screen),
+  // unless the user has muted sound. A ref guard ensures it fires exactly once.
+  const bellPlayedRef = useRef(false);
+  useEffect(() => {
+    if (complete && !bellPlayedRef.current) {
+      bellPlayedRef.current = true;
+      if (loadSoundEnabled()) playCompletionBell();
+    }
+  }, [complete]);
 
   // --- wake lock (progressive enhancement) ------------------------------------
   // Held only while actively playing (not paused, not complete). Re-acquired on
