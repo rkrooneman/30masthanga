@@ -418,6 +418,8 @@ body {
 .pose-card__graphic {
   display: flex;
   justify-content: center;
+  /* The pose icons stroke with currentColor, so set a calm sage here. */
+  color: var(--color-accent);
 }
 
 .pose-card__names {
@@ -723,6 +725,15 @@ body {
   gap: 0.15rem;
   min-height: 3.5rem; /* reserve space so the circle doesn't jump between steps */
   justify-content: flex-end;
+}
+
+/* A small, deliberately muted pose icon in the header — a supporting cue that
+   sits ABOVE the pose name and stays clearly subordinate to the breathing
+   circle. Muted tone + reduced opacity so the eye settles on the circle first;
+   it must never compete with the breath animation. */
+.guided-player__pose-icon {
+  color: var(--color-text-muted);
+  opacity: 0.7;
 }
 
 .guided-player__english {

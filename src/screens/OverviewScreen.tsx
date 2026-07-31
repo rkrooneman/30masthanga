@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { TouchEvent } from 'react';
 import type { OverviewScreenProps } from '../types/navigation';
 import { formatDuration } from '../lib/timing';
-import PosePlaceholder from '../components/PosePlaceholder';
+import PoseGraphic from '../components/PoseGraphic';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
 const UNVERIFIED = '__UNVERIFIED__';
@@ -156,7 +156,12 @@ function OverviewScreen({
         onTouchEnd={handleTouchEnd}
       >
         <div className="pose-card__graphic">
-          <PosePlaceholder name={pose.english} category={pose.category} />
+          <PoseGraphic
+            poseId={pose.id}
+            name={pose.english}
+            category={pose.category}
+            size={160}
+          />
         </div>
 
         <div className="pose-card__names">

@@ -46,6 +46,7 @@ import type { GuidedPhase, GuidedStep } from '../lib/guidedPlan';
 import { buildGuidedPlan } from '../lib/guidedPlan';
 import BreathingCircle from '../components/BreathingCircle';
 import NamasteMark from '../components/NamasteMark';
+import PoseGraphic from '../components/PoseGraphic';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
 const UNVERIFIED = '__UNVERIFIED__';
@@ -385,6 +386,14 @@ function GuidedScreen({
       {/* Middle: the focal stage. */}
       <div className="guided-player__stage">
         <div className="guided-player__pose">
+          {shownPose && (
+            <PoseGraphic
+              poseId={shownPose.id}
+              name={shownPose.english}
+              size={44}
+              className="guided-player__pose-icon"
+            />
+          )}
           <h2 className="guided-player__english">
             {shownPose?.english ?? '\u00a0'}
           </h2>
