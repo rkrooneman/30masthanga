@@ -49,10 +49,17 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Mobile-first app shell */
+/* ==========================================================================
+   App shell
+   Styling approach: a single global stylesheet (this file), imported once in
+   main.tsx. BEM-ish class names, mobile-first, palette driven entirely by the
+   CSS custom properties declared in :root above.
+   ========================================================================== */
+
+/* Mobile-first app shell. Top-aligned so list-heavy screens can scroll; short
+   screens (Home) center themselves via .home. */
 .app {
   display: flex;
-  align-items: center;
   justify-content: center;
   min-height: 100vh;
   padding: var(--space-page);
@@ -62,22 +69,322 @@ body {
   width: 100%;
   max-width: var(--container-max-width);
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------------------------------------------------------------------------
+   Shared button
+   -------------------------------------------------------------------------- */
+.button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Primary call-to-action: full-width within the container, calm sage fill. */
+.button--primary {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-surface);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.button--primary:hover {
+  background-color: #7d8d6f; /* slightly deeper sage on hover */
+  border-color: #7d8d6f;
+}
+
+/* Quiet, text-like button used for Back. */
+.button--ghost {
+  align-self: flex-start;
+  padding: 0.5rem 0.75rem;
+  margin-left: -0.75rem; /* optical alignment to the left edge */
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  background-color: transparent;
+}
+
+.button--ghost:hover {
+  color: var(--color-text);
+  background-color: var(--color-accent-soft);
+}
+
+/* --------------------------------------------------------------------------
+   Home screen
+   -------------------------------------------------------------------------- */
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  min-height: calc(100vh - (2 * var(--space-page)));
+  justify-content: center;
   text-align: center;
 }
 
-.app__title {
+.home__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.home__ring {
+  display: block;
+}
+
+.home__wordmark {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 2.5rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
   color: var(--color-text);
 }
 
-.app__subtitle {
-  margin: 0.25rem 0 0;
-  font-size: 1rem;
+.home__tagline {
+  margin: 0;
+  font-size: 0.9375rem;
   font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+}
+
+.home__controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.home__estimate {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.home__estimate-label {
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
-  text-transform: lowercase;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.home__estimate-value {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* --------------------------------------------------------------------------
+   Field + range slider
+   -------------------------------------------------------------------------- */
+.field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.field__label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.field__value {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Touch-friendly range input: large track + thumb, sage accent. */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2.5rem; /* large hit area */
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 0.5rem;
+}
+
+/* WebKit track + thumb */
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-accent-soft);
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -9px; /* center 24px thumb on 6px track */
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
+/* Firefox track + thumb */
+.slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-accent-soft);
+}
+
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
+/* --------------------------------------------------------------------------
+   Generic screen scaffold (Overview / Guided placeholders)
+   -------------------------------------------------------------------------- */
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
+}
+
+.screen__heading {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+}
+
+.screen__summary {
+  margin: -0.75rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Pose list (Overview placeholder)
+   -------------------------------------------------------------------------- */
+.pose-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pose-list__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.625rem;
+}
+
+.pose-list__index {
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.pose-list__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.pose-list__name {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.pose-list__repeat {
   color: var(--color-accent);
+  font-weight: 500;
+}
+
+.pose-list__sanskrit {
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.pose-list__meta {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Guided placeholder
+   -------------------------------------------------------------------------- */
+.guided {
+  min-height: calc(100vh - (2 * var(--space-page)));
+}
+
+.guided__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.guided__message {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--color-text);
+}
+
+.guided__first-pose {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
 }
