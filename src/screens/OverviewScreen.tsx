@@ -156,7 +156,7 @@ function OverviewScreen({
         onTouchEnd={handleTouchEnd}
       >
         <div className="pose-card__graphic">
-          <PosePlaceholder name={pose.english} />
+          <PosePlaceholder name={pose.english} category={pose.category} />
         </div>
 
         <div className="pose-card__names">

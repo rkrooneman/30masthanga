@@ -12,7 +12,7 @@ import { poses } from '../data/poses';
 import { generatePractice } from '../lib/generatePractice';
 import { formatDuration, MIN_BREATH_SECONDS, MAX_BREATH_SECONDS } from '../lib/timing';
 import { mulberry32 } from '../lib/mulberry32';
-import RingMark from '../components/RingMark';
+import LotusMark from '../components/LotusMark';
 
 /**
  * Fixed seed for the estimate only. The real "Generate" button uses genuine
@@ -47,7 +47,7 @@ function HomeScreen({
   return (
     <section className="home">
       <div className="home__brand">
-        <RingMark size={64} strokeWidth={2} className="home__ring" />
+        <LotusMark size={72} className="home__mark" />
         <h1 className="home__wordmark">ashtanga30</h1>
         <p className="home__tagline">a 30-minute Ashtanga companion</p>
       </div>

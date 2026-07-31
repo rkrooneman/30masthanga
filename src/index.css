@@ -5,6 +5,7 @@
   --color-text: #2f3330; /* soft dark, not pure black */
   --color-text-muted: #6b7169; /* muted stone-grey */
   --color-accent: #8a9a7b; /* muted sage */
+  --color-accent-strong: #7d8d6f; /* deeper sage, e.g. primary-button hover */
   --color-accent-soft: #dfe4d7; /* pale sage tint */
   --color-border: #e4e1d8; /* subtle divider */
 
@@ -17,6 +18,15 @@
   /* Layout */
   --container-max-width: 480px;
   --space-page: 1.5rem;
+  /* Total vertical padding the app shell adds (top + bottom), including any
+     safe-area insets. Screens that want to fill the viewport subtract this so
+     they never overflow into the notch / home-indicator zones. */
+  --space-page-vertical: calc(
+    (2 * var(--space-page)) + env(safe-area-inset-top, 0px) +
+      env(safe-area-inset-bottom, 0px)
+  );
+  /* Comfortable minimum tap target for controls / dots (~44px). */
+  --tap-target: 2.75rem;
 
   color-scheme: light;
 }
@@ -57,12 +67,21 @@ body {
    ========================================================================== */
 
 /* Mobile-first app shell. Top-aligned so list-heavy screens can scroll; short
-   screens (Home) center themselves via .home. */
+   screens (Home) center themselves via .home.
+
+   Safe-area insets (notched phones / home indicator): the base page padding is
+   augmented by env(safe-area-inset-*), which resolves to 0 on non-notched
+   devices, so the shell keeps its calm padding everywhere and simply grows it
+   into the safe zone where one exists. Requires viewport-fit=cover (index.html). */
 .app {
   display: flex;
   justify-content: center;
   min-height: 100vh;
   padding: var(--space-page);
+  padding-top: calc(var(--space-page) + env(safe-area-inset-top, 0px));
+  padding-right: calc(var(--space-page) + env(safe-area-inset-right, 0px));
+  padding-bottom: calc(var(--space-page) + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(var(--space-page) + env(safe-area-inset-left, 0px));
 }
 
 .app__container {
@@ -110,8 +129,8 @@ body {
 }
 
 .button--primary:hover {
-  background-color: #7d8d6f; /* slightly deeper sage on hover */
-  border-color: #7d8d6f;
+  background-color: var(--color-accent-strong); /* slightly deeper sage on hover */
+  border-color: var(--color-accent-strong);
 }
 
 /* Quiet, text-like button used for Back. */
@@ -137,7 +156,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2.5rem;
-  min-height: calc(100vh - (2 * var(--space-page)));
+  min-height: calc(100vh - var(--space-page-vertical));
   justify-content: center;
   text-align: center;
 }
@@ -149,7 +168,7 @@ body {
   gap: 0.75rem;
 }
 
-.home__ring {
+.home__mark {
   display: block;
 }
 
@@ -463,6 +482,10 @@ body {
 
 /* --------------------------------------------------------------------------
    Pose placeholder graphic
+   A deliberate "artwork coming" stand-in: a soft surface panel with a subtle
+   border, a faint neutral ring, the pose initial in a muted tone, and a small
+   category caption. Neutral on purpose — the LotusMark identity is kept out of
+   here so the lotus stays the app's signature.
    -------------------------------------------------------------------------- */
 .pose-placeholder {
   position: relative;
@@ -470,23 +493,42 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
-  background: var(--color-accent-soft);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
+  overflow: hidden;
 }
 
 .pose-placeholder__ring {
   position: absolute;
   inset: 0;
   margin: auto;
-  opacity: 0.5;
+  opacity: 0.35;
 }
 
 .pose-placeholder__initial {
   position: relative;
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 300;
-  color: var(--color-accent);
+  color: var(--color-text-muted);
   letter-spacing: 0.02em;
+}
+
+.pose-placeholder__caption {
+  position: absolute;
+  bottom: 0.55rem;
+  left: 0;
+  right: 0;
+  padding: 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-text-muted);
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* --------------------------------------------------------------------------
@@ -544,7 +586,12 @@ body {
   min-width: 0;
 }
 
+/* Dots keep a small visible circle (0.5rem) for a tight row, but each gets a
+   comfortable ~44px tap target via an invisible ::before overlay that extends
+   past the visible dot without affecting layout (the row still lays out on the
+   0.5rem boxes, so many dots never overflow at 375px). */
 .carousel-nav__dot {
+  position: relative;
   flex: 0 0 auto;
   width: 0.5rem;
   height: 0.5rem;
@@ -556,6 +603,16 @@ body {
   transition:
     background-color 0.15s ease,
     transform 0.15s ease;
+}
+
+.carousel-nav__dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  transform: translate(-50%, -50%);
 }
 
 .carousel-nav__dot:hover {
@@ -605,7 +662,7 @@ body {
    control bar. The circle is the focal point, so everything else is muted.
    -------------------------------------------------------------------------- */
 .guided-player {
-  min-height: calc(100vh - (2 * var(--space-page)));
+  min-height: calc(100vh - var(--space-page-vertical));
   gap: 0;
 }
 
@@ -793,16 +850,22 @@ body {
 }
 
 /* --- control bar ---------------------------------------------------------- */
+/* Anchored at the bottom of the guided screen. The app shell already adds the
+   bottom safe-area inset, but this bar is the closest content to the home
+   indicator, so it carries an extra inset of its own as belt-and-braces (it
+   resolves to 0 on non-notched devices). */
 .guided-player__controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   padding-top: 0.5rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .guided-player__control {
   flex: 1 1 0;
+  min-height: var(--tap-target);
   font: inherit;
   font-size: 0.9375rem;
   color: var(--color-text-muted);
@@ -840,7 +903,7 @@ body {
 
 /* --- completion screen ---------------------------------------------------- */
 .guided-complete {
-  min-height: calc(100vh - (2 * var(--space-page)));
+  min-height: calc(100vh - var(--space-page-vertical));
   justify-content: center;
   gap: 2rem;
 }
