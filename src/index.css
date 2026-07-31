@@ -186,37 +186,37 @@ body {
   line-height: 1;
 }
 
-/* The body is a CLIP WINDOW directly under the pill. The inner drawer slides
-   down out of it (and retracts back up behind the pill) via translateY, giving
-   a "pull-down shade" motion. The iframe is never unmounted — collapsing just
-   translates the drawer up out of view and then removes it from hit-testing —
-   so playback continues while collapsed and across screen navigation.
-
-   Collapsed: the clip window has 0 height (so it occupies no layout space) and
-   the drawer is translated fully up, tucked behind the pill. */
+/* The body (the player) is a CLIP WINDOW that sits ABOVE the pill in the flow.
+   Collapsed it has 0 height, so the pill rides up to the top and only the pill
+   shows. Expanding grows the clip window, which pushes the pill DOWN — so the
+   pill travels with the drawer as the player unfolds above it. Inside, the
+   player also slides down from behind the pill (translateY) for a "pull-out"
+   feel. The iframe is never unmounted, so playback continues while collapsed. */
 .spotify-panel__body {
+  order: -1; /* player above the pill within the flex drawer */
   overflow: hidden;
   max-height: 0;
+  width: 100%;
   transition: max-height 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .spotify-panel--expanded .spotify-panel__body {
-  max-height: 200px; /* clip window tall enough for the drawer + margins */
+  max-height: 200px; /* tall enough for the compact player + link + margins */
 }
 
-/* The drawer itself: starts translated up (hidden behind the pill / clipped by
-   the body window) and slides down to rest when expanded. */
+/* The player card: starts nudged up (tucked behind the pill / clipped by the
+   body window) and slides down to rest as the drawer opens. */
 .spotify-panel__inner {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   padding: 0.75rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 1rem;
   box-shadow: 0 4px 16px rgb(47 51 48 / 0.08);
-  transform: translateY(-110%);
+  transform: translateY(-16px);
   opacity: 0;
   visibility: hidden;
   transition:
