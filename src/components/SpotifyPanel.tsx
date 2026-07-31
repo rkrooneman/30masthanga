@@ -48,59 +48,67 @@ function SpotifyPanel() {
       className={`spotify-panel${expanded ? ' spotify-panel--expanded' : ''}`}
       aria-label="Music player"
     >
-      <button
-        type="button"
-        className="spotify-panel__pill"
-        onClick={toggle}
-        aria-expanded={expanded}
-        aria-controls={PANEL_BODY_ID}
-        aria-label={expanded ? 'Hide music player' : 'Show music player'}
-      >
-        <span className="spotify-panel__note" aria-hidden="true">
-          ♫
-        </span>
-        <span className="spotify-panel__label">Music</span>
-      </button>
-
       {/*
-        The body is ALWAYS rendered so the iframe mounts once and never
-        unmounts. Collapsing hides it via CSS (max-height + visibility), which
-        keeps the iframe alive so audio continues while collapsed and across
-        screen navigation. `inert` + aria-hidden keep hidden controls out of the
-        focus/AT order when collapsed.
+        One sliding unit holds BOTH the player and the pill footer, so they read
+        as a single connected surface (the shared background/border/shadow lives
+        on the drawer in CSS). The body/player has flex order -1 so it sits ABOVE
+        the pill; the pill is the always-visible handle at the bottom.
       */}
-      <div
-        id={PANEL_BODY_ID}
-        className="spotify-panel__body"
-        aria-hidden={!expanded}
-        inert={!expanded ? true : undefined}
-      >
-        <div className="spotify-panel__inner">
-          {/*
-            Compact 80px layout: Spotify serves a slim single-row player at this
-            height — cover art, the active track/artist, and the play/pause +
-            progress controls only, with NO track list. (We can't restyle inside
-            the cross-origin iframe, but the height selects this minimal layout.)
-          */}
-          <iframe
-            className="spotify-panel__embed"
-            title={`Spotify ${ACTIVE_PLAYLIST.name} playlist`}
-            src={ACTIVE_PLAYLIST.embedUrl}
-            width="100%"
-            height="80"
-            style={{ border: 0, borderRadius: 12 }}
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-          />
-          <a
-            className="spotify-panel__open"
-            href={ACTIVE_PLAYLIST.openUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open in Spotify for full playback
-          </a>
+      <div className="spotify-panel__drawer">
+        {/*
+          The body is ALWAYS rendered so the iframe mounts once and never
+          unmounts. Collapsing hides it via CSS (max-height), which keeps the
+          iframe alive so audio continues while collapsed and across screen
+          navigation. `inert` + aria-hidden keep hidden controls out of the
+          focus/AT order when collapsed.
+        */}
+        <div
+          id={PANEL_BODY_ID}
+          className="spotify-panel__body"
+          aria-hidden={!expanded}
+          inert={!expanded ? true : undefined}
+        >
+          <div className="spotify-panel__inner">
+            {/*
+              Compact 80px layout: Spotify serves a slim single-row player at
+              this height — cover art, the active track/artist, and the play/
+              pause + progress controls only, with NO track list.
+            */}
+            <iframe
+              className="spotify-panel__embed"
+              title={`Spotify ${ACTIVE_PLAYLIST.name} playlist`}
+              src={ACTIVE_PLAYLIST.embedUrl}
+              width="100%"
+              height="80"
+              style={{ border: 0, borderRadius: 12 }}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            />
+            <a
+              className="spotify-panel__open"
+              href={ACTIVE_PLAYLIST.openUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in Spotify for full playback
+            </a>
+          </div>
         </div>
+
+        {/* The pill: the always-visible handle at the bottom of the drawer. */}
+        <button
+          type="button"
+          className="spotify-panel__pill"
+          onClick={toggle}
+          aria-expanded={expanded}
+          aria-controls={PANEL_BODY_ID}
+          aria-label={expanded ? 'Hide music player' : 'Show music player'}
+        >
+          <span className="spotify-panel__note" aria-hidden="true">
+            ♫
+          </span>
+          <span className="spotify-panel__label">Music</span>
+        </button>
       </div>
     </section>
   );
