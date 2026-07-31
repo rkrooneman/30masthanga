@@ -34,7 +34,7 @@ function NamasteMark({ size = 96, className }: NamasteMarkProps) {
       strokeLinecap="round"
       strokeLinejoin="round"
       role="img"
-      aria-label="Namaste — hands pressed together"
+      aria-label="Namaste, hands pressed together"
     >
       {/* Left hand: fingertip point at top centre -> outer (pinky-side) edge
           curving down and widening -> wrist flaring outward at the bottom ->

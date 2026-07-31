@@ -253,7 +253,7 @@ function PoseCarousel({
             <span className="pose-card__drishti-value">{pose.drishti}</span>
           ) : (
             <span className="pose-card__drishti-value pose-card__drishti-value--muted">
-              Gaze — to be confirmed
+              Gaze: to be confirmed
             </span>
           )}
         </div>

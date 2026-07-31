@@ -157,14 +157,14 @@ function HomeScreen({
               <p className="about__text">
                 ashtanga30 generates a varied ~30-minute Ashtanga Primary Series
                 practice that always opens with the sun salutations and closes
-                with a shoulderstand and rest, keeping the traditional order
-                &mdash; a shorter practice you can sustain daily.
+                with a shoulderstand and rest, keeping the traditional order,
+                a shorter practice you can sustain daily.
               </p>
 
               <p className="about__text about__text--muted">
                 ashtanga30 is for general informational purposes only and is not
                 medical advice or a substitute for a qualified instructor. Yoga
-                involves physical activity with inherent risks &mdash; consult
+                involves physical activity with inherent risks, so consult
                 your physician before starting, practise within your limits, and
                 stop if you feel pain. The author accepts no liability for injury
                 or loss arising from use of this app.
