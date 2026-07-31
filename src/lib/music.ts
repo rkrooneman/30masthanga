@@ -40,22 +40,14 @@ function track(title: string, artist: string, filename: string): Track {
 }
 
 /**
- * The bundled tracks, in playback order. "Too Brief A Time To Be Anything" — a
- * long (~30 min) ambient bed — leads as the calm default so a whole practice can
- * run without a track change; the two shorter Ondrosik pieces follow.
- *
- * All tracks are CC0 (public domain); see CREDITS.md for provenance.
+ * The bundled track: a single long (~45 min) CC0 ambient bed that comfortably
+ * runs an entire practice without a track change — so the player only needs a
+ * play/pause control. See CREDITS.md for provenance.
  */
 export const TRACKS: readonly Track[] = [
   track(
     'Too Brief A Time To Be Anything',
     'HoliznaCC0',
     'HoliznaCC0 - Too Brief A Time To Be Anything.mp3',
-  ),
-  track('Morning meditation', 'Ondrosik', 'Ondrosik - Morning meditation.mp3'),
-  track(
-    'City lights at night',
-    'Ondrosik',
-    'Ondrosik - City lights at night.mp3',
   ),
 ];

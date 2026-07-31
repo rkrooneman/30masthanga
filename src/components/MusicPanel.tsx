@@ -39,24 +39,16 @@ import { loadMusicExpanded, saveMusicExpanded } from '../lib/preferences';
 
 const PANEL_BODY_ID = 'music-panel-body';
 
-/** Advance an index within the playlist, wrapping around at either end. */
-function wrapIndex(index: number, length: number): number {
-  return ((index % length) + length) % length;
-}
-
 function MusicPanel() {
   // Default collapsed; re-open only if the listener explicitly left it open.
   const [expanded, setExpanded] = useState<boolean>(loadMusicExpanded);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0); // 0..1 of the track
 
   const audioRef = useRef<HTMLAudioElement>(null);
-  // Tracks whether audio should keep playing across a track change (prev/next
-  // or auto-advance on end), so the new track resumes if the old one was live.
-  const wasPlayingRef = useRef<boolean>(false);
 
-  const currentTrack = TRACKS[currentIndex];
+  // A single long ambient track that loops — no playlist/track-change logic.
+  const currentTrack = TRACKS[0];
 
   const toggleExpanded = () => {
     setExpanded((prev) => {
@@ -66,64 +58,27 @@ function MusicPanel() {
     });
   };
 
-  /** Attempt playback, swallowing the autoplay-policy rejection promise. */
-  const playAudio = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.play().catch(() => {
-      /* autoplay blocked / interrupted — reflect reality, stay paused */
-    });
-  };
-
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
-      playAudio();
+      audio.play().catch(() => {
+        /* autoplay blocked / interrupted — reflect reality, stay paused */
+      });
     } else {
       audio.pause();
     }
   };
 
-  /** Move by a delta (±1), wrapping, and resume if we were mid-playback. */
-  const changeTrack = (delta: number) => {
-    const audio = audioRef.current;
-    wasPlayingRef.current = audio ? !audio.paused : false;
-    setCurrentIndex((prev) => wrapIndex(prev + delta, TRACKS.length));
-  };
-
-  const handlePrev = () => changeTrack(-1);
-  const handleNext = () => changeTrack(1);
-
-  // When the track changes, point the audio element at the new src. If we were
-  // playing before the change (or an auto-advance on `ended`), keep playing.
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.src = currentTrack.src;
-    audio.load();
-    setProgress(0);
-    if (wasPlayingRef.current) {
-      wasPlayingRef.current = false;
-      playAudio();
-    }
-    // Only re-run when the source changes; playAudio is stable in practice and
-    // its identity change would only re-issue a play() we already handle.
-  }, [currentTrack.src]);
-
-  // Keep isPlaying in sync with the ACTUAL audio state, advance on end, and
-  // drive the display-only progress bar. Listeners are attached once.
+  // Keep isPlaying in sync with the ACTUAL audio state and drive the
+  // display-only progress bar. The track loops natively (audio.loop). Listeners
+  // are attached once to the persistent audio element.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => {
-      // Loop the playlist: keep playing into the next track.
-      wasPlayingRef.current = true;
-      setCurrentIndex((prev) => wrapIndex(prev + 1, TRACKS.length));
-    };
     const handleTimeUpdate = () => {
       const { currentTime, duration } = audio;
       setProgress(duration > 0 ? currentTime / duration : 0);
@@ -131,13 +86,11 @@ function MusicPanel() {
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleEnded);
     audio.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, []);
@@ -170,10 +123,15 @@ function MusicPanel() {
           <div className="spotify-panel__inner">
             {/*
               The single, persistent audio element. Never rendered conditionally
-              so it survives collapse and navigation. `src` is set imperatively
-              in the track-change effect (already percent-encoded in TRACKS).
+              so it survives collapse and navigation. Loops the one long ambient
+              track; src is already percent-encoded in TRACKS.
             */}
-            <audio ref={audioRef} preload="metadata" />
+            <audio
+              ref={audioRef}
+              src={currentTrack.src}
+              loop
+              preload="metadata"
+            />
 
             <div className="music-player">
               {/* Centered track title + artist. */}
@@ -201,27 +159,9 @@ function MusicPanel() {
                 />
               </div>
 
-              {/* Centered transport controls, below the progress bar. */}
+              {/* Centered play/pause control, below the progress bar. A single
+                  long track means no prev/next is needed. */}
               <div className="music-player__transport">
-                <button
-                  type="button"
-                  className="music-btn"
-                  onClick={handlePrev}
-                  aria-label="Previous track"
-                >
-                  <svg
-                    className="music-btn__icon"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path
-                      d="M6 5v14M20 6.5v11a1 1 0 0 1-1.54.84l-8.2-5.5a1 1 0 0 1 0-1.68l8.2-5.5A1 1 0 0 1 20 6.5Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </button>
-
                 <button
                   type="button"
                   className="music-btn music-btn--primary"
@@ -251,25 +191,6 @@ function MusicPanel() {
                     </svg>
                   )}
                 </button>
-
-                <button
-                  type="button"
-                  className="music-btn"
-                  onClick={handleNext}
-                  aria-label="Next track"
-                >
-                  <svg
-                    className="music-btn__icon"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path
-                      d="M18 5v14M4 6.5v11a1 1 0 0 0 1.54.84l8.2-5.5a1 1 0 0 0 0-1.68l-8.2-5.5A1 1 0 0 0 4 6.5Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </button>
               </div>
             </div>
           </div>
@@ -285,7 +206,7 @@ function MusicPanel() {
           aria-label={expanded ? 'Hide music player' : 'Show music player'}
         >
           <span className="spotify-panel__note" aria-hidden="true">
-            {isPlaying ? '▶' : '♫'}
+            ♫
           </span>
           <span className="spotify-panel__label">Music</span>
         </button>
