@@ -30,14 +30,29 @@ export const TARGET_MINUTES = 30;
 export const TARGET_SECONDS = TARGET_MINUTES * 60; // 1800
 
 /**
- * How long a single pose is held, in whole seconds.
+ * How long a single card takes in total, in whole seconds — INCLUDING the
+ * internal transitions between its own repeats.
  *
  * Counts BOTH sides: `breaths` is per-side, so a 5-breath / 2-side pose at
  * 5s/breath holds for 5 * 2 * 5 = 50s. For salutation cards `sides` is 1 and
  * `breaths` already carries the whole-flow count, so the math still holds.
+ *
+ * Counts ALL repeats: a card performed `repeat` times holds for
+ * breaths * sides * repeat * breathSeconds.
+ *
+ * Internal repeat transitions: a card performed `repeat` times is `repeat`
+ * back-to-back flows with a transition gap BETWEEN each pair — i.e.
+ * (repeat - 1) gaps. That internal transition time is folded into this card's
+ * total here (e.g. Sun A ×3 = 3 flows + 2 internal gaps). The between-card gap
+ * that follows this card is NOT included here — `sequenceDurationSeconds` adds
+ * the (n-1) between-card gaps separately, so there is no double counting: the
+ * single between-card transition after a salutation still moves to the next
+ * card, exactly as before.
  */
 export function poseHoldSeconds(pose: Pose, breathSeconds: number): number {
-  return pose.breaths * pose.sides * breathSeconds;
+  const hold = pose.breaths * pose.sides * pose.repeat * breathSeconds;
+  const internalTransitions = (pose.repeat - 1) * TRANSITION_SECONDS;
+  return hold + internalTransitions;
 }
 
 /**

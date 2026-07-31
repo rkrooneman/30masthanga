@@ -69,9 +69,11 @@ for (const seed of SEEDS) {
     const name = `${p.english} (${p.sanskrit})`;
     const catGroup = `${p.category}/${p.group}`;
     const bxs = `${p.breaths}\u00d7${p.sides}`;
+    const rep = p.repeat > 1 ? `\u00d7${p.repeat}` : '';
     console.log(
       `${num}. [${orderCol}] ${name.padEnd(46)} ` +
-        `${catGroup.padEnd(22)} ${bxs.padStart(5)}  ${formatDuration(hold)}`,
+        `${catGroup.padEnd(22)} ${bxs.padStart(5)} ${rep.padStart(3)}  ` +
+        `${formatDuration(hold)}`,
     );
   });
 

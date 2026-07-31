@@ -45,6 +45,8 @@ export type PoseCategory =
  *                   total breath count for the whole flow (may be tuned later).
  * - `sides`         1 = single/symmetric; 2 = both sides (left + right).
  *                   Guided practice runs both sides; time math counts both.
+ * - `repeat`        How many times this card is performed back-to-back (e.g. Sun
+ *                   Salutations ×3). Timing counts all repeats. Default 1.
  * - `alwaysInclude` true = always present in every generated sequence.
  * - `selectable`    false = fixed structural pose, never randomly dropped.
  *                   (alwaysInclude poses are typically selectable:false.)
@@ -62,6 +64,7 @@ export interface Pose {
   order: number;
   breaths: number;
   sides: 1 | 2;
+  repeat: number;
   alwaysInclude: boolean;
   selectable: boolean;
   description: string;

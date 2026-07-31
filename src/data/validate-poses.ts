@@ -10,6 +10,7 @@
 
 import type { PoseCategory } from '../types/pose';
 import { poses } from './poses';
+import { poseHoldSeconds } from '../lib/timing';
 
 const SECONDS_PER_BREATH = 5;
 
@@ -67,6 +68,32 @@ for (const p of poses) {
       `breaths must be a positive integer on pose "${p.id}" (got ${p.breaths})`,
     );
   }
+  if (!Number.isInteger(p.repeat) || p.repeat <= 0) {
+    errors.push(
+      `repeat must be a positive integer on pose "${p.id}" (got ${p.repeat})`,
+    );
+  }
+}
+
+// --- repeat: only the two salutations may have repeat > 1 (both === 3) ---
+const expectedRepeated = new Set([
+  'surya_namaskara_a',
+  'surya_namaskara_b',
+]);
+const repeatedIds = poses.filter((p) => p.repeat > 1).map((p) => p.id);
+for (const p of poses) {
+  if (expectedRepeated.has(p.id)) {
+    if (p.repeat !== 3) {
+      errors.push(
+        `${p.id} is expected to have repeat === 3 (got ${p.repeat})`,
+      );
+    }
+  } else if (p.repeat > 1) {
+    errors.push(
+      `Unexpected repeat > 1 on pose "${p.id}" (got ${p.repeat}); only ` +
+        `surya_namaskara_a and surya_namaskara_b should repeat`,
+    );
+  }
 }
 
 // --- 6. alwaysInclude reporting ---
@@ -110,16 +137,29 @@ for (const c of VALID_CATEGORIES) {
 }
 console.log(`  ${'TOTAL'.padEnd(10)} ${poses.length}`);
 
-// full-practice time estimate
+// repeated poses report
+console.log('\nRepeated poses (repeat > 1):');
+if (repeatedIds.length === 0) {
+  console.log('  (none)');
+} else {
+  for (const id of repeatedIds) {
+    const p = poses.find((x) => x.id === id)!;
+    const tag = expectedRepeated.has(id) ? '(expected)' : '(UNEXPECTED)';
+    console.log(`  - ${id} \u00d7${p.repeat} ${tag}`);
+  }
+}
+
+// full-practice time estimate (accounts for sides AND repeat via poseHoldSeconds)
 let totalBreaths = 0;
-for (const p of poses) totalBreaths += p.breaths * p.sides;
-const totalSeconds = totalBreaths * SECONDS_PER_BREATH;
+for (const p of poses) totalBreaths += p.breaths * p.sides * p.repeat;
+let totalSeconds = 0;
+for (const p of poses) totalSeconds += poseHoldSeconds(p, SECONDS_PER_BREATH);
 const minutes = Math.floor(totalSeconds / 60);
 const seconds = totalSeconds % 60;
-console.log('\nFull-practice estimate (all poses, both sides):');
-console.log(`  total breath-units (breaths * sides): ${totalBreaths}`);
-console.log(`  at ${SECONDS_PER_BREATH}s/breath: ${totalSeconds}s ` +
-  `= ${minutes}m ${seconds}s`);
+console.log('\nFull-practice estimate (all poses, both sides, all repeats):');
+console.log(`  total breath-units (breaths * sides * repeat): ${totalBreaths}`);
+console.log(`  at ${SECONDS_PER_BREATH}s/breath (incl. internal repeat ` +
+  `transitions): ${totalSeconds}s = ${minutes}m ${seconds}s`);
 
 // --- Result ---
 if (errors.length > 0) {
