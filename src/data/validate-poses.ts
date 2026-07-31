@@ -60,6 +60,9 @@ for (const p of poses) {
   if (!p.english || p.english.trim() === '') {
     errors.push(`Empty english on pose "${p.id}"`);
   }
+  if (typeof p.drishti !== 'string' || p.drishti.trim() === '') {
+    errors.push(`Empty drishti on pose "${p.id}"`);
+  }
   if (p.sides !== 1 && p.sides !== 2) {
     errors.push(`sides must be 1 or 2 on pose "${p.id}" (got ${p.sides})`);
   }

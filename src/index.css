@@ -299,65 +299,303 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Pose list (Overview placeholder)
+   Overview carousel (Slice 4)
    -------------------------------------------------------------------------- */
-.pose-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.overview {
+  gap: 1rem;
 }
 
-.pose-list__item {
+.overview__header {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.625rem 0.75rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Compact icon-only back button; overrides the ghost self-alignment. */
+.overview__back {
+  align-self: auto;
+  margin-left: -0.75rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.5rem 0.75rem;
+}
+
+.overview__summary {
+  margin: 0;
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* The focus of the screen: one calm pose card at a time. */
+.pose-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 0.625rem;
+  border-radius: 1rem;
+  /* touch swipe should not select text or trigger horizontal page scroll */
+  user-select: none;
+  touch-action: pan-y;
 }
 
-.pose-list__index {
-  flex: 0 0 auto;
-  min-width: 1.5rem;
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
+/* --------------------------------------------------------------------------
+   Pose-card transition (Slice 4 enhancement)
+   The card is remounted (key={index}) on every navigation, so applying one of
+   these enter animations re-triggers a calm directional slide + fade. Going
+   "next" the incoming card slides in from the right; going "prev", from the
+   left. The initial mount fades in only, with no directional slide. Timing is
+   deliberately gentle (~300ms, ease-out-ish) — smooth, not bouncy.
+   -------------------------------------------------------------------------- */
+@keyframes pose-card-enter-next {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.pose-list__body {
-  flex: 1 1 auto;
+@keyframes pose-card-enter-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pose-card-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pose-card--enter-next {
+  animation: pose-card-enter-next 300ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.pose-card--enter-prev {
+  animation: pose-card-enter-prev 300ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* First paint: quiet fade-in, no directional slide. */
+.pose-card--enter-initial {
+  animation: pose-card-fade-in 300ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.pose-card__graphic {
+  display: flex;
+  justify-content: center;
+}
+
+.pose-card__names {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  min-width: 0;
+  gap: 0.15rem;
 }
 
-.pose-list__name {
-  font-size: 0.9375rem;
+.pose-card__english {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   color: var(--color-text);
 }
 
-.pose-list__repeat {
-  color: var(--color-accent);
-  font-weight: 500;
+.pose-card__sanskrit {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
 }
 
-.pose-list__sanskrit {
+.pose-card__phonetic {
+  margin: 0;
   font-size: 0.8125rem;
   font-style: italic;
   color: var(--color-text-muted);
 }
 
-.pose-list__meta {
-  flex: 0 0 auto;
-  font-size: 0.75rem;
+.pose-card__meta {
+  margin: 0;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
-  text-align: right;
-  white-space: nowrap;
+}
+
+.pose-card__drishti {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 100%;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.pose-card__drishti-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.pose-card__drishti-value {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.pose-card__drishti-value--muted {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Pose placeholder graphic
+   -------------------------------------------------------------------------- */
+.pose-placeholder {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-border);
+}
+
+.pose-placeholder__ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0.5;
+}
+
+.pose-placeholder__initial {
+  position: relative;
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--color-accent);
+  letter-spacing: 0.02em;
+}
+
+/* --------------------------------------------------------------------------
+   Carousel navigation: prev/next arrows + tappable dots
+   -------------------------------------------------------------------------- */
+.carousel-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carousel-nav__arrow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.carousel-nav__arrow:hover:not(:disabled) {
+  background: var(--color-accent-soft);
+}
+
+.carousel-nav__arrow:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.carousel-nav__arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Dots wrap to multiple rows so ~37 dots never overflow at 375px. */
+.carousel-nav__dots {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.carousel-nav__dot {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-border);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.carousel-nav__dot:hover {
+  background: var(--color-accent-soft);
+}
+
+.carousel-nav__dot:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.carousel-nav__dot--active {
+  background: var(--color-accent);
+  transform: scale(1.35);
+}
+
+.overview__position {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+/* Respect reduced-motion: drop the dot scale/transition flourish, and replace
+   the pose-card directional slide with a quick, translate-free cross-fade so
+   users who opt out never see motion. */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-nav__dot,
+  .carousel-nav__arrow {
+    transition: none;
+  }
+  .carousel-nav__dot--active {
+    transform: none;
+  }
+  .pose-card--enter-next,
+  .pose-card--enter-prev,
+  .pose-card--enter-initial {
+    animation: pose-card-fade-in 120ms ease both;
+  }
 }
 
 /* --------------------------------------------------------------------------

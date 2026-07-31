@@ -1,22 +1,21 @@
 /**
  * Pose type definitions for the 30-minute Ashtanga companion.
  *
- * === "NEEDS VERIFICATION" convention ===
- * Some fields carry yoga-instruction content that MUST be correct before the app
- * can be trusted (getting bandha/drishti/description wrong would make the app
- * misleading). For every pose in the catalog, the three instruction fields
- * `description`, `bandha`, and `drishti` are deliberately set to the exact
- * sentinel string `"NEEDS VERIFICATION"`. A human will fill these in against
- * authoritative sources (David Swenson's Ashtanga Yoga "The Practice Manual"
- * and tummee.com).
+ * === drishti convention ===
+ * `drishti` is the only remaining yoga-instruction field (the earlier
+ * `description` and `bandha` fields were removed in Slice 4). It carries the
+ * standardized Ashtanga Primary Series gaze point and MUST be correct before the
+ * app can be trusted, so each value is the traditional gaze as codified in the
+ * KPJAYI tradition and David Swenson's "The Practice Manual".
  *
- * The same sentinel may also appear in `phonetic` or `group` on the rare
- * occasion the drafter was genuinely unsure — treat any occurrence of
- * `"NEEDS VERIFICATION"` as "do not trust, verify me".
+ * Any pose whose standardized gaze the drafter was not confident about carries
+ * the exact sentinel string `"__UNVERIFIED__"` — treat that as "do not trust,
+ * verify me". The older `"NEEDS VERIFICATION"` sentinel may still appear in
+ * `phonetic` or `group` on the rare occasion the drafter was genuinely unsure.
  *
- * Numeric fields (`order`, `breaths`, `sides`) are NEVER marked NEEDS
- * VERIFICATION — where a traditional count is ambiguous a sensible default is
- * used and can be tuned later.
+ * Numeric fields (`order`, `breaths`, `sides`) are NEVER marked unverified —
+ * where a traditional count is ambiguous a sensible default is used and can be
+ * tuned later.
  */
 
 /** High-level section of the Primary Series a pose belongs to. */
@@ -50,9 +49,8 @@ export type PoseCategory =
  * - `alwaysInclude` true = always present in every generated sequence.
  * - `selectable`    false = fixed structural pose, never randomly dropped.
  *                   (alwaysInclude poses are typically selectable:false.)
- * - `description`   Cueing / how-to. Currently "NEEDS VERIFICATION".
- * - `bandha`        Engaged energetic lock(s). Currently "NEEDS VERIFICATION".
- * - `drishti`       Gaze point. Currently "NEEDS VERIFICATION".
+ * - `drishti`       Standardized Ashtanga gaze point (Sanskrit term + plain
+ *                   English target). "__UNVERIFIED__" if not yet confirmed.
  */
 export interface Pose {
   id: string;
@@ -67,7 +65,5 @@ export interface Pose {
   repeat: number;
   alwaysInclude: boolean;
   selectable: boolean;
-  description: string;
-  bandha: string;
   drishti: string;
 }

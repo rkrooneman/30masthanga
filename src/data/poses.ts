@@ -3,12 +3,18 @@
  *
  * SLICE 1 SCOPE: data + types only. No UI, no generation logic.
  *
- * === "NEEDS VERIFICATION" convention ===
- * The three yoga-instruction fields — `description`, `bandha`, `drishti` — are
- * set to the exact string "NEEDS VERIFICATION" on EVERY pose. Getting these
- * wrong would make the app misleading, so a human will fill them in against
- * David Swenson's "The Practice Manual" and tummee.com. `phonetic` and `group`
- * may also carry the sentinel where the drafter was genuinely unsure.
+ * === drishti convention ===
+ * `drishti` is the single remaining yoga-instruction field (description and
+ * bandha were removed in Slice 4). Each value is the standardized Ashtanga
+ * Primary Series gaze point (the nine traditional drishtis as codified in the
+ * KPJAYI tradition and David Swenson's "The Practice Manual"), given as the
+ * Sanskrit drishti term plus the plain-English target, e.g.
+ * "Nasagrai (tip of the nose)".
+ *
+ * The exact string "__UNVERIFIED__" marks any pose whose standardized gaze the
+ * drafter was not confident about — a human should confirm it against Swenson
+ * before it is trusted. `phonetic` and `group` may still carry the older
+ * "NEEDS VERIFICATION" sentinel where the drafter was genuinely unsure.
  *
  * === order ===
  * `order` is strictly increasing across the whole array in canonical Primary
@@ -50,8 +56,6 @@
 
 import type { Pose } from '../types/pose';
 
-const NV = 'NEEDS VERIFICATION';
-
 export const poses: Pose[] = [
   // ----- Sun Salutations (one card each, whole flow) -----
   {
@@ -67,9 +71,7 @@ export const poses: Pose[] = [
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose) — varies through the flow',
   },
   {
     id: 'surya_namaskara_b',
@@ -84,9 +86,7 @@ export const poses: Pose[] = [
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose) — varies through the flow',
   },
 
   // ----- Standing sequence -----
@@ -103,9 +103,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'padahastasana',
@@ -120,9 +118,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'utthita_trikonasana',
@@ -137,9 +133,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Hastagrai (fingertips of the top hand)',
   },
   {
     id: 'parivrtta_trikonasana',
@@ -154,9 +148,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Hastagrai (fingertips of the top hand)',
   },
   {
     id: 'utthita_parsvakonasana',
@@ -171,9 +163,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Hastagrai (raised hand)',
   },
   {
     id: 'parivrtta_parsvakonasana',
@@ -188,9 +178,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Hastagrai (raised hand)',
   },
   {
     id: 'prasarita_padottanasana_a',
@@ -205,9 +193,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'prasarita_padottanasana_b',
@@ -222,9 +208,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'prasarita_padottanasana_c',
@@ -239,9 +223,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'prasarita_padottanasana_d',
@@ -256,9 +238,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'parsvottanasana',
@@ -273,9 +253,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'utthita_hasta_padangusthasana',
@@ -290,9 +268,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'ardha_baddha_padmottanasana',
@@ -307,9 +283,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'utkatasana',
@@ -324,9 +298,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Angusthamadhyai / Urdhva (up to the thumbs)',
   },
   {
     id: 'virabhadrasana_a',
@@ -341,9 +313,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Angusthamadhyai / Urdhva (up to the thumbs)',
   },
   {
     id: 'virabhadrasana_b',
@@ -358,9 +328,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Hastagrai (front hand)',
   },
 
   // ----- Seated sequence -----
@@ -377,9 +345,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'paschimottanasana',
@@ -394,9 +360,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'purvottanasana',
@@ -411,9 +375,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Broomadhya / Nasagrai (third eye / tip of the nose)',
   },
   {
     id: 'ardha_baddha_padma_paschimottanasana',
@@ -428,9 +390,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'trianga_mukhaikapada_paschimottanasana',
@@ -445,9 +405,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'janu_sirsasana_a',
@@ -462,9 +420,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'janu_sirsasana_b',
@@ -479,9 +435,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'janu_sirsasana_c',
@@ -496,9 +450,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'marichyasana_a',
@@ -513,9 +465,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'marichyasana_b',
@@ -530,9 +480,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'marichyasana_c',
@@ -547,9 +495,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Parsva (far to the side)',
   },
   {
     id: 'marichyasana_d',
@@ -564,9 +510,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Parsva (far to the side)',
   },
   {
     id: 'navasana',
@@ -581,9 +525,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'bhujapidasana',
@@ -598,9 +540,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'kurmasana',
@@ -615,9 +555,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Broomadhya / Nasagrai (third eye / tip of the nose)',
   },
   {
     id: 'supta_kurmasana',
@@ -632,9 +570,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Broomadhya / Nasagrai (third eye / tip of the nose)',
   },
   {
     id: 'garbha_pindasana',
@@ -649,9 +585,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'kukkutasana',
@@ -666,9 +600,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'baddha_konasana',
@@ -683,9 +615,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'upavistha_konasana',
@@ -700,9 +630,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Urdhva / Antara Drishti (up to the sky)',
   },
   {
     id: 'supta_konasana',
@@ -717,9 +645,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'supta_padangusthasana',
@@ -734,9 +660,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'ubhaya_padangusthasana',
@@ -751,9 +675,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Urdhva / Antara Drishti (up to the sky)',
   },
   {
     id: 'urdhva_mukha_paschimottanasana',
@@ -768,9 +690,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'setu_bandhasana',
@@ -785,9 +705,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
 
   // ----- Closing / finishing sequence -----
@@ -804,9 +722,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose / between the hands)',
   },
   {
     id: 'paschimottanasana_closing',
@@ -821,9 +737,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Padhayoragrai (toes)',
   },
   {
     id: 'salamba_sarvangasana',
@@ -838,9 +752,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: true,
     selectable: false,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'halasana',
@@ -855,9 +767,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'karnapidasana',
@@ -872,9 +782,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'urdhva_padmasana',
@@ -889,9 +797,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'pindasana',
@@ -906,9 +812,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'matsyasana',
@@ -923,9 +827,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Broomadhya (third eye / between the eyebrows)',
   },
   {
     id: 'uttana_padasana',
@@ -940,9 +842,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'sirsasana',
@@ -957,9 +857,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'baddha_padmasana',
@@ -974,9 +872,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'yoga_mudra',
@@ -991,9 +887,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Broomadhya / Nasagrai (third eye / tip of the nose)',
   },
   {
     id: 'padmasana',
@@ -1008,9 +902,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
   {
     id: 'utpluthih',
@@ -1025,9 +917,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'Nasagrai (tip of the nose)',
   },
 
   // ----- Final rest -----
@@ -1044,9 +934,7 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: true,
     selectable: false,
-    description: NV,
-    bandha: NV,
-    drishti: NV,
+    drishti: 'eyes closed (inner gaze)',
   },
 ];
 
