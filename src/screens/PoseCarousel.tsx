@@ -45,6 +45,12 @@ interface PoseCarouselProps {
    * updates upstream and the new `poses` flow back down as props.
    */
   onSwapPose: (poseId: string) => void;
+  /**
+   * Whether "Basics only" mode is active. Threaded into the swap-candidacy
+   * check so the enabled/disabled swap control matches the mode the practice
+   * was generated in (basics-mode swaps only offer basic poses).
+   */
+  basicsOnly: boolean;
 }
 
 function PoseCarousel({
@@ -54,6 +60,7 @@ function PoseCarousel({
   onBackToMap,
   onStartGuided,
   onSwapPose,
+  basicsOnly,
 }: PoseCarouselProps) {
   const count = poses.length;
 
@@ -177,7 +184,8 @@ function PoseCarousel({
   //   - otherwise: enabled.
   const isFixed = pose.alwaysInclude;
   const canSwap =
-    !isFixed && hasSwapCandidate(poses, breathSeconds, pose.id);
+    !isFixed &&
+    hasSwapCandidate(poses, breathSeconds, pose.id, { basicsOnly });
   const swapDisabled = isFixed || !canSwap;
   const swapHint = isFixed
     ? 'Fixed part of the practice'

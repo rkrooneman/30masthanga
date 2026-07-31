@@ -36,6 +36,12 @@ export interface SwapOptions {
   rng?: () => number;
   /** Target (and hard-ceiling) duration in seconds. Default TARGET_SECONDS. */
   targetSeconds?: number;
+  /**
+   * "Basics only" (Smart Start) mode. When true, replacement candidates are
+   * additionally restricted to curated root/basic poses (`isBasic === true`),
+   * so basics-mode swaps only ever offer basic poses. Default false.
+   */
+  basicsOnly?: boolean;
 }
 
 /**
@@ -51,6 +57,7 @@ function findCandidates(
   breathSeconds: number,
   poseIdToRemove: string,
   targetSeconds: number,
+  basicsOnly: boolean,
 ): { removed: Pose; candidates: Pose[] } | null {
   const removed = current.find((p) => p.id === poseIdToRemove);
   // Missing, or a fixed-frame pose: not swappable (caller should have disabled).
@@ -64,6 +71,8 @@ function findCandidates(
   const candidates = catalog.filter((cand) => {
     if (cand.category !== removed.category) return false;
     if (!cand.selectable || cand.alwaysInclude) return false;
+    // Basics only: restrict to curated root/basic poses.
+    if (basicsOnly && !cand.isBasic) return false;
     if (presentIds.has(cand.id)) return false; // already in the practice
     // Budget check: the full list (base + candidate) must fit the ceiling.
     // Sorting is order-independent for duration but kept for consistency.
@@ -89,7 +98,14 @@ export function hasSwapCandidate(
   options?: SwapOptions,
 ): boolean {
   const targetSeconds = options?.targetSeconds ?? TARGET_SECONDS;
-  const found = findCandidates(current, breathSeconds, poseId, targetSeconds);
+  const basicsOnly = options?.basicsOnly ?? false;
+  const found = findCandidates(
+    current,
+    breathSeconds,
+    poseId,
+    targetSeconds,
+    basicsOnly,
+  );
   return found !== null && found.candidates.length > 0;
 }
 
@@ -109,12 +125,14 @@ export function swapPose(
 ): SwapResult | null {
   const rng = options?.rng ?? Math.random;
   const targetSeconds = options?.targetSeconds ?? TARGET_SECONDS;
+  const basicsOnly = options?.basicsOnly ?? false;
 
   const found = findCandidates(
     current,
     breathSeconds,
     poseIdToRemove,
     targetSeconds,
+    basicsOnly,
   );
   if (!found || found.candidates.length === 0) return null;
 

@@ -6,7 +6,7 @@
  * number doesn't flicker while dragging the slider (see the estimate note below).
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { HomeScreenProps } from '../types/navigation';
 import { poses } from '../data/poses';
 import { generatePractice } from '../lib/generatePractice';
@@ -27,6 +27,20 @@ function HomeScreen({
   onBreathSecondsChange,
   onGenerate,
 }: HomeScreenProps) {
+  // Local UI state only: whether the "About this app" dialog is open. Kept here
+  // (not in the shell) since it's purely presentational and Home-only.
+  const [aboutOpen, setAboutOpen] = useState(false);
+
+  // Close the About dialog on Escape while it's open.
+  useEffect(() => {
+    if (!aboutOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAboutOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [aboutOpen]);
+
   // Stable estimate: recomputed only when the breath pace changes, and always
   // with the SAME seeded rng, so a given pace always shows the same numbers.
   const estimate = useMemo(() => {
@@ -46,6 +60,28 @@ function HomeScreen({
 
   return (
     <section className="home">
+      <button
+        type="button"
+        className="home__info"
+        aria-label="About this app"
+        onClick={() => setAboutOpen(true)}
+      >
+        <svg
+          className="home__info-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="9" />
+          <line x1="12" y1="11" x2="12" y2="16" />
+          <circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+
       <div className="home__brand">
         <LotusMark size={72} className="home__mark" />
         <h1 className="home__wordmark">ashtanga30</h1>
@@ -87,6 +123,75 @@ function HomeScreen({
       >
         Generate my next practice
       </button>
+
+      <footer className="home__footer">
+        <p className="home__copyright">&copy; 2026 Roderik Krooneman</p>
+      </footer>
+
+      {aboutOpen && (
+        <div
+          className="about-backdrop"
+          onClick={() => setAboutOpen(false)}
+        >
+          <div
+            className="about"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="about-heading"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="about__close"
+              aria-label="Close"
+              onClick={() => setAboutOpen(false)}
+            >
+              &times;
+            </button>
+
+            <div className="about__body">
+              <h2 id="about-heading" className="about__heading">
+                About ashtanga30
+              </h2>
+
+              <p className="about__text">
+                ashtanga30 generates a varied ~30-minute Ashtanga Primary Series
+                practice that always opens with the sun salutations and closes
+                with a shoulderstand and rest, keeping the traditional order
+                &mdash; a shorter practice you can sustain daily.
+              </p>
+
+              <p className="about__text about__text--muted">
+                ashtanga30 is for general informational purposes only and is not
+                medical advice or a substitute for a qualified instructor. Yoga
+                involves physical activity with inherent risks &mdash; consult
+                your physician before starting, practise within your limits, and
+                stop if you feel pain. The author accepts no liability for injury
+                or loss arising from use of this app.
+              </p>
+
+              <p className="about__text about__text--muted">
+                Background music: CC0 public-domain tracks (see the project's
+                CREDITS). Pose illustrations are original works. Open-source
+                under the MIT License.
+              </p>
+
+              <p className="about__text about__text--muted">
+                <a
+                  className="about__link"
+                  href="https://github.com/rkrooneman/30masthanga"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View the project on GitHub
+                </a>
+              </p>
+
+              <p className="about__copyright">&copy; 2026 Roderik Krooneman</p>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

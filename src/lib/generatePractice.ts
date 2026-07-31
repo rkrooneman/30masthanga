@@ -30,6 +30,13 @@ export interface GenerateOptions {
   targetSeconds?: number;
   /** Injectable RNG returning [0,1). Default Math.random. */
   rng?: () => number;
+  /**
+   * "Basics only" (Smart Start) mode. When true, the fillable candidate pools
+   * are restricted to curated root/basic poses (`isBasic === true`), producing
+   * a shorter practice of the essential poses. The fixed frame is unaffected
+   * (its poses are always included). Default false (full "All poses" mode).
+   */
+  basicsOnly?: boolean;
 }
 
 export interface GeneratedPractice {
@@ -44,11 +51,16 @@ export interface GeneratedPractice {
 /** The three fillable middle sections, in canonical progression order. */
 type Section = 'standing' | 'seated' | 'closing';
 
-/** Weighting of the free budget across sections (traditional emphasis). */
+/**
+ * Weighting of the free budget across sections (traditional emphasis). The
+ * closing share is bumped (0.20 -> 0.30, taken from standing and seated) so a
+ * shortened practice reliably reaches its finishing/inversion poses. Applies in
+ * BOTH modes.
+ */
 const SECTION_WEIGHTS: Record<Section, number> = {
-  standing: 0.35,
-  seated: 0.45,
-  closing: 0.2,
+  standing: 0.3,
+  seated: 0.4,
+  closing: 0.3,
 };
 
 /** The canonical ids that make up the always-present fixed frame. */
@@ -180,6 +192,7 @@ export function generatePractice(
   const breathSeconds = options?.breathSeconds ?? DEFAULT_BREATH_SECONDS;
   const targetSeconds = options?.targetSeconds ?? TARGET_SECONDS;
   const rng = options?.rng ?? Math.random;
+  const basicsOnly = options?.basicsOnly ?? false;
 
   // --- A. Fixed frame (always include, in whatever order they appear) ---
   const fixed = all.filter((p) => p.alwaysInclude);
@@ -189,8 +202,14 @@ export function generatePractice(
   const freeBudget = Math.max(0, targetSeconds - fixedDuration);
 
   // --- C. Candidate pools (selectable only; excludes the fixed frame) ---
+  // In "Basics only" mode the pool is additionally restricted to curated
+  // root/basic poses (isBasic === true).
   const selectable = all.filter(
-    (p) => p.selectable && !p.alwaysInclude && sectionOf(p) !== null,
+    (p) =>
+      p.selectable &&
+      !p.alwaysInclude &&
+      sectionOf(p) !== null &&
+      (!basicsOnly || p.isBasic),
   );
   const pools: Record<Section, Pose[]> = {
     standing: selectable.filter((p) => sectionOf(p) === 'standing'),
@@ -227,6 +246,49 @@ export function generatePractice(
     }
   }
 
+  // --- F (part 2). Protected finisher (applies in BOTH modes) ---
+  // Guarantee that at least one "finisher" — any selectable `closing` pose,
+  // i.e. a proper finishing/inversion pose such as Headstand — survives the
+  // ceiling trim below, in addition to the always-present fixed-frame
+  // Shoulderstand. This keeps every shortened practice reaching a real close.
+  //
+  // Choose a single protected finisher id: prefer Headstand (`sirsasana`) if it
+  // is already selected, else the earliest-order selected closing pose. If NO
+  // closing pose is selected yet, seed one (prefer Headstand, else the cheapest
+  // affordable closing pose) using the same seeding pattern as step F part 1.
+  const CLOSING_SECTION: Section = 'closing';
+  const selectedClosing = selected.filter(
+    (p) => sectionOfSelected.get(p.id) === CLOSING_SECTION,
+  );
+  let protectedFinisherId: string | null = null;
+  if (selectedClosing.length > 0) {
+    const headstand = selectedClosing.find((p) => p.id === 'sirsasana');
+    const earliest = selectedClosing
+      .slice()
+      .sort((a, b) => a.order - b.order)[0];
+    protectedFinisherId = (headstand ?? earliest).id;
+  } else {
+    const alreadyUsed = new Set(selected.map((p) => p.id));
+    const availableClosing = pools[CLOSING_SECTION].filter(
+      (p) => !alreadyUsed.has(p.id),
+    );
+    const headstand = availableClosing.find((p) => p.id === 'sirsasana');
+    // Prefer Headstand if it fits the free budget; else the cheapest closing
+    // pose that fits. May be null if none fits (extreme edge case) — then there
+    // is simply no finisher to protect.
+    const headstandFits =
+      headstand !== undefined &&
+      marginalCost(headstand, breathSeconds) <= freeBudget;
+    const seed = headstandFits
+      ? headstand!
+      : cheapestFor(availableClosing, freeBudget, breathSeconds);
+    if (seed) {
+      selected.push(seed);
+      sectionOfSelected.set(seed.id, CLOSING_SECTION);
+      protectedFinisherId = seed.id;
+    }
+  }
+
   // --- E. Assemble, sort by canonical order, enforce the hard ceiling ---
   const assemble = (sel: Pose[]): Pose[] =>
     [...fixed, ...sel].sort((a, b) => a.order - b.order);
@@ -246,8 +308,15 @@ export function generatePractice(
     const working = selected.slice();
 
     while (total > targetSeconds) {
-      // Only selectable, non-fixed poses may be removed.
-      const removable = working.filter((p) => !FIXED_FRAME_IDS.has(p.id));
+      // Only selectable, non-fixed poses may be removed. The protected finisher
+      // (if any) is also non-removable, so the trim never strips away the one
+      // guaranteed finishing pose (see step F part 2). The existing
+      // `removable.length === 0` guard below still lets the trim bottom out
+      // rather than loop forever in the extreme case where protecting the
+      // finisher would otherwise make it impossible to get under the ceiling.
+      const removable = working.filter(
+        (p) => !FIXED_FRAME_IDS.has(p.id) && p.id !== protectedFinisherId,
+      );
       if (removable.length === 0) break; // can't trim further (should not happen)
 
       // Current actual cost per section (hold + one transition per pose).

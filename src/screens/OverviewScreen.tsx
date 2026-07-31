@@ -37,6 +37,8 @@ function OverviewScreen({
   onStartGuided,
   onRegenerate,
   onSwapPose,
+  basicsOnly,
+  onToggleBasics,
 }: OverviewScreenProps) {
   const { poses } = practice;
   const count = poses.length;
@@ -76,6 +78,7 @@ function OverviewScreen({
         onBackToMap={backToMap}
         onStartGuided={onStartGuided}
         onSwapPose={onSwapPose}
+        basicsOnly={basicsOnly}
       />
     );
   }
@@ -90,6 +93,8 @@ function OverviewScreen({
       onStartGuided={onStartGuided}
       onRegenerate={regenerate}
       animateRefresh={regenCount > 0}
+      basicsOnly={basicsOnly}
+      onToggleBasics={onToggleBasics}
     />
   );
 }

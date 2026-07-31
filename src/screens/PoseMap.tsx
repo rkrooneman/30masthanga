@@ -62,6 +62,10 @@ interface PoseMapProps {
    * in a row.
    */
   animateRefresh?: boolean;
+  /** Whether "Basics only" (Smart Start) mode is active (drives the switch). */
+  basicsOnly: boolean;
+  /** Toggle "Basics only" mode (parent persists + regenerates). */
+  onToggleBasics: (next: boolean) => void;
 }
 
 /** A pose paired with its absolute index in the full practice sequence. */
@@ -100,6 +104,8 @@ function PoseMap({
   onStartGuided,
   onRegenerate,
   animateRefresh = false,
+  basicsOnly,
+  onToggleBasics,
 }: PoseMapProps) {
   const { poses, totalSeconds } = practice;
   const count = poses.length;
@@ -123,6 +129,25 @@ function PoseMap({
           {count} poses &middot; {formatDuration(totalSeconds)}
         </p>
       </header>
+
+      <div className="basics-toggle">
+        <label className="basics-toggle__label" htmlFor="basics-only-switch">
+          <span className="basics-toggle__text">Basics only</span>
+          <input
+            type="checkbox"
+            id="basics-only-switch"
+            className="basics-toggle__input"
+            checked={basicsOnly}
+            onChange={(e) => onToggleBasics(e.target.checked)}
+          />
+          <span className="basics-toggle__track" aria-hidden="true">
+            <span className="basics-toggle__thumb" />
+          </span>
+        </label>
+        <p className="basics-toggle__hint">
+          A shorter practice of the essential root poses.
+        </p>
+      </div>
 
       <div
         className={
@@ -178,6 +203,10 @@ function PoseMap({
             </section>
           );
         })}
+
+        <p className="pose-map__total">
+          Total &middot; {count} poses &middot; {formatDuration(totalSeconds)}
+        </p>
       </div>
 
       <div className="pose-map__actions">

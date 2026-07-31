@@ -50,6 +50,7 @@ function makePose(overrides: Partial<Pose>): Pose {
     alwaysInclude: false,
     selectable: true,
     drishti: 'Nasagrai (tip of the nose)',
+    isBasic: false,
     ...overrides,
   };
 }

@@ -51,6 +51,9 @@ export type PoseCategory =
  *                   (alwaysInclude poses are typically selectable:false.)
  * - `drishti`       Standardized Ashtanga gaze point (Sanskrit term + plain
  *                   English target). "__UNVERIFIED__" if not yet confirmed.
+ * - `isBasic`       true = a curated root/basic pose included in "Basics only"
+ *                   (Smart Start) mode; false = only appears in the full "All
+ *                   poses" mode.
  */
 export interface Pose {
   id: string;
@@ -66,4 +69,5 @@ export interface Pose {
   alwaysInclude: boolean;
   selectable: boolean;
   drishti: string;
+  isBasic: boolean;
 }

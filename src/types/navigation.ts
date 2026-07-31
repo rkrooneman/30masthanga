@@ -39,6 +39,16 @@ export interface OverviewScreenProps {
    * alternative (see swapPose). No-op if the pose is fixed or has no candidate.
    */
   onSwapPose: (poseId: string) => void;
+  /**
+   * Whether "Basics only" (Smart Start) mode is active. Drives the header
+   * switch and is threaded down so swap candidacy matches the current mode.
+   */
+  basicsOnly: boolean;
+  /**
+   * Toggle "Basics only" mode. The shell persists the choice and regenerates
+   * the current practice in the new mode.
+   */
+  onToggleBasics: (next: boolean) => void;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */

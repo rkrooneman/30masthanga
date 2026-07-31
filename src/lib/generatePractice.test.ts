@@ -52,6 +52,13 @@ const FIXED_IDS = [
 
 const catalogIds = new Set(poses.map((p) => p.id));
 
+// Ids allowed in "Basics only" mode: any curated basic pose (isBasic) plus the
+// always-present fixed frame (which is itself marked isBasic, but list the
+// frame explicitly for clarity).
+const basicIds = new Set(
+  poses.filter((p) => p.isBasic).map((p) => p.id),
+);
+
 const SEEDS = Array.from({ length: 20 }, (_, i) => i + 1);
 const BREATHS = [
   MIN_BREATH_SECONDS, // 4
@@ -123,6 +130,14 @@ function runInvariants(seq: Pose[], totalSeconds: number, ctx: string): void {
       `(missing: ${FIXED_IDS.filter((id) => !ids.includes(id)).join(', ')})`,
   );
 
+  // 8b. protected finisher: at least one `closing` pose is always present. The
+  // fixed-frame Shoulderstand is a closing pose so this always holds, but the
+  // check guards the protected-finisher rule in BOTH modes regardless.
+  check(
+    seq.some((p) => p.category === 'closing'),
+    `${ctx}: at least one closing pose must be present (protected finisher)`,
+  );
+
   // 9. reported totalSeconds matches recomputation
   // (uses the same breathSeconds embedded in ctx via closure below)
 }
@@ -161,6 +176,41 @@ for (const breathSeconds of BREATHS) {
       again.poses.map((p) => p.id).join(',') ===
         result.poses.map((p) => p.id).join(','),
       `${ctx}: generation must be deterministic for a fixed seed`,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Basics only (Smart Start) mode.
+//   (i)  every pose in a basics-only practice is in the basic set (fixed frame
+//        included — the frame is itself marked isBasic).
+//   (ii) all the standard invariants still hold, including the protected
+//        finisher (>= 1 closing pose).
+// ---------------------------------------------------------------------------
+for (const breathSeconds of BREATHS) {
+  for (const seed of SEEDS) {
+    const ctx = `basicsOnly seed=${seed} breathSeconds=${breathSeconds}`;
+    const result = generatePractice(poses, {
+      breathSeconds,
+      basicsOnly: true,
+      rng: mulberry32(seed),
+    });
+
+    // All standard invariants hold in basics mode too (fixed frame, ordering,
+    // ceiling, protected finisher, etc.).
+    runInvariants(result.poses, result.totalSeconds, ctx);
+
+    // (i) only basic-set poses appear.
+    const nonBasic = result.poses.filter((p) => !basicIds.has(p.id));
+    check(
+      nonBasic.length === 0,
+      `${ctx}: only basic-set poses may appear ` +
+        `(offenders: ${nonBasic.map((p) => p.id).join(', ')})`,
+    );
+    // Every appearing pose is also flagged isBasic in the catalog.
+    check(
+      result.poses.every((p) => p.isBasic),
+      `${ctx}: every pose in a basics-only practice must have isBasic === true`,
     );
   }
 }

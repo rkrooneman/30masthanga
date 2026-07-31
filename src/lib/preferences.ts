@@ -15,6 +15,7 @@ import {
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
+const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
 
 /**
  * Load the saved breath pace, clamped to the valid slider range. Returns the
@@ -57,6 +58,28 @@ export function loadSoundEnabled(): boolean {
 export function saveSoundEnabled(enabled: boolean): void {
   try {
     window.localStorage.setItem(SOUND_ENABLED_KEY, enabled ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Whether "Basics only" (Smart Start) mode is enabled. Defaults to false (the
+ * full "All poses" mode); only an explicit stored "1" enables it. Safe on
+ * storage failure.
+ */
+export function loadBasicsOnly(): boolean {
+  try {
+    return window.localStorage.getItem(BASICS_ONLY_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Persist the basics-only preference. Silently no-ops on storage failure. */
+export function saveBasicsOnly(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(BASICS_ONLY_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
   }

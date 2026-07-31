@@ -55,3 +55,24 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet.
 ## Notes
 
 Drishti values follow standard Ashtanga (KPJAYI / David Swenson) convention and are worth verifying against a trusted source before relying on them. Pose icons are original schematic line drawings intended as clear references, not anatomical illustrations.
+
+## Disclaimer
+
+ashtanga30 is provided for general informational and educational purposes only.
+It is not medical advice and is not a substitute for guidance from a qualified
+yoga instructor or healthcare professional. Yoga involves physical activity that
+carries inherent risks. Consult your physician before beginning any exercise
+programme, especially if you are pregnant, injured, or have a medical condition.
+Always practise within your own limits and stop if you feel pain or discomfort.
+The pose descriptions, drishti (gaze) references, and generated sequences are
+schematic aids, not authoritative instruction. To the fullest extent permitted
+by law, the author accepts no liability for any injury, loss, or damage arising
+from use of this application. By using ashtanga30 you accept these terms.
+
+## License
+
+Licensed under the [MIT License](LICENSE) — © 2026 Roderik Krooneman.
+
+The bundled background music consists of CC0 (public-domain) tracks; see
+[CREDITS.md](CREDITS.md) for provenance. The pose illustrations are original
+works created for this project.

@@ -14,7 +14,12 @@ import type { GeneratedPractice } from './lib/generatePractice';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
 import { swapPose } from './lib/swapPose';
-import { loadBreathSeconds, saveBreathSeconds } from './lib/preferences';
+import {
+  loadBreathSeconds,
+  saveBreathSeconds,
+  loadBasicsOnly,
+  saveBasicsOnly,
+} from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
 import GuidedScreen from './screens/GuidedScreen';
@@ -28,6 +33,8 @@ function App() {
   const [practice, setPractice] = useState<GeneratedPractice | null>(null);
   // Breath pace is remembered across visits (persisted to localStorage).
   const [breathSeconds, setBreathSeconds] = useState<number>(loadBreathSeconds);
+  // "Basics only" (Smart Start) mode, also remembered across visits.
+  const [basicsOnly, setBasicsOnly] = useState<boolean>(loadBasicsOnly);
 
   // DEV-ONLY pilot escape hatch: visiting `/?pilot` renders the pose-icon
   // contact sheet instead of the normal app. Computed after hooks (Rules of
@@ -45,7 +52,10 @@ function App() {
 
   // Generate a real (randomised) practice and advance to the overview.
   const handleGenerate = (pace: number) => {
-    const generated = generatePractice(poses, { breathSeconds: pace });
+    const generated = generatePractice(poses, {
+      breathSeconds: pace,
+      basicsOnly,
+    });
     setPractice(generated);
     setBreathSeconds(pace);
     saveBreathSeconds(pace);
@@ -54,7 +64,7 @@ function App() {
 
   // Regenerate a fresh practice at the same breath pace (from the Overview map).
   const handleRegenerate = () => {
-    setPractice(generatePractice(poses, { breathSeconds }));
+    setPractice(generatePractice(poses, { breathSeconds, basicsOnly }));
   };
 
   // Swap one pose in the current practice for a valid same-category alternative.
@@ -65,7 +75,9 @@ function App() {
   const handleSwapPose = (poseId: string) => {
     setPractice((prev) => {
       if (!prev) return prev;
-      const result = swapPose(prev.poses, prev.breathSeconds, poseId);
+      const result = swapPose(prev.poses, prev.breathSeconds, poseId, {
+        basicsOnly,
+      });
       if (!result) return prev;
       return {
         poses: result.poses,
@@ -73,6 +85,15 @@ function App() {
         breathSeconds: prev.breathSeconds,
       };
     });
+  };
+
+  // Toggle "Basics only" mode: remember the choice and immediately rebuild the
+  // current practice in the new mode so the Overview reflects it right away.
+  // Uses `next` (not the state, which updates asynchronously) for the rebuild.
+  const handleToggleBasics = (next: boolean) => {
+    setBasicsOnly(next);
+    saveBasicsOnly(next);
+    setPractice(generatePractice(poses, { breathSeconds, basicsOnly: next }));
   };
 
   const handleBackHome = () => setScreen('home');
@@ -106,6 +127,8 @@ function App() {
             onStartGuided={handleStartGuided}
             onRegenerate={handleRegenerate}
             onSwapPose={handleSwapPose}
+            basicsOnly={basicsOnly}
+            onToggleBasics={handleToggleBasics}
           />
         )}
 
