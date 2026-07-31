@@ -176,6 +176,32 @@ function MusicPanel() {
             <audio ref={audioRef} preload="metadata" />
 
             <div className="music-player">
+              {/* Centered track title + artist. */}
+              <div className="music-player__meta">
+                <span className="music-player__title">
+                  {currentTrack.title}
+                </span>
+                <span className="music-player__artist">
+                  {currentTrack.artist}
+                </span>
+              </div>
+
+              {/* Thin, display-only progress bar. */}
+              <div
+                className="music-progress"
+                role="progressbar"
+                aria-label="Track progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(progress * 100)}
+              >
+                <div
+                  className="music-progress__fill"
+                  style={{ width: `${progress * 100}%` }}
+                />
+              </div>
+
+              {/* Centered transport controls, below the progress bar. */}
               <div className="music-player__transport">
                 <button
                   type="button"
@@ -244,30 +270,6 @@ function MusicPanel() {
                     />
                   </svg>
                 </button>
-
-                <div className="music-player__meta">
-                  <span className="music-player__title">
-                    {currentTrack.title}
-                  </span>
-                  <span className="music-player__artist">
-                    {currentTrack.artist}
-                  </span>
-                </div>
-              </div>
-
-              {/* Thin, display-only progress bar. */}
-              <div
-                className="music-progress"
-                role="progressbar"
-                aria-label="Track progress"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={Math.round(progress * 100)}
-              >
-                <div
-                  className="music-progress__fill"
-                  style={{ width: `${progress * 100}%` }}
-                />
               </div>
             </div>
           </div>
