@@ -1,50 +1,49 @@
 /**
- * music — playlist configuration for the collapsible Spotify panel.
+ * music — local track list for the collapsible music panel.
  *
- * The single source of truth for which playlist the app offers. Kept as plain
- * config constants (no React, no logic) so the playlist is trivial to change
- * later, and so a second playlist can be added without touching the component:
- * add another entry to PLAYLISTS and point the panel at it.
+ * The single source of truth for the bundled, self-hosted audio the app offers.
+ * Kept as plain config constants (no React, no logic) so the playlist is trivial
+ * to change later: add another entry to TRACKS.
  *
- * The embed URL feeds Spotify's iframe player (in-app, 30s previews unless the
- * listener is signed into Premium); the open URL is the "Open in Spotify" deep
- * link that hands off to the native app / web player for full playback.
+ * The tracks are shipped in `public/music/` and served statically from the site
+ * root, so their URLs are `/music/<filename>`. The filenames contain spaces (and
+ * the "Ondrosik - " prefix), so each src is built with encodeURIComponent on the
+ * filename segment — the browser needs those characters percent-encoded for the
+ * <audio src> to resolve. The leading `/music/` path stays literal.
+ *
+ * Licensing: all three tracks are by Ondrosik, from the "Burnout" album on the
+ * Free Music Archive, released under CC0 1.0 Universal (public domain). No
+ * attribution is required. See CREDITS.md at the repo root for provenance.
  */
 
-/** Shape of a single playlist entry. */
-export interface Playlist {
-  /** Human-readable name (used for accessible titles). */
-  readonly name: string;
-  /** Spotify playlist ID (the trailing segment of a playlist URL). */
-  readonly id: string;
-  /** Spotify iframe embed URL — used as the <iframe src>. */
-  readonly embedUrl: string;
-  /** Public playlist URL — the "Open in Spotify" fallback link. */
-  readonly openUrl: string;
+/** Shape of a single bundled track. */
+export interface Track {
+  /** Human-readable display name, e.g. "City lights at night". */
+  readonly title: string;
+  /** Artist name (all "Ondrosik" here). */
+  readonly artist: string;
+  /** Public URL for the <audio src>, with the filename percent-encoded. */
+  readonly src: string;
 }
 
-/** Build a Playlist entry from a name + Spotify playlist ID. */
-function playlist(name: string, id: string): Playlist {
+/** Base path (literal) under which the bundled mp3s are served. */
+const MUSIC_BASE = '/music/';
+
+/** Build a Track, safely encoding the filename (spaces / special chars). */
+function track(title: string, filename: string): Track {
   return {
-    name,
-    id,
-    embedUrl: `https://open.spotify.com/embed/playlist/${id}`,
-    openUrl: `https://open.spotify.com/playlist/${id}`,
+    title,
+    artist: 'Ondrosik',
+    src: MUSIC_BASE + encodeURIComponent(filename),
   };
 }
 
-/** The single yoga playlist currently offered in the app. */
-export const YOGA_PLAYLIST_ID = '37i9dQZF1DXdVyc8LtLi96';
-export const YOGA_PLAYLIST_EMBED_URL = `https://open.spotify.com/embed/playlist/${YOGA_PLAYLIST_ID}`;
-export const YOGA_PLAYLIST_OPEN_URL = `https://open.spotify.com/playlist/${YOGA_PLAYLIST_ID}`;
-
 /**
- * All playlists the panel can offer. A single entry for now; add more here to
- * extend later (the panel reads the first entry as its active playlist).
+ * The bundled tracks, in playback order. "Morning meditation" — a long (~12 min)
+ * ambient bed — leads as the calm default; the two shorter pieces follow.
  */
-export const PLAYLISTS: readonly Playlist[] = [
-  playlist('Yoga', YOGA_PLAYLIST_ID),
+export const TRACKS: readonly Track[] = [
+  track('Morning meditation', 'Ondrosik - Morning meditation.mp3'),
+  track('City lights at night', 'Ondrosik - City lights at night.mp3'),
+  track('Night at the old castle', 'Ondrosik - Night at the old castle.mp3'),
 ];
-
-/** The playlist the panel plays. Change this (or PLAYLISTS[0]) to swap it. */
-export const ACTIVE_PLAYLIST: Playlist = PLAYLISTS[0];

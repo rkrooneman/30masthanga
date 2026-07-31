@@ -17,7 +17,7 @@ import { loadBreathSeconds, saveBreathSeconds } from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
 import GuidedScreen from './screens/GuidedScreen';
-import SpotifyPanel from './components/SpotifyPanel';
+import MusicPanel from './components/MusicPanel';
 // DEV-ONLY (pose-icon contact sheet): reached via the `?pilot` query string.
 // Gated behind import.meta.env.DEV so it is tree-shaken out of production.
 import PosePilot from './components/poses/PosePilot';
@@ -64,11 +64,11 @@ function App() {
     <main className="app">
       {/*
         Rendered at the shell level, OUTSIDE the per-screen conditionals below,
-        so the music panel is present on every screen and its Spotify iframe
+        so the music panel is present on every screen and its <audio> element
         never unmounts on navigation — playback persists across Home → Overview
         → Guided. Collapsed by default; it only toggles a CSS class.
       */}
-      <SpotifyPanel />
+      <MusicPanel />
 
       <div className="app__container">
         {screen === 'home' && (
