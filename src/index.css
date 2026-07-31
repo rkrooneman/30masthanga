@@ -18,12 +18,17 @@
   /* Layout */
   --container-max-width: 480px;
   --space-page: 1.5rem;
+  /* Space reserved at the top of the shell for the fixed, collapsed music pill
+     (~44px tap target + 0.5rem margin). Screens that fill the viewport subtract
+     this too, so they never overflow beneath the pill. */
+  --space-music-pill: 3.25rem;
   /* Total vertical padding the app shell adds (top + bottom), including any
-     safe-area insets. Screens that want to fill the viewport subtract this so
-     they never overflow into the notch / home-indicator zones. */
+     safe-area insets AND the reserved music-pill space. Screens that want to
+     fill the viewport subtract this so they never overflow into the notch /
+     home-indicator zones or beneath the music pill. */
   --space-page-vertical: calc(
-    (2 * var(--space-page)) + env(safe-area-inset-top, 0px) +
-      env(safe-area-inset-bottom, 0px)
+    (2 * var(--space-page)) + var(--space-music-pill) +
+      env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px)
   );
   /* Comfortable minimum tap target for controls / dots (~44px). */
   --tap-target: 2.75rem;
@@ -78,7 +83,12 @@ body {
   justify-content: center;
   min-height: 100vh;
   padding: var(--space-page);
-  padding-top: calc(var(--space-page) + env(safe-area-inset-top, 0px));
+  /* Reserve room at the top for the fixed, collapsed music pill (~44px tap
+     target + its 0.5rem margin) so screen content never sits beneath it,
+     including on the full-height guided view. */
+  padding-top: calc(
+    var(--space-page) + var(--space-music-pill) + env(safe-area-inset-top, 0px)
+  );
   padding-right: calc(var(--space-page) + env(safe-area-inset-right, 0px));
   padding-bottom: calc(var(--space-page) + env(safe-area-inset-bottom, 0px));
   padding-left: calc(var(--space-page) + env(safe-area-inset-left, 0px));
@@ -90,6 +100,157 @@ body {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+}
+
+/* --------------------------------------------------------------------------
+   Spotify music panel (collapsible, shell-level, persistent playback)
+   Fixed to the top of the viewport so it floats above every screen without
+   participating in the shell's flex-centering (which would otherwise place it
+   beside the container). Centered and width-matched to the 480px container. The
+   iframe is mounted once in the shell and only HIDDEN via CSS when collapsed,
+   so audio keeps playing while collapsed and across screen navigation.
+   -------------------------------------------------------------------------- */
+.spotify-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Keep clear of the notch; horizontal insets keep it off curved edges. */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: calc(var(--space-page) + env(safe-area-inset-left, 0px));
+  padding-right: calc(var(--space-page) + env(safe-area-inset-right, 0px));
+  pointer-events: none; /* let taps fall through the empty gutter... */
+}
+
+/* ...but the interactive pieces themselves remain tappable. */
+.spotify-panel__pill,
+.spotify-panel__body {
+  pointer-events: auto;
+  width: 100%;
+  max-width: var(--container-max-width);
+}
+
+/* Collapsed state: a small, minimal pill. Comfortable tap target but visually
+   light so it never blocks screen content (incl. the guided breathing view). */
+.spotify-panel__pill {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: auto; /* override the 100% above — the pill is intrinsically small */
+  min-height: var(--tap-target);
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgb(47 51 48 / 0.06);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.spotify-panel__pill:hover {
+  color: var(--color-text);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-soft);
+}
+
+.spotify-panel__pill:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.spotify-panel__note {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+.spotify-panel__label {
+  line-height: 1;
+}
+
+/* Collapsed body: hidden via max-height + visibility (NOT unmounted) so the
+   iframe stays alive and playback continues. Smooth expand/collapse. */
+.spotify-panel__body {
+  overflow: hidden;
+  max-height: 0;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    max-height 0.28s ease,
+    opacity 0.2s ease,
+    visibility 0s linear 0.28s;
+}
+
+.spotify-panel--expanded .spotify-panel__body {
+  max-height: 320px; /* comfortably fits the 152px embed + link + padding */
+  visibility: visible;
+  opacity: 1;
+  transition:
+    max-height 0.28s ease,
+    opacity 0.2s ease,
+    visibility 0s linear 0s;
+}
+
+.spotify-panel__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px rgb(47 51 48 / 0.08);
+}
+
+.spotify-panel__embed {
+  display: block;
+  width: 100%;
+}
+
+/* Subtle ghost text link; sets the 30s-preview expectation and points Premium
+   / app users to full playback. */
+.spotify-panel__open {
+  align-self: center;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.spotify-panel__open:hover {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+}
+
+.spotify-panel__open:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: no expand/collapse animation. */
+@media (prefers-reduced-motion: reduce) {
+  .spotify-panel__body,
+  .spotify-panel--expanded .spotify-panel__body {
+    transition: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
