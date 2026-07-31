@@ -141,19 +141,16 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  width: fit-content; /* hug the pill when collapsed */
+  width: 100%; /* same width collapsed or expanded (matches the container) */
   max-width: var(--container-max-width);
-  margin-top: 0.5rem;
   overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 1.1rem;
+  /* Seamless at the top: square top corners, rounded bottom only, so the panel
+     fuses to the top edge of the screen. */
+  border-top: none;
+  border-radius: 0 0 1.1rem 1.1rem;
   box-shadow: 0 2px 10px rgb(47 51 48 / 0.08);
-  transition: border-radius 0.2s ease;
-}
-
-.spotify-panel--expanded .spotify-panel__drawer {
-  width: 100%;
 }
 
 /* The pill is the drawer's footer/handle — a borderless, transparent button
@@ -207,38 +204,38 @@ body {
   line-height: 1;
 }
 
-/* The body (the player) is a CLIP WINDOW that sits ABOVE the pill in the flow.
-   Collapsed it has 0 height, so the pill rides up to the top and only the pill
-   shows. Expanding grows the clip window, which pushes the pill DOWN — so the
-   pill travels with the drawer as the player unfolds above it. Inside, the
-   player also slides down from behind the pill (translateY) for a "pull-out"
-   feel. The iframe is never unmounted, so playback continues while collapsed. */
+/* The body is a fixed-height CLIP WINDOW that sits ABOVE the pill. The player
+   inside it is translated fully UP (hidden behind the top bar / clipped) when
+   collapsed, and slides DOWN to rest when expanded — a true drawer motion, not
+   a fade+grow. The window's own height animates in lockstep so the pill (the
+   footer handle) rides down as the drawer extends. The iframe is never
+   unmounted, so playback continues while collapsed. */
 .spotify-panel__body {
   order: -1; /* player above the pill within the flex drawer */
   overflow: hidden;
-  max-height: 0;
+  height: 0;
   width: 100%;
-  transition: max-height 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: height 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .spotify-panel--expanded .spotify-panel__body {
-  max-height: 200px; /* tall enough for the compact player + link + margins */
+  height: 152px; /* compact player (80) + link + padding */
 }
 
-/* The player content sits flush inside the drawer's shared surface — no border
-   or background of its own — so player + footer read as one card. It fades in
-   as the clip window opens. */
+/* The player content: flush inside the shared surface (no border/background of
+   its own). Starts pushed fully up out of the clip window, slides down to rest
+   as the drawer opens — the tactile "pulled out from the top" motion. */
 .spotify-panel__inner {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.75rem;
-  opacity: 0;
-  transition: opacity 0.24s ease;
+  transform: translateY(-100%);
+  transition: transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .spotify-panel--expanded .spotify-panel__inner {
-  opacity: 1;
+  transform: translateY(0);
 }
 
 .spotify-panel__embed {
