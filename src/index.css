@@ -6,6 +6,11 @@
   --color-text-muted: #6b7169; /* muted stone-grey */
   --color-accent: #8a9a7b; /* muted sage */
   --color-accent-strong: #7d8d6f; /* deeper sage, e.g. primary-button hover */
+  /* Accessible TEXT variant of the accent: a darker sage that passes WCAG AA
+     (>= 4.5:1) for normal text against both --color-bg (5.16:1) and
+     --color-surface (5.48:1). Use for sage-coloured TEXT only; borders, icon
+     wells, fills and outlines stay on --color-accent. */
+  --color-accent-text: #5c6b4f;
   --color-accent-soft: #dfe4d7; /* pale sage tint */
   --color-border: #e4e1d8; /* subtle divider */
 
@@ -174,7 +179,7 @@ body {
 .spotify-panel__note {
   font-size: 1rem;
   line-height: 1;
-  color: var(--color-accent);
+  color: var(--color-accent-text); /* accessible sage text */
 }
 
 .spotify-panel__label {
@@ -319,7 +324,7 @@ body {
   font-size: 1.0625rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: var(--color-accent);
+  color: var(--color-accent-text); /* accessible sage text; border stays --color-accent */
   background-color: transparent;
   border-color: var(--color-accent);
 }
@@ -533,7 +538,20 @@ body {
   flex-direction: column;
   align-items: stretch;
   gap: 0.75rem;
-  margin-top: 0.75rem; /* extra breathing room above the last pose card */
+  /* Pin the actions to the bottom of the viewport so "Start practice" stays
+     reachable while the pose list scrolls behind it. A calm bg backdrop plus a
+     subtle top border separates it from the scrolling cards without a harsh
+     line. z-index stays well below the fixed music pill (z-index: 20). */
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin-top: 0.25rem; /* padding-top now carries most of the breathing room */
+  padding-top: 0.75rem;
+  /* Keep the buttons clear of the iPhone home indicator now that the bar is
+     pinned to the bottom (resolves to 0.75rem on non-notched devices). */
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
 }
 
 .pose-map__regenerate {
@@ -567,6 +585,23 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+/* Regenerate feedback: when a fresh practice is generated the sections grid is
+   remounted (via a changing React key) and replays this quiet, translate-free
+   cross-fade so the change is acknowledged — consistent with the app's
+   reduced-motion cross-fade language elsewhere. Opacity only, no slide. */
+@keyframes pose-map-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pose-map__sections--refreshed {
+  animation: pose-map-fade-in 220ms ease both;
 }
 
 .pose-map__section {
@@ -989,6 +1024,11 @@ body {
   .pose-card--enter-initial {
     animation: pose-card-fade-in 120ms ease both;
   }
+  /* Regenerate cross-fade: disabled for users who opt out of motion. The grid
+     still remounts on regenerate; it simply appears without animating. */
+  .pose-map__sections--refreshed {
+    animation: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -1182,7 +1222,7 @@ body {
 .breathing-circle__count {
   font-size: 2.5rem;
   font-weight: 300;
-  color: var(--color-accent);
+  color: var(--color-accent-text); /* accessible sage text */
   font-variant-numeric: tabular-nums;
 }
 

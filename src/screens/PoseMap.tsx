@@ -54,6 +54,14 @@ interface PoseMapProps {
   onStartGuided: () => void;
   /** Generate a fresh practice at the same breath pace. */
   onRegenerate: () => void;
+  /**
+   * When true, the sections grid replays a quiet cross-fade on mount — used to
+   * acknowledge a freshly regenerated practice. False on the initial landing so
+   * the first paint is still. The parent remounts PoseMap (via a changing key)
+   * on each regenerate, so the fade replays cleanly every time, including twice
+   * in a row.
+   */
+  animateRefresh?: boolean;
 }
 
 /** A pose paired with its absolute index in the full practice sequence. */
@@ -91,6 +99,7 @@ function PoseMap({
   onBack,
   onStartGuided,
   onRegenerate,
+  animateRefresh = false,
 }: PoseMapProps) {
   const { poses, totalSeconds } = practice;
   const count = poses.length;
@@ -115,7 +124,13 @@ function PoseMap({
         </p>
       </header>
 
-      <div className="pose-map__sections">
+      <div
+        className={
+          animateRefresh
+            ? 'pose-map__sections pose-map__sections--refreshed'
+            : 'pose-map__sections'
+        }
+      >
         {SECTIONS.map((section) => {
           const items = indexed.filter(({ pose }) =>
             section.categories.includes(pose.category),
@@ -172,7 +187,7 @@ function PoseMap({
           onClick={onRegenerate}
           aria-label="Generate a different practice"
         >
-          &#8635; New sequence
+          <span aria-hidden="true">&#8635;</span> New sequence
         </button>
         <button
           type="button"

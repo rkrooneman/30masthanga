@@ -42,6 +42,10 @@ function OverviewScreen({
 
   const [view, setView] = useState<OverviewView>('map');
   const [detailIndex, setDetailIndex] = useState(0);
+  // Bumped on each regenerate. Used as PoseMap's key so the map remounts and its
+  // sections grid replays the cross-fade; also gates the fade so the initial
+  // landing (count 0) stays still.
+  const [regenCount, setRegenCount] = useState(0);
 
   // Open the carousel at the tapped pose. Clamp here as well as in the carousel
   // so a stray index can never escape the sequence bounds.
@@ -59,6 +63,7 @@ function OverviewScreen({
     onRegenerate();
     setDetailIndex(0);
     setView('map');
+    setRegenCount((n) => n + 1);
   };
 
   if (view === 'detail') {
@@ -75,12 +80,14 @@ function OverviewScreen({
 
   return (
     <PoseMap
+      key={regenCount}
       practice={practice}
       breathSeconds={breathSeconds}
       onOpenPose={openPose}
       onBack={onBack}
       onStartGuided={onStartGuided}
       onRegenerate={regenerate}
+      animateRefresh={regenCount > 0}
     />
   );
 }
