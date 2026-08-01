@@ -381,16 +381,16 @@ function GuidedScreen({
       step.kind === 'breath' ? step.poseIndex : step.toPoseIndex;
 
     if (enteredPoseIndex === lastAnnouncedPoseIndexRef.current) {
-      // Same pose as last announced. If we're at the start of a SAME-pose
-      // transition (switch sides / next round — not entering a new pose), play
-      // the switch-sides cue instead of re-announcing the pose name.
-      if (step.kind === 'transition') {
-        const isSamePoseTransition =
-          step.fromPoseIndex === step.toPoseIndex || step.cue === 'Switch sides';
-        if (isSamePoseTransition) {
-          // Self-guards on the voice + sound toggles.
-          speakSwitchSides();
-        }
+      // Same pose as last announced. Two kinds of same-pose transition exist:
+      //   - a genuine SIDE switch (a 2-sided pose going left -> right): the plan
+      //     sets cue === 'Switch sides', and we play the switch-sides voice cue.
+      //   - a ROUND repeat (e.g. Surya A x3, Navasana x5): the plan sets cue to
+      //     'Round N of M'. This is NOT a side switch, so we stay SILENT (no
+      //     switch-sides cue, no pose-name re-announce).
+      // Gate strictly on the cue so round repeats never say "switch sides".
+      if (step.kind === 'transition' && step.cue === 'Switch sides') {
+        // Self-guards on the voice + sound toggles.
+        speakSwitchSides();
       }
       return;
     }
