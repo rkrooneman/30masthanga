@@ -1,3 +1,5 @@
+<img width="1200" height="630" alt="ashtanga30_og" src="https://github.com/user-attachments/assets/907303c3-0db0-4adf-b6c3-c8b78f9d96bd" />
+
 # ashtanga30
 
 A calm, mobile-first **30-minute Ashtanga companion** that generates a varied Primary Series practice and guides you through it, breath by breath.
