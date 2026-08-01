@@ -15,6 +15,7 @@ import {
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
+const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
 const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
 
 /**
@@ -58,6 +59,28 @@ export function loadSoundEnabled(): boolean {
 export function saveSoundEnabled(enabled: boolean): void {
   try {
     window.localStorage.setItem(SOUND_ENABLED_KEY, enabled ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Whether spoken pose-name narration (voice guidance) is enabled. Defaults to
+ * true; only an explicit stored "0" disables it. Safe on storage failure. Note
+ * that voice cues additionally require sound to be enabled (see voice.ts).
+ */
+export function loadVoiceEnabled(): boolean {
+  try {
+    return window.localStorage.getItem(VOICE_ENABLED_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+/** Persist the voice-enabled preference. Silently no-ops on storage failure. */
+export function saveVoiceEnabled(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(VOICE_ENABLED_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
   }

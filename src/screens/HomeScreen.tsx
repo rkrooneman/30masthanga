@@ -12,6 +12,7 @@ import { poses } from '../data/poses';
 import { generatePractice } from '../lib/generatePractice';
 import { formatDuration, MIN_BREATH_SECONDS, MAX_BREATH_SECONDS } from '../lib/timing';
 import { mulberry32 } from '../lib/mulberry32';
+import { loadVoiceEnabled, saveVoiceEnabled } from '../lib/preferences';
 import LotusMark from '../components/LotusMark';
 
 /**
@@ -30,6 +31,17 @@ function HomeScreen({
   // Local UI state only: whether the "About this app" dialog is open. Kept here
   // (not in the shell) since it's purely presentational and Home-only.
   const [aboutOpen, setAboutOpen] = useState(false);
+
+  // Voice-guidance toggle. Purely a Home-side presentational control (like the
+  // About dialog): the guided player reads the preference fresh from storage, so
+  // this never needs to thread through App. Seeded from storage, persisted on
+  // change.
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(loadVoiceEnabled);
+
+  const handleVoiceToggle = (next: boolean) => {
+    setVoiceEnabled(next);
+    saveVoiceEnabled(next);
+  };
 
   // Close the About dialog on Escape while it's open.
   useEffect(() => {
@@ -114,6 +126,25 @@ function HomeScreen({
             &asymp; {estimate.duration} &middot; {estimate.count} poses
           </span>
         </p>
+
+        <div className="basics-toggle home__voice-toggle">
+          <label className="basics-toggle__label" htmlFor="voice-guidance-switch">
+            <span className="basics-toggle__text">Voice guidance</span>
+            <input
+              type="checkbox"
+              id="voice-guidance-switch"
+              className="basics-toggle__input"
+              checked={voiceEnabled}
+              onChange={(e) => handleVoiceToggle(e.target.checked)}
+            />
+            <span className="basics-toggle__track" aria-hidden="true">
+              <span className="basics-toggle__thumb" />
+            </span>
+          </label>
+          <p className="basics-toggle__hint">
+            Announces each pose name as you flow.
+          </p>
+        </div>
       </div>
 
       <button

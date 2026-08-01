@@ -762,6 +762,12 @@ body {
   color: var(--color-text-muted);
 }
 
+/* Home-specific placement: the reused .basics-toggle switch sits calmly in the
+   Home controls column, given a little breathing room above it. */
+.home__voice-toggle {
+  margin-top: 0.75rem;
+}
+
 /* --------------------------------------------------------------------------
    Overview MAP view (the scannable landing grid)
    A calm, sectioned grid of pose thumbnails. 3 columns on phone width; each

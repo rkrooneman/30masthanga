@@ -18,6 +18,8 @@
  *   best-effort enhancement, not a guarantee.
  */
 
+import { requestDuck, releaseDuck } from './audioBus';
+
 type AudioContextClass = typeof AudioContext;
 
 function getAudioContextClass(): AudioContextClass | undefined {
@@ -59,18 +61,38 @@ export function unlockAudio(): void {
   }
 }
 
+/** Bell envelope length (s) — the oscillators stop at now + 3.3 (see below). */
+const BELL_DURATION_SECONDS = 3.3;
+
 /**
  * Play a single soft bell. Two detuned sine partials through a gentle
  * exponential decay give a warm, calm timbre. Best-effort: silent on failure.
+ *
+ * While the bell rings, the background music is ducked (via audioBus) so the
+ * bell isn't masked by the music, then un-ducked once the envelope finishes.
+ * The duck/release is balanced even on error: releaseDuck is scheduled, and
+ * audioBus clamps at 0 so an unmatched release is a harmless no-op.
  */
 export function playCompletionBell(): void {
   const context = getContext();
   if (!context) return;
 
+  // Duck the music for the bell. Released after the envelope finishes (or via
+  // the catch below if synthesis throws before scheduling).
+  let released = false;
+  const release = () => {
+    if (released) return;
+    released = true;
+    releaseDuck();
+  };
+  requestDuck();
+
   try {
     if (context.state === 'suspended') void context.resume();
 
     const now = context.currentTime;
+    // Un-duck once the bell's envelope has finished ringing.
+    window.setTimeout(release, BELL_DURATION_SECONDS * 1000);
     // Master gain shapes the overall envelope: quick soft attack, long decay.
     const master = context.createGain();
     master.gain.setValueAtTime(0.0001, now);
@@ -96,9 +118,11 @@ export function playCompletionBell(): void {
       partialGain.connect(master);
 
       osc.start(now);
-      osc.stop(now + 3.3);
+      osc.stop(now + BELL_DURATION_SECONDS);
     }
   } catch {
-    /* ignore — best-effort */
+    // Synthesis failed before/while scheduling — release the duck we requested
+    // so the music can never be stranded at low volume.
+    release();
   }
 }

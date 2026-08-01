@@ -18,14 +18,43 @@
  *
  * Accessibility: the button carries an explicit, state-aware aria-label
  * (Play music / Pause music); the icon is aria-hidden.
+ *
+ * Ducking: the panel subscribes to the audioBus (see src/lib/audioBus.ts). When
+ * a spoken pose name or the completion bell requests a duck, the music volume
+ * ramps down to DUCK_VOLUME; when released, it ramps back to FULL_VOLUME. Only
+ * the <audio> element's volume is touched — never its play/pause state — so
+ * ducking is entirely independent of whether the user is playing music.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { TRACKS } from '../lib/music';
+import { subscribeDuck } from '../lib/audioBus';
+
+/** Volume while ducked (music dipped so a cue can be heard over it). */
+const DUCK_VOLUME = 0.15;
+/** Normal (un-ducked) volume. */
+const FULL_VOLUME = 1;
+/**
+ * Ramp durations are asymmetric and eased for an organic feel: the music dips
+ * fairly quickly but smoothly when a cue starts (DUCK), then swells back in more
+ * slowly once the cue ends (RELEASE), so it "breathes back" rather than snapping.
+ * Linear volume ramps sound abrupt (loudness perception is ~logarithmic), so the
+ * ramp is shaped with an ease-in-out cubic curve instead.
+ */
+const DUCK_RAMP_MS = 450;
+const RELEASE_RAMP_MS = 900;
+
+/** Ease-in-out cubic: smooth acceleration and deceleration, no hard edges. */
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 function MusicPanel() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  // Holds the id of an in-flight volume ramp (requestAnimationFrame) so it can
+  // be cancelled if a new duck/unduck arrives mid-ramp or on cleanup.
+  const rampRef = useRef<number | null>(null);
 
   // A single long ambient track that loops — no playlist / track-change logic.
   const currentTrack = TRACKS[0];
@@ -57,6 +86,58 @@ function MusicPanel() {
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
+    };
+  }, []);
+
+  // --- ducking ---------------------------------------------------------------
+  // Subscribe to the audio bus and smoothly ramp the music volume between full
+  // and ducked. Only volume is affected — play/pause state is never touched.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Smoothly move audio.volume to `target` using an eased cubic curve over a
+    // direction-aware duration (quicker to duck, slower to release), replacing
+    // any ramp already in flight so overlapping duck/unduck events don't fight.
+    const rampTo = (target: number) => {
+      if (rampRef.current !== null) {
+        cancelAnimationFrame(rampRef.current);
+        rampRef.current = null;
+      }
+      const from = audio.volume;
+      const delta = target - from;
+      if (Math.abs(delta) < 0.001) {
+        audio.volume = target;
+        return;
+      }
+      // Ducking down is quicker; swelling back up is gentler and slower.
+      const duration = target < from ? DUCK_RAMP_MS : RELEASE_RAMP_MS;
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = easeInOutCubic(t);
+        audio.volume = Math.max(0, Math.min(1, from + delta * eased));
+        if (t < 1) {
+          rampRef.current = requestAnimationFrame(step);
+        } else {
+          rampRef.current = null;
+        }
+      };
+      rampRef.current = requestAnimationFrame(step);
+    };
+
+    const unsubscribe = subscribeDuck((ducked) => {
+      rampTo(ducked ? DUCK_VOLUME : FULL_VOLUME);
+    });
+
+    return () => {
+      unsubscribe();
+      if (rampRef.current !== null) {
+        cancelAnimationFrame(rampRef.current);
+        rampRef.current = null;
+      }
+      // Restore full volume so a later re-mount / re-play isn't left dipped.
+      audio.volume = FULL_VOLUME;
     };
   }, []);
 

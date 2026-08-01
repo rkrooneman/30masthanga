@@ -48,6 +48,7 @@ import BreathingCircle from '../components/BreathingCircle';
 import NamasteMark from '../components/NamasteMark';
 import PoseGraphic from '../components/PoseGraphic';
 import { unlockAudio, playCompletionBell } from '../lib/chime';
+import { speakPose, speakNamaste, unlockVoice } from '../lib/voice';
 import { loadSoundEnabled } from '../lib/preferences';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
@@ -234,15 +235,57 @@ function GuidedScreen({
   // that mobile browsers require for audio.
   useEffect(() => {
     unlockAudio();
+    // Warm up MP3 <audio> playback within the same gesture window so the first
+    // spoken pose name is more likely to be permitted on mobile.
+    unlockVoice();
   }, []);
+
+  // --- spoken pose-name narration --------------------------------------------
+  // Announce each DISTINCT pose once, on ENTRY — not on side-switches or rounds.
+  //
+  // The single source of truth for "which pose are we entering" is the current
+  // step's target pose index: a breath step targets its own `poseIndex`; a
+  // transition targets `toPoseIndex` (the pose it leads INTO). A ref tracks the
+  // last pose index we announced; we speak only when the target index changes to
+  // a not-just-announced pose. This makes each pose announced exactly once even
+  // across pause/resume (which re-runs effects but leaves the index unchanged),
+  // and correctly re-announces when prev/next-pose navigation jumps to a
+  // different pose. Same-pose transitions (switch sides / next round) keep the
+  // same target index, so they never trigger a re-announcement.
+  //
+  // The first pose is deliberately held until the opening "get ready" countdown
+  // ends (`starting` flips to false), so its name lands just as the first breath
+  // begins rather than during the settle-in.
+  const lastAnnouncedPoseIndexRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (complete) return;
+    if (starting) return; // wait for the opening countdown to finish
+    const step = steps[stepIndex];
+    if (!step) return;
+    const enteredPoseIndex =
+      step.kind === 'breath' ? step.poseIndex : step.toPoseIndex;
+    if (enteredPoseIndex === lastAnnouncedPoseIndexRef.current) return;
+    lastAnnouncedPoseIndexRef.current = enteredPoseIndex;
+    const pose = step.kind === 'breath' ? step.pose : step.toPose;
+    // speakPose self-guards on the voice + sound toggles, so call unconditionally.
+    speakPose(pose.id);
+  }, [stepIndex, starting, complete, steps]);
 
   // Play a single soft bell the moment the practice completes (Namaste screen),
   // unless the user has muted sound. A ref guard ensures it fires exactly once.
+  // AFTER the bell has had a moment to establish, speak the closing "Namaste"
+  // (its own toggle-guard applies), sequenced so the two cues don't collide.
   const bellPlayedRef = useRef(false);
+  const namastePlayedRef = useRef(false);
   useEffect(() => {
     if (complete && !bellPlayedRef.current) {
       bellPlayedRef.current = true;
       if (loadSoundEnabled()) playCompletionBell();
+      if (!namastePlayedRef.current) {
+        namastePlayedRef.current = true;
+        // Let the bell establish first, then speak Namaste over its tail.
+        window.setTimeout(() => speakNamaste(), 1400);
+      }
     }
   }, [complete]);
 
