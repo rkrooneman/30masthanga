@@ -57,6 +57,7 @@ import {
   unlockVoice,
 } from '../lib/voice';
 import { loadSoundEnabled } from '../lib/preferences';
+import { recordPractice } from '../lib/practiceLog';
 import { OPENING_COUNTDOWN_SECONDS, formatDuration } from '../lib/timing';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
@@ -410,6 +411,20 @@ function GuidedScreen({
   // (its own toggle-guard applies), sequenced so the two cues don't collide.
   const bellPlayedRef = useRef(false);
   const namastePlayedRef = useRef(false);
+  // Records the completed practice to the on-device practice log exactly once,
+  // for the calm "last 7 days" row on Home. Guarded by its own ref so it fires
+  // only on the first real completion. Deliberately EXCLUDES the DEV-only
+  // `?complete` hatch (startComplete): that debug path must never pollute the
+  // log. Best-effort (practiceLog swallows storage errors) and needs no user
+  // gesture — it's just localStorage.
+  const practiceRecordedRef = useRef(false);
+  useEffect(() => {
+    if (complete && !startComplete && !practiceRecordedRef.current) {
+      practiceRecordedRef.current = true;
+      recordPractice();
+    }
+  }, [complete, startComplete]);
+
   useEffect(() => {
     if (!complete || bellPlayedRef.current) return;
 

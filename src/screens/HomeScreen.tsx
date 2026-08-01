@@ -15,6 +15,7 @@ import { mulberry32 } from '../lib/mulberry32';
 import { loadVoiceEnabled, saveVoiceEnabled } from '../lib/preferences';
 import { getAmbientEnabled, setAmbientEnabled } from '../lib/ambientPref';
 import LotusMark from '../components/LotusMark';
+import PracticeWeek from '../components/PracticeWeek';
 
 /**
  * Fixed seed for the estimate only. The real "Generate" button uses genuine
@@ -111,6 +112,9 @@ function HomeScreen({
         <LotusMark size={72} className="home__mark" />
         <h1 className="home__wordmark">ashtanga30</h1>
         <p className="home__tagline">a 30-minute Ashtanga companion</p>
+        {/* Calm "last 7 days" petals — always shown, even with no history. Sits
+            directly under the tagline, between the brand and the controls. */}
+        <PracticeWeek />
       </div>
 
       <div className="home__controls">

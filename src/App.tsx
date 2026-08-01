@@ -14,6 +14,7 @@ import type { GeneratedPractice } from './lib/generatePractice';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
 import { swapPose } from './lib/swapPose';
+import { seedFakePractice } from './lib/practiceLog';
 import {
   loadBreathSeconds,
   saveBreathSeconds,
@@ -27,6 +28,11 @@ import MusicPanel from './components/MusicPanel';
 // DEV-ONLY (pose-icon contact sheet): reached via the `?pilot` query string.
 // Gated behind import.meta.env.DEV so it is tree-shaken out of production.
 import PosePilot from './components/poses/PosePilot';
+
+// DEV-ONLY seed guard: ensures the `?seedweek` hatch seeds the practice log at
+// most once per page load (module scope survives re-renders, unlike a ref that
+// would need a mounted component). Stripped from production with the DEV branch.
+let seedWeekApplied = false;
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -42,6 +48,20 @@ function App() {
   // this branch and the PosePilot import are stripped from the prod bundle.
   if (import.meta.env.DEV && window.location.search.includes('pilot')) {
     return <PosePilot />;
+  }
+
+  // DEV-ONLY seed escape hatch: visiting `/?seedweek` seeds a few days into the
+  // practice log (today, yesterday, 3/4/6 days ago) ONCE, then renders the normal
+  // app so the filled petals in the Home "last 7 days" row can be previewed
+  // without practicing for real. `import.meta.env.DEV` is statically false in
+  // production, so this branch and the seedFakePractice import are stripped.
+  if (
+    import.meta.env.DEV &&
+    !seedWeekApplied &&
+    window.location.search.includes('seedweek')
+  ) {
+    seedWeekApplied = true;
+    seedFakePractice([0, 1, 3, 4, 6]);
   }
 
   // DEV-ONLY completion escape hatch: visiting `/?complete` generates a practice

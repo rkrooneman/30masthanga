@@ -341,6 +341,59 @@ body {
   color: var(--color-text-muted);
 }
 
+/* --------------------------------------------------------------------------
+   Practice week — the calm "last 7 days" row under the Home tagline. Seven
+   evenly-spaced day columns, today rightmost: a small petal (empty outline =
+   no practice, filled sage = practiced) above a small muted weekday letter.
+   Today is subtly highlighted with a faint ring behind its petal and a
+   full-strength label. NOT a streak counter — quiet and anti-pressure.
+   -------------------------------------------------------------------------- */
+.practice-week {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.375rem;
+  align-items: end;
+  justify-items: center;
+  width: 100%;
+  max-width: 15rem;
+}
+
+.practice-week__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.15rem;
+  border-radius: 0.5rem;
+}
+
+/* Today: a faint sage well behind the petal + label, so "you are here" reads
+   even when the day is still an empty petal. */
+.practice-week__day--today {
+  background: var(--color-accent-soft);
+}
+
+.practice-week__petal {
+  display: block;
+}
+
+.practice-week__label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+/* Today's letter is full-strength text (vs muted for the other days). */
+.practice-week__day--today .practice-week__label {
+  color: var(--color-text);
+}
+
 .home__controls {
   width: 100%;
   display: flex;
