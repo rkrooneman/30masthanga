@@ -2,7 +2,7 @@
 
 A calm, mobile-first **30-minute Ashtanga companion** that generates a varied Primary Series practice and guides you through it, breath by breath.
 
-**Live app: [ashtanga30.vercel.app](https://ashtanga30.vercel.app/)**
+**Live app: [ashtanga30.com](https://ashtanga30.com/)**
 
 The full Ashtanga Primary Series takes well over an hour, which makes a daily practice hard to sustain. ashtanga30 builds a fresh ~30-minute sequence each time (always faithful to Ashtanga's structure and order) so you get a complete, varied practice that fits into your day.
 
@@ -67,6 +67,8 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, or `/?complete` to re
 ## Notes
 
 Drishti values follow standard Ashtanga (KPJAYI / David Swenson) convention and have been reviewed against it. They remain a study reference, not authoritative instruction. Pose icons are original schematic line drawings intended as clear references, not anatomical illustrations.
+
+`public/.well-known/assetlinks.json` is groundwork for a future Trusted Web Activity (TWA) wrapper on the Google Play Store. It is served at `https://ashtanga30.com/.well-known/assetlinks.json` and verifies domain ownership for the Android app. The `sha256_cert_fingerprints` value is a placeholder until the Android app signing key exists: replace it with the app signing key's SHA-256 fingerprint from the Play Console (or Bubblewrap), and confirm `package_name` matches the generated app before publishing.
 
 ## Disclaimer
 
