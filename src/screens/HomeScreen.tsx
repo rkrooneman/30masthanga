@@ -13,6 +13,7 @@ import { generatePractice } from '../lib/generatePractice';
 import { formatDuration, MIN_BREATH_SECONDS, MAX_BREATH_SECONDS } from '../lib/timing';
 import { mulberry32 } from '../lib/mulberry32';
 import { loadVoiceEnabled, saveVoiceEnabled } from '../lib/preferences';
+import { getAmbientEnabled, setAmbientEnabled } from '../lib/ambientPref';
 import LotusMark from '../components/LotusMark';
 
 /**
@@ -41,6 +42,18 @@ function HomeScreen({
   const handleVoiceToggle = (next: boolean) => {
     setVoiceEnabled(next);
     saveVoiceEnabled(next);
+  };
+
+  // Ambient-sound toggle. The persistent enable/disable preference for the
+  // background ambient track. Unlike voice guidance, this must reach MusicPanel
+  // (which owns the <audio> at the app shell) live, so it flows through the
+  // ambientPref pub/sub — setAmbientEnabled() both persists and notifies the
+  // panel. Seeded from the shared getter (which reads storage on module load).
+  const [ambientEnabled, setAmbientEnabledState] = useState<boolean>(getAmbientEnabled);
+
+  const handleAmbientToggle = (next: boolean) => {
+    setAmbientEnabledState(next);
+    setAmbientEnabled(next);
   };
 
   // Close the About dialog on Escape while it's open.
@@ -145,6 +158,25 @@ function HomeScreen({
             Announces each pose name as you flow.
           </p>
         </div>
+
+        <div className="basics-toggle home__ambient-toggle">
+          <label className="basics-toggle__label" htmlFor="ambient-sound-switch">
+            <span className="basics-toggle__text">Ambient sound</span>
+            <input
+              type="checkbox"
+              id="ambient-sound-switch"
+              className="basics-toggle__input"
+              checked={ambientEnabled}
+              onChange={(e) => handleAmbientToggle(e.target.checked)}
+            />
+            <span className="basics-toggle__track" aria-hidden="true">
+              <span className="basics-toggle__thumb" />
+            </span>
+          </label>
+          <p className="basics-toggle__hint">
+            Plays a calm ambient track during practice.
+          </p>
+        </div>
       </div>
 
       <button
@@ -202,9 +234,9 @@ function HomeScreen({
               </p>
 
               <p className="about__text about__text--muted">
-                Background music: CC0 public-domain tracks (see the project's
-                CREDITS). Pose illustrations are original works. Open-source
-                under the MIT License.
+                Background ambient sound: CC0 public-domain tracks (see the
+                project's CREDITS). Pose illustrations are original works.
+                Open-source under the MIT License.
               </p>
 
               <p className="about__text about__text--muted">

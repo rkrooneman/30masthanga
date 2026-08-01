@@ -408,13 +408,13 @@ function GuidedScreen({
   // unless the user has muted sound. A ref guard ensures it fires exactly once.
   // AFTER the bell has had a moment to establish, speak the closing "Namaste"
   // (its own toggle-guard applies), sequenced so the two cues don't collide.
-  // These fire on completion whether reached normally OR via the DEV-only
-  // `?complete` hatch (so that hatch can be used to preview the completion
-  // sounds); refreshing it simply replays them.
   const bellPlayedRef = useRef(false);
   const namastePlayedRef = useRef(false);
   useEffect(() => {
-    if (complete && !bellPlayedRef.current) {
+    if (!complete || bellPlayedRef.current) return;
+
+    const playCompletionSounds = () => {
+      if (bellPlayedRef.current) return;
       bellPlayedRef.current = true;
       if (loadSoundEnabled()) playCompletionBell();
       if (!namastePlayedRef.current) {
@@ -422,8 +422,27 @@ function GuidedScreen({
         // Let the bell establish first, then speak Namaste over its tail.
         window.setTimeout(() => speakNamaste(), 1400);
       }
+    };
+
+    if (!startComplete) {
+      // Normal completion: the user tapped "Start practice" earlier, so audio is
+      // already unlocked. Play the completion sounds right away.
+      playCompletionSounds();
+      return;
     }
-  }, [complete]);
+
+    // DEV-only `?complete` hatch: the screen mounts straight into completion with
+    // NO prior user gesture, so browser autoplay policy would block audio played
+    // on mount. Defer the completion sounds until the first user interaction on
+    // the page (which unlocks audio), so the hatch can still preview them.
+    const onFirstGesture = () => playCompletionSounds();
+    window.addEventListener('pointerdown', onFirstGesture, { once: true });
+    window.addEventListener('keydown', onFirstGesture, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+  }, [complete, startComplete]);
 
   // --- wake lock (progressive enhancement) ------------------------------------
   // Held only while actively playing (not paused, not complete). Re-acquired on
@@ -666,7 +685,7 @@ function GuidedScreen({
           disabled={atFirstPose}
           aria-label="Previous pose"
         >
-          &lsaquo; Pose
+          &lsaquo; Previous
         </button>
 
         <button
@@ -683,9 +702,9 @@ function GuidedScreen({
           className="guided-player__control"
           onClick={goNextPose}
           disabled={atLastPose}
-          aria-label="Next pose"
+          aria-label="Skip pose"
         >
-          Pose &rsaquo;
+          Skip &rsaquo;
         </button>
       </div>
     </section>

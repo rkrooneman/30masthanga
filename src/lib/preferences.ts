@@ -16,6 +16,7 @@ import {
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
 const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
+const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
 const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
 
 /**
@@ -81,6 +82,28 @@ export function loadVoiceEnabled(): boolean {
 export function saveVoiceEnabled(enabled: boolean): void {
   try {
     window.localStorage.setItem(VOICE_ENABLED_KEY, enabled ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Whether the calm background ambient sound is enabled. Unlike voice/sound this
+ * defaults to OFF (false): ambient playback is opt-in, so only an explicit
+ * stored "1" enables it. Safe on storage failure (returns false).
+ */
+export function loadAmbientEnabled(): boolean {
+  try {
+    return window.localStorage.getItem(AMBIENT_ENABLED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Persist the ambient-enabled preference. Silently no-ops on storage failure. */
+export function saveAmbientEnabled(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(AMBIENT_ENABLED_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
   }

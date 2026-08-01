@@ -1,41 +1,59 @@
 /**
- * MusicPanel — a single sticky play/pause button for ashtanga30's background
- * music.
+ * MusicPanel — the background ambient sound for ashtanga30.
  *
  * Rendered ONCE at the app-shell level (see App.tsx) so it is present on every
  * screen (Home, Overview, Guided) and never unmounts on navigation — the single
- * <audio> element stays in the DOM for the life of the app, so playback (and the
- * play/pause state) persists across screen changes.
+ * <audio> element stays in the DOM for the life of the app, so playback (and
+ * mute state) persists across screen changes.
  *
  * There is one long, looping CC0 (public-domain) ambient track (see
- * src/lib/music.ts + CREDITS.md) served from `public/music/`. With a single
- * loop-and-forget track there is nothing to reveal — no playlist, no scrubbing —
- * so the whole UI is one icon-only button: tap to play, tap to pause.
+ * src/lib/music.ts + CREDITS.md) served from `public/music/`.
  *
- * Autoplay policy: browsers only permit audio to start from a user gesture. Play
- * always originates from the button tap (a gesture), but audio.play() still
- * returns a promise that can reject, so the call is wrapped in a .catch.
+ * === enable vs. mute (two distinct controls) ===
+ * There are two separate concepts, driven by two separate controls:
+ *   - ENABLE/DISABLE is the *persistent preference* the user sets with the
+ *     "Ambient sound" switch on Home. When enabled, the track auto-plays; when
+ *     disabled, it pauses. This flows in via the ambientPref pub/sub, which also
+ *     persists it (preferences.ts). This panel only listens.
+ *   - MUTE/UNMUTE is the *momentary* control on the floating corner button. It
+ *     toggles audio.muted for the currently-playing track WITHOUT touching the
+ *     Home preference — a quick "silence this now" that doesn't disable ambient.
+ * Because there is nothing to mute when ambient is disabled, the corner button
+ * is HIDDEN entirely while disabled (cleanest — no dead/no-op control) and only
+ * appears, as a mute toggle, once ambient is enabled.
  *
- * Accessibility: the button carries an explicit, state-aware aria-label
- * (Play music / Pause music); the icon is aria-hidden.
+ * === autoplay-safe start ===
+ * Browsers block audio until a user gesture. When ambient is enabled we attempt
+ * play() immediately (best-effort; it may reject), AND install a one-time global
+ * gesture listener (pointerdown/keydown) that retries play() if it was blocked.
+ * Once a successful (or attempted) play happens, the listener removes itself.
+ * Turning the preference OFF pauses the audio.
  *
- * Ducking: the panel subscribes to the audioBus (see src/lib/audioBus.ts). When
- * a spoken pose name or the completion bell requests a duck, the music volume
- * ramps down to DUCK_VOLUME; when released, it ramps back to FULL_VOLUME. Only
- * the <audio> element's volume is touched — never its play/pause state — so
- * ducking is entirely independent of whether the user is playing music.
+ * === ducking (unchanged) ===
+ * The panel subscribes to the audioBus (see src/lib/audioBus.ts). When a spoken
+ * pose name or the completion bell requests a duck, the ambient volume ramps
+ * down to DUCK_VOLUME; when released, it ramps back to FULL_VOLUME. Only the
+ * <audio> element's `volume` is touched — never its play/pause state. Muting is
+ * independent: audio.muted overrides output regardless of volume, so mute and
+ * the duck volume ramp coexist without conflict (a muted track stays silent
+ * whatever the ramped volume is; unmuting reveals the current ramped volume).
+ *
+ * Accessibility: the corner button carries a state-aware aria-label
+ * (Mute ambient sound / Unmute ambient sound) and aria-pressed reflects muted;
+ * the icon is aria-hidden.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { TRACKS } from '../lib/music';
 import { subscribeDuck } from '../lib/audioBus';
+import { subscribeAmbient } from '../lib/ambientPref';
 
-/** Volume while ducked (music dipped so a cue can be heard over it). */
+/** Volume while ducked (ambient dipped so a cue can be heard over it). */
 const DUCK_VOLUME = 0.15;
 /** Normal (un-ducked) volume. */
 const FULL_VOLUME = 1;
 /**
- * Ramp durations are asymmetric and eased for an organic feel: the music dips
+ * Ramp durations are asymmetric and eased for an organic feel: the ambient dips
  * fairly quickly but smoothly when a cue starts (DUCK), then swells back in more
  * slowly once the cue ends (RELEASE), so it "breathes back" rather than snapping.
  * Linear volume ramps sound abrupt (loudness perception is ~logarithmic), so the
@@ -50,8 +68,15 @@ function easeInOutCubic(t: number): number {
 }
 
 function MusicPanel() {
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  // Persistent enable/disable preference (from Home via ambientPref). Drives
+  // auto-play/pause and whether the corner mute button is shown at all.
+  const [enabled, setEnabled] = useState<boolean>(false);
+  // Momentary mute state of the currently-playing track (corner button).
+  const [muted, setMuted] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  // Mirror of `enabled` for use inside the (stable, mount-once) gesture callback
+  // so it reads the latest value without the enable effect having to re-subscribe.
+  const enabledRef = useRef<boolean>(false);
   // Holds the id of an in-flight volume ramp (requestAnimationFrame) so it can
   // be cancelled if a new duck/unduck arrives mid-ramp or on cleanup.
   const rampRef = useRef<number | null>(null);
@@ -59,39 +84,100 @@ function MusicPanel() {
   // A single long ambient track that loops — no playlist / track-change logic.
   const currentTrack = TRACKS[0];
 
-  const togglePlay = () => {
+  // The corner button toggles MUTE/UNMUTE for the current track. It does NOT
+  // change the Home enable preference and never touches play/pause.
+  const toggleMute = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) {
-      audio.play().catch(() => {
-        /* autoplay blocked / interrupted — reflect reality, stay paused */
-      });
-    } else {
-      audio.pause();
-    }
+    const next = !audio.muted;
+    audio.muted = next;
+    setMuted(next);
   };
 
-  // Keep isPlaying in sync with the ACTUAL audio state (so the icon always
-  // reflects reality). The track loops natively via the audio `loop` attribute.
+  // --- enable-driven playback (auto-play / pause) ----------------------------
+  // Subscribe to the ambient preference. On the immediate sync + every change:
+  //   enabled  -> best-effort play() now, plus a one-time gesture retry if the
+  //              browser blocked autoplay.
+  //   disabled -> pause.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    // A one-time global gesture listener used to retry a blocked play(). Kept in
+    // a ref-like closure var so we can install/remove exactly one at a time.
+    let removeGestureRetry: (() => void) | null = null;
 
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
+    const clearGestureRetry = () => {
+      if (removeGestureRetry) {
+        removeGestureRetry();
+        removeGestureRetry = null;
+      }
+    };
+
+    const tryPlay = () => {
+      // Best-effort: play() may reject if no user gesture has happened yet.
+      audio.play().catch(() => {
+        /* autoplay blocked — the gesture listener below will retry */
+      });
+    };
+
+    const installGestureRetry = () => {
+      if (removeGestureRetry) return; // already armed
+      const onGesture = () => {
+        // Only retry if still enabled and not already playing.
+        if (enabledRef.current && audio.paused) {
+          audio.play().catch(() => {
+            /* still blocked/interrupted — leave paused, best-effort */
+          });
+        }
+        clearGestureRetry();
+      };
+      document.addEventListener('pointerdown', onGesture, { once: true });
+      document.addEventListener('keydown', onGesture, { once: true });
+      removeGestureRetry = () => {
+        document.removeEventListener('pointerdown', onGesture);
+        document.removeEventListener('keydown', onGesture);
+      };
+    };
+
+    const unsubscribe = subscribeAmbient((next) => {
+      enabledRef.current = next;
+      setEnabled(next);
+      if (next) {
+        tryPlay();
+        // Arm a one-time gesture retry in case the immediate play() was blocked.
+        installGestureRetry();
+      } else {
+        clearGestureRetry();
+        audio.pause();
+      }
+    });
 
     return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
+      unsubscribe();
+      clearGestureRetry();
     };
   }, []);
 
-  // --- ducking ---------------------------------------------------------------
-  // Subscribe to the audio bus and smoothly ramp the music volume between full
-  // and ducked. Only volume is affected — play/pause state is never touched.
+  // Keep the muted UI in sync with the ACTUAL audio state (so the icon always
+  // reflects reality even if muted changes by some other path). The track loops
+  // natively via the audio `loop` attribute.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleVolumeChange = () => setMuted(audio.muted);
+
+    audio.addEventListener('volumechange', handleVolumeChange);
+
+    return () => {
+      audio.removeEventListener('volumechange', handleVolumeChange);
+    };
+  }, []);
+
+  // --- ducking (unchanged) ---------------------------------------------------
+  // Subscribe to the audio bus and smoothly ramp the ambient volume between full
+  // and ducked. Only volume is affected — play/pause and mute are never touched.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -150,36 +236,62 @@ function MusicPanel() {
       */}
       <audio ref={audioRef} src={currentTrack.src} loop preload="metadata" />
 
-      <button
-        type="button"
-        className="music-toggle__btn"
-        onClick={togglePlay}
-        aria-label={isPlaying ? 'Pause music' : 'Play music'}
-        aria-pressed={isPlaying}
-      >
-        {isPlaying ? (
-          <svg
-            className="music-toggle__icon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor" />
-          </svg>
-        ) : (
-          <svg
-            className="music-toggle__icon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path
-              d="M8 5.5v13a1 1 0 0 0 1.54.84l10-6.5a1 1 0 0 0 0-1.68l-10-6.5A1 1 0 0 0 8 5.5Z"
-              fill="currentColor"
-            />
-          </svg>
-        )}
-      </button>
+      {/*
+        The corner button is a MUTE toggle for the currently-playing ambient
+        sound. It is only meaningful while ambient is enabled (there is nothing
+        to mute otherwise), so it is hidden entirely when disabled.
+      */}
+      {enabled && (
+        <button
+          type="button"
+          className="music-toggle__btn"
+          onClick={toggleMute}
+          aria-label={muted ? 'Unmute ambient sound' : 'Mute ambient sound'}
+          aria-pressed={muted}
+        >
+          {muted ? (
+            // Muted speaker: speaker glyph with an "x" where the waves would be.
+            <svg
+              className="music-toggle__icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M4 9v6h4l5 4V5L8 9H4Z"
+                fill="currentColor"
+              />
+              <path
+                d="M16 9.5l4 5M20 9.5l-4 5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          ) : (
+            // Speaker with sound waves: audible / unmuted state.
+            <svg
+              className="music-toggle__icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M4 9v6h4l5 4V5L8 9H4Z"
+                fill="currentColor"
+              />
+              <path
+                d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
+        </button>
+      )}
     </div>
   );
 }
