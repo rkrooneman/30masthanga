@@ -2,7 +2,7 @@
 
 # ashtanga30
 
-A calm, mobile-first **30-minute Ashtanga companion** that generates a varied Primary Series practice and guides you through it, breath by breath.
+A calm, mobile-first **30-minute Ashtanga companion** that generates a varied Primary Series practice and guides you through it, breath by breath, including the Sun Salutations move by move.
 
 **Live app: [ashtanga30.com](https://ashtanga30.com/)**
 
@@ -11,14 +11,17 @@ The full Ashtanga Primary Series takes well over an hour, which makes a daily pr
 ## Features
 
 - **Generates a ~30-minute practice** that always opens with Sun Salutations (A ×3, B ×3) and closes with a shoulderstand and Savasana, keeps the canonical Primary Series order, and never mixes in poses from outside the series. The free time budget is spread across the standing (0.30), seated (0.40), and closing (0.30) sections, and one finishing pose (such as Headstand) is protected so a shortened practice always reaches a real close alongside the always-present shoulderstand.
+- **Guided Sun Salutations, move by move:** the Sun Salutations are modeled as their full authentic vinyasa, and the guided player walks each movement of the flow, showing the current sub-pose name on screen (Sanskrit, with the Warrior side labeled in Surya B). It paces the Downward Dog hold at 5 breaths and plays two prerecorded voice cues hands-free: "last breath" on the fifth breath of the Down Dog hold, and "step/jump forward" as you come out of it, so you can follow the flow without watching the screen (for example, while in Down Dog). Surya A is 13 breaths per round, Surya B is 21, matching the traditional count.
 - **Varied every session:** a different valid subset of standing, seated, and closing poses each time, so no two practices are identical.
+- **Last 7 days at a glance:** a calm, minimalist row on Home shows the last 7 days (today rightmost) as small leaves, empty outlines until a practice is completed that day, then filled in sage. Weekday letters sit beneath and today is gently highlighted. It is an anti-pressure alternative to a streak counter, remembered on-device.
 - **Basics (Smart Start) mode:** a "Basics only" toggle on the Overview restricts the generated practice to a curated set of essential root/basic poses, a shorter, gentler Smart Start practice. The choice is remembered on-device across sessions.
 - **Adjustable breath pace:** a slider (4-7s per breath) tunes the practice toward the 30-minute target without ever exceeding it.
 - **Pose swap:** in the Overview carousel, swap any pose for a same-category alternative that keeps the practice within the 30-minute budget; fixed frame poses stay locked. In Basics mode, swaps stay within basic poses.
-- **Practice overview:** a scannable, section-grouped map of the whole sequence (with per-section counts and times, ×2 / ×3 markers, and a grand-total duration line at the bottom), which opens into a swipeable card carousel for studying each pose, including its Sanskrit, phonetic, and English names and its drishti (gaze).
-- **Guided practice:** a breathing circle that expands on the inhale and contracts on the exhale at your chosen pace, auto-advancing after each pose's breath count, running both sides and salutation rounds in full, with a get-ready countdown and variable transition countdowns (1s for a side or round switch, 3s for a new pose in the same section, 8s when moving to a new section). On completion it shows a redrawn Namaste mark plus an end-of-practice summary (poses, breaths, total duration), plays a soft completion bell, then speaks a closing "Namaste". Keeps the screen awake while you practice.
-- **Voice guidance:** during guided practice the app speaks each pose's phonetic name (prerecorded clips), plays a "switch sides" cue on same-pose side transitions, and speaks the closing "Namaste". A persisted "Voice guidance" toggle on the Home screen (default on) turns it off; the choice is remembered on-device.
-- **Background music:** a single icon-only play/pause button plays one long, looping CC0 (public-domain) ambient track. It lives at the app shell, so playback continues across screens, and briefly ducks (dips in volume) while voice cues and the completion bell play, then returns.
+- **Traditional repeats:** alongside the Sun Salutations (A ×3, B ×3), a few poses repeat per tradition, Navasana (Boat) ×5 and Setu Bandhasana (Bridge) ×3, so the ×N markers in the overview and player reflect the real practice.
+- **Practice overview:** a scannable, section-grouped map of the whole sequence (with per-section counts and times, ×2 / ×3 markers, and a grand-total duration line at the bottom), which opens into a swipeable card carousel for studying each pose. The UI leads with Sanskrit: the map shows the Sanskrit name only, and the detail carousel shows Sanskrit as the primary name with English and phonetic as smaller secondary lines, alongside the pose's drishti (gaze).
+- **Guided practice:** a breathing circle that expands on the inhale and contracts on the exhale at your chosen pace, auto-advancing after each pose's breath count, running both sides and salutation rounds in full (the Sun Salutations are guided move by move, see above), with a get-ready countdown and variable transition countdowns (1s for a side or round switch, 3s for a new pose in the same section, 8s when moving to a new section). The guided player shows the Sanskrit name as the primary name with a smaller English secondary line. On completion it shows a redrawn Namaste mark plus an end-of-practice summary (poses, breaths, total duration), plays a soft completion bell, then speaks a closing "Namaste", and quietly records the day in the last-7-days row. Keeps the screen awake while you practice.
+- **Voice guidance:** during guided practice the app speaks each pose's name (prerecorded clips), plays a "switch sides" cue on same-pose side transitions, plays the salutation cues ("last breath" on the Down Dog hold's final breath and "step/jump forward" on the exit), and speaks the closing "Namaste". A persisted "Voice guidance" toggle on the Home screen (default on) turns it off; the choice is remembered on-device.
+- **Ambient sound:** a persisted "Ambient sound" toggle on Home (OFF by default) enables and auto-plays one long, looping CC0 (public-domain) ambient track. The `<audio>` lives at the app shell, so playback continues across screens. A floating corner button mutes/unmutes the ambient sound (shown only when ambient is enabled), and the track briefly ducks (dips in volume) while voice cues and the completion bell play, then returns.
 - **Installable:** a PWA you can add to your phone's home screen.
 - **Original artwork:** every pose has its own minimalist line-drawing icon, and the completion Namaste mark is original vector art too.
 
@@ -49,19 +52,22 @@ npx tsx src/lib/guidedPlan.test.ts            # guided-practice plan tests
 npx tsx src/components/poses/verify-coverage.ts  # confirm every pose has an icon
 ```
 
-Visit `/?pilot` in dev to see the pose-icon contact sheet, or `/?complete` to render the guided completion screen directly (Namaste mark + summary, including its bell and Namaste sounds) without playing through a whole practice. Both hatches are DEV-only and stripped from production builds.
+Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to render the guided completion screen directly (Namaste mark + summary, including its bell and Namaste sounds) without playing through a whole practice, or `/?seedweek` to seed a few days into the last-7-days practice log so the filled leaves can be previewed. All three hatches are DEV-only and stripped from production builds.
 
 ## Project structure
 
-- `src/data/poses.ts`: the Ashtanga Primary Series catalog (58 poses): names, category, canonical order, breaths, sides, repeats, drishti, and the `isBasic` flag for Smart Start mode.
+- `src/data/poses.ts`: the Ashtanga Primary Series catalog (58 poses): names, category, canonical order, breaths, sides, repeats, drishti, the `isBasic` flag for Smart Start mode, and an optional vinyasa `flow` (carried by the two Sun Salutations) that breaks the salutation into its move-by-move sub-poses and voice cues.
 - `src/lib/generatePractice.ts`: builds a valid, varied, under-30-minute sequence, weights the free budget across sections, protects a finishing pose, and supports Basics-only mode.
 - `src/lib/swapPose.ts`: the budget-safe, same-category pose-swap engine used by the Overview carousel.
-- `src/lib/guidedPlan.ts` / `src/lib/timing.ts`: turn a practice into a breath-by-breath timeline, with the variable transition model.
-- `src/lib/voice.ts`: spoken pose-name (and "switch sides" / "Namaste") playback for guided practice.
+- `src/lib/guidedPlan.ts` / `src/lib/timing.ts`: turn a practice into a breath-by-breath timeline, with the variable transition model; the salutation `flow` is expanded into sub-pose labels and per-breath voice cues.
+- `src/lib/voice.ts`: spoken pose-name playback (plus "switch sides", "Namaste", and the salutation cues "last breath" / "step/jump forward") for guided practice.
 - `src/lib/chime.ts`: the completion bell (`public/audio/effects/bell.mp3`).
-- `src/lib/audioBus.ts`: the duck bus that lets voice cues and the bell lower the music volume while they play.
-- `src/lib/music.ts` / `src/components/MusicPanel.tsx`: the background-music play/pause button and its track list (tracks served from `public/music/`).
-- `public/audio/voice/`: prerecorded pose-name clips plus `namaste.mp3` and `switch_sides.mp3`; `public/audio/effects/bell.mp3` is the completion bell.
+- `src/lib/audioBus.ts`: the duck bus that lets voice cues and the bell lower the ambient-sound volume while they play.
+- `src/lib/music.ts` / `src/components/MusicPanel.tsx`: the ambient-sound `<audio>` element and its track list (tracks served from `public/music/`), with the corner mute/unmute button.
+- `src/lib/ambientPref.ts`: the ambient-sound enable preference, a tiny pub/sub shared between the Home toggle and the shell-level `MusicPanel`.
+- `src/lib/practiceLog.ts`: the on-device log of days a practice was completed, powering the last-7-days row on Home.
+- `src/components/PracticeWeek.tsx` / `src/components/PetalMark.tsx`: the last-7-days leaf row and the single leaf marker (empty outline or filled sage).
+- `public/audio/voice/`: prerecorded pose-name clips plus `namaste.mp3`, `switch_sides.mp3`, and the salutation cues `last_breath.mp3` and `step_jump_forward.mp3`; `public/audio/effects/bell.mp3` is the completion bell.
 - `src/screens/`: Home, Overview (map + carousel), and the Guided player.
 - `src/components/NamasteMark.tsx`: the completion Namaste mark (original traced SVG vector art).
 - `src/components/poses/`: the 58 pose icons and their registry.
@@ -89,6 +95,6 @@ from use of this application. By using ashtanga30 you accept these terms.
 
 Licensed under the [MIT License](LICENSE). © 2026 Roderik Krooneman.
 
-The bundled background music consists of CC0 (public-domain) tracks; see
+The bundled ambient sound consists of CC0 (public-domain) tracks; see
 [CREDITS.md](CREDITS.md) for provenance. The pose illustrations are original
 works created for this project.
