@@ -234,8 +234,8 @@ function PoseCarousel({
         </div>
 
         <div className="pose-card__names">
-          <h2 className="pose-card__english">{pose.english}</h2>
-          <p className="pose-card__sanskrit">{pose.sanskrit}</p>
+          <h2 className="pose-card__primary-name">{pose.sanskrit}</h2>
+          <p className="pose-card__secondary-name">{pose.english}</p>
           <p className="pose-card__phonetic">{pose.phonetic}</p>
         </div>
 
@@ -266,8 +266,8 @@ function PoseCarousel({
             disabled={swapDisabled}
             aria-label={
               swapDisabled
-                ? `Swap ${pose.english} (unavailable: ${swapHint})`
-                : `Swap ${pose.english} for another ${pose.category} pose`
+                ? `Swap ${pose.sanskrit} (unavailable: ${swapHint})`
+                : `Swap ${pose.sanskrit} for another ${pose.category} pose`
             }
             aria-describedby={swapHint ? swapHintId : undefined}
           >
@@ -306,7 +306,7 @@ function PoseCarousel({
                 (i === index ? ' carousel-nav__dot--active' : '')
               }
               onClick={() => goTo(i)}
-              aria-label={`Go to pose ${i + 1}: ${p.english}`}
+              aria-label={`Go to pose ${i + 1}: ${p.sanskrit}`}
               aria-current={i === index ? 'true' : undefined}
             />
           ))}

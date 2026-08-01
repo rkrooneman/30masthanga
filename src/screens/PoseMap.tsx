@@ -187,12 +187,12 @@ function PoseMap({
                         type="button"
                         className="pose-map__thumb"
                         onClick={() => onOpenPose(index)}
-                        aria-label={`Open pose ${index + 1}: ${pose.english}`}
+                        aria-label={`Open pose ${index + 1}: ${pose.sanskrit}`}
                       >
                         <span className="pose-map__figure">
                           <PoseGraphic
                             poseId={pose.id}
-                            name={pose.english}
+                            name={pose.sanskrit}
                             category={pose.category}
                             size={THUMB_ICON_SIZE}
                           />
@@ -200,7 +200,7 @@ function PoseMap({
                             <span className="pose-map__badge">{badge}</span>
                           )}
                         </span>
-                        <span className="pose-map__name">{pose.english}</span>
+                        <span className="pose-map__name">{pose.sanskrit}</span>
                       </button>
                     </li>
                   );

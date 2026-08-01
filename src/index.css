@@ -921,10 +921,11 @@ body {
 /* Pose name below the icon: small, may wrap; cells stay equal height because
    they align to the top and the grid rows size to the tallest cell. */
 .pose-map__name {
-  font-size: 0.75rem;
-  line-height: 1.25;
+  font-size: 0.7rem;
+  line-height: 1.3;
   color: var(--color-text);
   overflow-wrap: anywhere;
+  hyphens: none;
 }
 
 /* Keep the persistent CTA clear of the home indicator on notched devices. */
@@ -1014,7 +1015,7 @@ body {
   gap: 0.15rem;
 }
 
-.pose-card__english {
+.pose-card__primary-name {
   margin: 0;
   font-size: 1.375rem;
   font-weight: 400;
@@ -1022,7 +1023,7 @@ body {
   color: var(--color-text);
 }
 
-.pose-card__sanskrit {
+.pose-card__secondary-name {
   margin: 0;
   font-size: 0.9375rem;
   color: var(--color-text-muted);
@@ -1366,7 +1367,7 @@ body {
   opacity: 0.7;
 }
 
-.guided-player__english {
+.guided-player__primary-name {
   margin: 0;
   font-size: 1.375rem;
   font-weight: 400;
@@ -1374,7 +1375,7 @@ body {
   color: var(--color-text);
 }
 
-.guided-player__sanskrit {
+.guided-player__secondary-name {
   margin: 0;
   font-size: 0.9375rem;
   color: var(--color-text-muted);

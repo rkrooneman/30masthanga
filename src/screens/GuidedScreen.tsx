@@ -633,11 +633,11 @@ function GuidedScreen({
               className="guided-player__pose-icon"
             />
           )}
-          <h2 className="guided-player__english">
-            {shownPose?.english ?? '\u00a0'}
+          <h2 className="guided-player__primary-name">
+            {shownPose?.sanskrit ?? '\u00a0'}
           </h2>
-          {shownPose?.sanskrit && (
-            <p className="guided-player__sanskrit">{shownPose.sanskrit}</p>
+          {shownPose?.english && (
+            <p className="guided-player__secondary-name">{shownPose.english}</p>
           )}
           {isBreath && drishtiVerified && (
             <p className="guided-player__drishti">Gaze: {shownPose?.drishti}</p>
