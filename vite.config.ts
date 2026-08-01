@@ -46,7 +46,39 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Precache the app shell plus the SMALL, essential audio: the spoken
+        // pose-name / switch-sides / Namaste voice clips and the completion bell
+        // (public/audio/**, ~1.3 MB total), so guided-practice audio works fully
+        // offline. The large background-music track (public/music/**, ~36 MB) is
+        // deliberately EXCLUDED from precache so first load stays light; it is
+        // runtime-cached on first play instead (see runtimeCaching below).
+        globPatterns: [
+          '**/*.{js,css,html,svg,png,ico,woff2}',
+          'audio/**/*.mp3',
+        ],
+        runtimeCaching: [
+          {
+            // Background music: cache-first, populated the first time the track
+            // is played, so it is available offline thereafter without forcing a
+            // ~36 MB download on every visitor up front.
+            urlPattern: ({ url }) => url.pathname.startsWith('/music/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'music-audio',
+              // The single ambient track is ~36 MB, well above Workbox's default
+              // range-request handling threshold; allow it explicitly.
+              rangeRequests: true,
+              expiration: {
+                maxEntries: 4,
+                maxAgeSeconds: 60 * 60 * 24 * 60, // 60 days
+              },
+              cacheableResponse: {
+                // 200 (full) and 206 (partial/range) responses are both cacheable.
+                statuses: [200, 206],
+              },
+            },
+          },
+        ],
       },
     }),
   ],
