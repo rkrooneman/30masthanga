@@ -563,7 +563,8 @@ export const poses: Pose[] = [
     order: 310,
     breaths: 5,
     sides: 1,
-    repeat: 1,
+    // Traditionally repeated 5 times (5 breaths each), with a lift between rounds.
+    repeat: 5,
     alwaysInclude: false,
     selectable: true,
     drishti: 'Padhayoragrai (toes)',
@@ -755,7 +756,8 @@ export const poses: Pose[] = [
     order: 430,
     breaths: 5,
     sides: 1,
-    repeat: 1,
+    // Traditionally repeated 3 times.
+    repeat: 3,
     alwaysInclude: false,
     selectable: true,
     drishti: 'Nasagrai (tip of the nose)',

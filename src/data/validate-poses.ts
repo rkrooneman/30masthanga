@@ -78,23 +78,28 @@ for (const p of poses) {
   }
 }
 
-// --- repeat: only the two salutations may have repeat > 1 (both === 3) ---
-const expectedRepeated = new Set([
-  'surya_namaskara_a',
-  'surya_namaskara_b',
+// --- repeat: a known set of poses are repeated in traditional Ashtanga, each
+// with its own expected count. The two Sun Salutations (x3), plus Navasana
+// (Boat, x5) and Setu Bandhasana (Bridge, x3). Every other pose must be x1. ---
+const expectedRepeats = new Map<string, number>([
+  ['surya_namaskara_a', 3],
+  ['surya_namaskara_b', 3],
+  ['navasana', 5],
+  ['setu_bandhasana', 3],
 ]);
 const repeatedIds = poses.filter((p) => p.repeat > 1).map((p) => p.id);
 for (const p of poses) {
-  if (expectedRepeated.has(p.id)) {
-    if (p.repeat !== 3) {
+  const expected = expectedRepeats.get(p.id);
+  if (expected !== undefined) {
+    if (p.repeat !== expected) {
       errors.push(
-        `${p.id} is expected to have repeat === 3 (got ${p.repeat})`,
+        `${p.id} is expected to have repeat === ${expected} (got ${p.repeat})`,
       );
     }
   } else if (p.repeat > 1) {
     errors.push(
       `Unexpected repeat > 1 on pose "${p.id}" (got ${p.repeat}); only ` +
-        `surya_namaskara_a and surya_namaskara_b should repeat`,
+        `${[...expectedRepeats.keys()].join(', ')} should repeat`,
     );
   }
 }
@@ -147,7 +152,7 @@ if (repeatedIds.length === 0) {
 } else {
   for (const id of repeatedIds) {
     const p = poses.find((x) => x.id === id)!;
-    const tag = expectedRepeated.has(id) ? '(expected)' : '(UNEXPECTED)';
+    const tag = expectedRepeats.has(id) ? '(expected)' : '(UNEXPECTED)';
     console.log(`  - ${id} \u00d7${p.repeat} ${tag}`);
   }
 }
