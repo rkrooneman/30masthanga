@@ -66,7 +66,7 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, or `/?complete` to re
 
 ## Notes
 
-Drishti values follow standard Ashtanga (KPJAYI / David Swenson) convention and are worth verifying against a trusted source before relying on them. Pose icons are original schematic line drawings intended as clear references, not anatomical illustrations.
+Drishti values follow standard Ashtanga (KPJAYI / David Swenson) convention and have been reviewed against it. They remain a study reference, not authoritative instruction. Pose icons are original schematic line drawings intended as clear references, not anatomical illustrations.
 
 ## Disclaimer
 

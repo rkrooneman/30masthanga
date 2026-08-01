@@ -11,10 +11,13 @@
  * Sanskrit drishti term plus the plain-English target, e.g.
  * "Nasagrai (tip of the nose)".
  *
- * The exact string "__UNVERIFIED__" marks any pose whose standardized gaze the
- * drafter was not confident about — a human should confirm it against Swenson
- * before it is trusted. `phonetic` and `group` may still carry the older
- * "NEEDS VERIFICATION" sentinel where the drafter was genuinely unsure.
+ * All drishti values have been reviewed against the convention above; no pose
+ * currently carries the "__UNVERIFIED__" sentinel. That sentinel remains
+ * available for future edits: set a pose's drishti to the exact string
+ * "__UNVERIFIED__" to mark a gaze a human should confirm against Swenson before
+ * it is trusted (the UI treats it as "unverified" and hides it). `phonetic` and
+ * `group` may still carry the older "NEEDS VERIFICATION" sentinel where the
+ * drafter was genuinely unsure.
  *
  * === order ===
  * `order` is strictly increasing across the whole array in canonical Primary
