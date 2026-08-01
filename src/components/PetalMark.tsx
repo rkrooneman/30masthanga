@@ -47,7 +47,7 @@ function PetalMark({ filled, size = 20, className }: PetalMarkProps) {
       height={size}
       viewBox="0 0 24 24"
       // The empty leaf reads as a quiet placeholder; the filled one is present.
-      opacity={filled ? 1 : 0.7}
+      opacity={filled ? 1 : 0.85}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
@@ -55,21 +55,22 @@ function PetalMark({ filled, size = 20, className }: PetalMarkProps) {
       {/* A gentle clockwise tilt (about the leaf's centre) gives it a natural,
           growing lean rather than a stiff upright drop. */}
       <g transform="rotate(18 12 12)">
-        {/* Leaf body: sage fill when practiced, thin muted outline when not. */}
+        {/* Leaf body: sage fill when practiced, muted-grey outline when not (a
+            clearer "not yet" than the very pale border colour). */}
         <path
           d={LEAF_PATH}
           fill={filled ? accent : 'none'}
-          stroke={filled ? 'none' : 'var(--color-border)'}
+          stroke={filled ? 'none' : 'var(--color-text-muted)'}
           strokeWidth={filled ? 0 : 1.4}
         />
         {/* Midrib vein: shows through the fill (surface tint) when filled, or a
-            faint accent line when empty — the detail that reads as a leaf. */}
+            faint muted line when empty — the detail that reads as a leaf. */}
         <path
           d={VEIN_PATH}
           fill="none"
-          stroke={filled ? 'var(--color-surface)' : 'var(--color-border)'}
+          stroke={filled ? 'var(--color-surface)' : 'var(--color-text-muted)'}
           strokeWidth={filled ? 1.1 : 1}
-          opacity={filled ? 0.7 : 1}
+          opacity={filled ? 0.7 : 0.8}
         />
       </g>
     </svg>
