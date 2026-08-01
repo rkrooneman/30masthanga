@@ -14,31 +14,42 @@
  * segment is `breaths` breaths. Every breath is inhale-then-exhale on a 50/50
  * split (at 5s/breath: 2.5s in, 2.5s out).
  *
- * A `TRANSITION_SECONDS` countdown is inserted BEFORE every segment except the
- * very first segment of the whole practice — that covers switching sides,
- * moving to the next salutation round, AND moving to the next pose. There is no
- * leading transition before the first breath and no trailing transition after
- * the final breath.
+ * A countdown is inserted BEFORE every segment except the very first segment of
+ * the whole practice — that covers switching sides, moving to the next
+ * salutation round, AND moving to the next pose. There is no leading transition
+ * before the first breath and no trailing transition after the final breath.
+ *
+ * === variable transition durations ===
+ * Each transition's length is computed by the centralized model in timing.ts
+ * (`transitionSecondsBetween`), so the runtime and the generator budget always
+ * agree:
+ *   - a transition into a LATER segment of the SAME pose (switch sides / next
+ *     round) is a same-pose transition → `TRANSITION_SAME_POSE_SECONDS` (1s);
+ *   - a transition entering a NEW pose is sized by section change →
+ *     `transitionSecondsBetween(prevPose, nextPose, false)` (3s within a
+ *     section, 8s across sections).
  *
  * === timing reconciliation with timing.ts ===
  * `sequenceDurationSeconds` counts, per pose, only `(repeat - 1)` internal
- * transitions (via `poseHoldSeconds`) plus `(n - 1)` between-pose transitions.
- * The guided plan additionally inserts a transition between the SIDES of a
- * multi-sided pose (`sides > 1`), which `poseHoldSeconds` does NOT count. The
- * per-pose delta is therefore `repeat * (sides - 1)` extra transitions, i.e. in
- * the current catalog (where every 2-sided pose has repeat = 1) exactly one
- * extra transition per 2-sided pose. So, for a given sequence:
+ * same-pose transitions (via `poseHoldSeconds`, at 1s each) plus one variable
+ * between-pose transition for each of the `(n - 1)` adjacent pairs. The guided
+ * plan additionally inserts a same-pose transition between the SIDES of a
+ * multi-sided pose (`sides > 1`), which `poseHoldSeconds` does NOT count. Those
+ * extra transitions are same-pose (1s each), and the per-pose count is
+ * `repeat * (sides - 1)`. Between-pose transitions themselves are identical in
+ * both computations (same model, same 3s/8s tiers), so they cancel. Therefore,
+ * for a given sequence:
  *
  *   guidedPlan.totalMs / 1000
  *     === sequenceDurationSeconds(poses, breathSeconds)
- *       + (Σ over poses of repeat * (sides - 1)) * TRANSITION_SECONDS
+ *       + (Σ over poses of repeat * (sides - 1)) * TRANSITION_SAME_POSE_SECONDS
  *
  * The unit test asserts this exact delta from the catalog. Everything here is
  * PURE so it stays fully unit-testable.
  */
 
 import type { Pose } from '../types/pose';
-import { TRANSITION_SECONDS } from './timing';
+import { transitionSecondsBetween } from './timing';
 
 /** Which half of a single breath a `BreathStep` phase refers to. */
 export type GuidedPhase = 'inhale' | 'exhale';
@@ -68,7 +79,11 @@ export interface BreathStep {
 /** A countdown gap shown before entering the next segment/pose. */
 export interface TransitionStep {
   kind: 'transition';
-  /** Countdown length in seconds (= TRANSITION_SECONDS). */
+  /**
+   * Countdown length in seconds, sized by the centralized transition model:
+   * 1s for a same-pose (switch sides / next round) transition, or 3s/8s for a
+   * new pose depending on whether it stays in the same display section.
+   */
   seconds: number;
   /** Index of the pose being left, or null before the first pose's later segments. */
   fromPoseIndex: number | null;
@@ -158,11 +173,12 @@ function cueFor(
  */
 export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPlan {
   const halfMs = (breathSeconds / 2) * 1000;
-  const transitionMs = TRANSITION_SECONDS * 1000;
 
   const steps: GuidedStep[] = [];
   let totalMs = 0;
   let sawFirstSegment = false;
+  // The pose of the immediately preceding segment (null before the first).
+  let prevPose: Pose | null = null;
 
   for (let poseIndex = 0; poseIndex < poses.length; poseIndex++) {
     const pose = poses[poseIndex];
@@ -174,18 +190,29 @@ export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPla
       // Transition before this segment, unless it's the very first segment of
       // the whole practice.
       if (sawFirstSegment) {
+        // A later segment of the SAME pose (switch sides / next round) is a
+        // same-pose transition (1s); entering a NEW pose is sized by section
+        // change (3s / 8s) via the centralized model. `prevPose` is guaranteed
+        // non-null here (sawFirstSegment is true).
+        const samePose = !enteringNewPose;
+        const seconds = transitionSecondsBetween(
+          prevPose as Pose,
+          pose,
+          samePose,
+        );
         const transition: TransitionStep = {
           kind: 'transition',
-          seconds: TRANSITION_SECONDS,
+          seconds,
           fromPoseIndex: enteringNewPose ? poseIndex - 1 : poseIndex,
           toPoseIndex: poseIndex,
           toPose: pose,
           cue: cueFor(pose, segmentIndex, enteringNewPose && poseIndex > 0),
         };
         steps.push(transition);
-        totalMs += transitionMs;
+        totalMs += seconds * 1000;
       }
       sawFirstSegment = true;
+      prevPose = pose;
 
       const segmentLabel = segmentLabelFor(pose, segmentIndex);
 

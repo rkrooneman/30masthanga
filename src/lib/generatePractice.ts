@@ -18,7 +18,7 @@ import type { Pose, PoseCategory } from '../types/pose';
 import {
   DEFAULT_BREATH_SECONDS,
   TARGET_SECONDS,
-  TRANSITION_SECONDS,
+  TRANSITION_SIMILAR_SECONDS,
   poseHoldSeconds,
   sequenceDurationSeconds,
 } from './timing';
@@ -102,9 +102,16 @@ function sectionOf(pose: Pose): Section | null {
 /**
  * The marginal cost of ADDING one pose to a growing section: its hold time
  * plus one transition (every added pose introduces one more gap).
+ *
+ * This is a greedy fill/seed HEURISTIC only — the authoritative ceiling is
+ * always enforced with `sequenceDurationSeconds` (the variable model) below, so
+ * a per-pose estimate is sufficient here. We use the in-section "similar" rate
+ * (3s): section fills add poses within the same display section, where every
+ * between-pose gap is exactly this rate; the rarer cross-section gaps (8s) are
+ * absorbed by the exact ceiling check.
  */
 function marginalCost(pose: Pose, breathSeconds: number): number {
-  return poseHoldSeconds(pose, breathSeconds) + TRANSITION_SECONDS;
+  return poseHoldSeconds(pose, breathSeconds) + TRANSITION_SIMILAR_SECONDS;
 }
 
 /**

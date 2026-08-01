@@ -13,17 +13,23 @@
  * both within and across sections. Only sections with ≥1 pose are rendered.
  *
  * Section time: computed as the sum of `poseHoldSeconds` for the section's poses
- * plus one `TRANSITION_SECONDS` gap between each consecutive pair within the
- * section — i.e. `sum(hold) + (count - 1) * TRANSITION_SECONDS`. This mirrors
- * the app's own `sequenceDurationSeconds` model applied to the section in
- * isolation (it deliberately ignores the single cross-section transition, so the
- * per-section figures are a calm approximation, not a strict partition of the
- * grand total).
+ * plus one in-section transition gap between each consecutive pair within the
+ * section — i.e. `sum(hold) + (count - 1) * TRANSITION_SIMILAR_SECONDS`. Every
+ * pose in a display section shares that section, so the in-section "similar"
+ * rate (3s) is exactly the between-pose gap the guided plan uses here. This
+ * mirrors the app's own `sequenceDurationSeconds` model applied to the section
+ * in isolation (it deliberately ignores the single cross-section transition, so
+ * the per-section figures are a calm approximation, not a strict partition of
+ * the grand total).
  */
 
 import type { GeneratedPractice } from '../lib/generatePractice';
 import type { Pose, PoseCategory } from '../types/pose';
-import { formatDuration, poseHoldSeconds, TRANSITION_SECONDS } from '../lib/timing';
+import {
+  formatDuration,
+  poseHoldSeconds,
+  TRANSITION_SIMILAR_SECONDS,
+} from '../lib/timing';
 import PoseGraphic from '../components/PoseGraphic';
 
 /** Icon size (px) for each thumbnail. */
@@ -84,7 +90,7 @@ function sectionSeconds(items: IndexedPose[], breathSeconds: number): number {
   for (const { pose } of items) {
     total += poseHoldSeconds(pose, breathSeconds);
   }
-  total += (items.length - 1) * TRANSITION_SECONDS;
+  total += (items.length - 1) * TRANSITION_SIMILAR_SECONDS;
   return total;
 }
 

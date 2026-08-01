@@ -11,8 +11,50 @@
 
 import type { Pose } from '../types/pose';
 
-/** Countdown gap (seconds) shown BETWEEN two consecutive poses. */
-export const TRANSITION_SECONDS = 3;
+/**
+ * === centralized transition model ===
+ *
+ * The gap (in whole seconds) shown between two consecutive segments/poses is no
+ * longer a single flat value. It varies with how big a change the practitioner
+ * is making, and there is ONE source of truth — `transitionSecondsBetween` —
+ * used by BOTH the guided plan (runtime) and the generator budget so the two can
+ * never disagree.
+ *
+ * Three tiers:
+ *   - SAME pose (other side / next round of the SAME card) → very short (1s).
+ *   - NEW pose within the SAME display section → medium (3s).
+ *   - NEW pose crossing into a DIFFERENT display section → long (8s).
+ *
+ * `TRANSITION_SECONDS` is retained (= the medium/similar tier, 3) purely as a
+ * backward-compatible alias for the "new pose, same section" gap. It is no
+ * longer used for a pose's INTERNAL repeat transitions — those are same-pose
+ * repeats and use `TRANSITION_SAME_POSE_SECONDS` (1) instead (see
+ * `poseHoldSeconds`). Keeping the two constants distinct makes the model
+ * explicit at every call site.
+ */
+
+/** Same pose, other side / next round of the same card. */
+export const TRANSITION_SAME_POSE_SECONDS = 1;
+
+/** New pose, same display section (similar or same-section-different-group). */
+export const TRANSITION_SIMILAR_SECONDS = 3;
+
+/** New pose, crossing into a different display section. */
+export const TRANSITION_SECTION_CHANGE_SECONDS = 8;
+
+/**
+ * Backward-compatible alias for the "new pose, same section" gap (the medium
+ * tier). Prefer `transitionSecondsBetween` / the named tier constants above at
+ * new call sites; this remains so existing references keep the same meaning.
+ */
+export const TRANSITION_SECONDS = TRANSITION_SIMILAR_SECONDS;
+
+/**
+ * Seconds of "get ready" countdown before the very first breath of a practice.
+ * Single-sourced here and imported by GuidedScreen so the runtime and any
+ * future duration math agree on it.
+ */
+export const OPENING_COUNTDOWN_SECONDS = 5;
 
 /** Default seconds-per-breath used when the caller doesn't specify one. */
 export const DEFAULT_BREATH_SECONDS = 5;
@@ -30,6 +72,57 @@ export const TARGET_MINUTES = 30;
 export const TARGET_SECONDS = TARGET_MINUTES * 60; // 1800
 
 /**
+ * The DISPLAY section a pose belongs to, mirroring the Overview PoseMap grouping
+ * (Sun Salutations / Standing / Seated / Closing / Rest). Both salutation
+ * categories collapse to a single 'sun' section, so Sun A → Sun B is an
+ * in-section change (medium gap), not a section change.
+ *
+ * This is the granularity the transition model reasons about: crossing from one
+ * of these sections into another is the "big" transition (8s).
+ */
+export function displaySection(pose: Pose): string {
+  switch (pose.category) {
+    case 'sun_a':
+    case 'sun_b':
+      return 'sun';
+    case 'standing':
+      return 'standing';
+    case 'seated':
+      return 'seated';
+    case 'closing':
+      return 'closing';
+    case 'finishing':
+      return 'rest';
+  }
+}
+
+/**
+ * The single source of truth for the transition gap (whole seconds) between two
+ * consecutive poses, used by BOTH the guided plan and the generator budget.
+ *
+ * Rules, in order:
+ *   1. `samePose` true  → the same card, other side / next round → 1s
+ *      (`TRANSITION_SAME_POSE_SECONDS`).
+ *   2. Different display section → a big change → 8s
+ *      (`TRANSITION_SECTION_CHANGE_SECONDS`).
+ *   3. Otherwise (a new pose within the same section, whether the same `group`
+ *      "similar" or a different group) → 3s (`TRANSITION_SIMILAR_SECONDS`).
+ *
+ * Note Sun A → Sun B are both section 'sun', so they get the 3s in-section gap.
+ */
+export function transitionSecondsBetween(
+  prevPose: Pose,
+  nextPose: Pose,
+  samePose: boolean,
+): number {
+  if (samePose) return TRANSITION_SAME_POSE_SECONDS;
+  if (displaySection(prevPose) !== displaySection(nextPose)) {
+    return TRANSITION_SECTION_CHANGE_SECONDS;
+  }
+  return TRANSITION_SIMILAR_SECONDS;
+}
+
+/**
  * How long a single card takes in total, in whole seconds — INCLUDING the
  * internal transitions between its own repeats.
  *
@@ -42,25 +135,31 @@ export const TARGET_SECONDS = TARGET_MINUTES * 60; // 1800
  *
  * Internal repeat transitions: a card performed `repeat` times is `repeat`
  * back-to-back flows with a transition gap BETWEEN each pair — i.e.
- * (repeat - 1) gaps. That internal transition time is folded into this card's
- * total here (e.g. Sun A ×3 = 3 flows + 2 internal gaps). The between-card gap
- * that follows this card is NOT included here — `sequenceDurationSeconds` adds
- * the (n-1) between-card gaps separately, so there is no double counting: the
- * single between-card transition after a salutation still moves to the next
- * card, exactly as before.
+ * (repeat - 1) gaps. Those gaps are SAME-pose repeats (next round of the same
+ * card), so they cost `TRANSITION_SAME_POSE_SECONDS` (1s) each under the
+ * variable transition model — NOT the between-pose rate. That internal
+ * transition time is folded into this card's total here (e.g. Sun A ×3 = 3
+ * flows + 2 internal 1s gaps). The between-card gap that follows this card is
+ * NOT included here — `sequenceDurationSeconds` adds the (n-1) between-card gaps
+ * separately (via `transitionSecondsBetween`), so there is no double counting.
  */
 export function poseHoldSeconds(pose: Pose, breathSeconds: number): number {
   const hold = pose.breaths * pose.sides * pose.repeat * breathSeconds;
-  const internalTransitions = (pose.repeat - 1) * TRANSITION_SECONDS;
+  const internalTransitions =
+    (pose.repeat - 1) * TRANSITION_SAME_POSE_SECONDS;
   return hold + internalTransitions;
 }
 
 /**
  * Total duration of an ordered sequence, in whole seconds.
  *
- * = sum of every pose's hold time
- * + one TRANSITION_SECONDS gap between each consecutive pair (n-1 gaps for n
- *   poses; no leading or trailing transition).
+ * = sum of every pose's hold time (incl. its internal same-pose repeat gaps)
+ * + one VARIABLE between-pose gap for each consecutive pair, sized by
+ *   `transitionSecondsBetween(prev, next, false)` — the sequence has one card
+ *   per pose, so every adjacent pair is a NEW pose (3s within a section, 8s
+ *   across sections). Multi-side/round expansion happens only in the guided
+ *   plan, not here; the reconciliation identity in guidedPlan.ts accounts for
+ *   the extra same-pose side/round gaps the plan inserts.
  *
  * An empty sequence is 0s; a single-pose sequence is just its hold time.
  */
@@ -73,7 +172,9 @@ export function sequenceDurationSeconds(
   for (const pose of seq) {
     total += poseHoldSeconds(pose, breathSeconds);
   }
-  total += (seq.length - 1) * TRANSITION_SECONDS;
+  for (let i = 1; i < seq.length; i++) {
+    total += transitionSecondsBetween(seq[i - 1], seq[i], false);
+  }
   return total;
 }
 

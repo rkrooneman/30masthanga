@@ -67,4 +67,12 @@ export interface GuidedScreenProps {
    * "Return home" button, semantically a fresh start).
    */
   onComplete: () => void;
+  /**
+   * DEV-ONLY: when true, the screen mounts straight into the completion state
+   * (Namaste + summary) without playing through the practice. The completion
+   * bell and Namaste voice still fire (so the hatch can preview the completion
+   * sounds), and refreshing replays them. Wired to the `?complete` dev escape
+   * hatch in App.tsx and stripped from production builds. Never set in normal use.
+   */
+  startComplete?: boolean;
 }

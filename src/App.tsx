@@ -44,6 +44,20 @@ function App() {
     return <PosePilot />;
   }
 
+  // DEV-ONLY completion escape hatch: visiting `/?complete` generates a practice
+  // and mounts the Guided screen straight into its completion state (Namaste mark
+  // + end-of-practice summary), so that screen can be iterated on without playing
+  // through a whole practice. The completion bell + Namaste voice play (and
+  // replay on refresh). Gated behind import.meta.env.DEV so it is stripped from
+  // production builds.
+  const devComplete =
+    import.meta.env.DEV && window.location.search.includes('complete');
+  // Generate the throwaway practice for the `?complete` hatch once (only when the
+  // hatch is active). Not stateful — this render path never re-renders normally.
+  const devPractice = devComplete
+    ? generatePractice(poses, { breathSeconds, basicsOnly })
+    : null;
+
   // Persist the breath pace whenever it changes (from the Home slider).
   const handleBreathSecondsChange = (pace: number) => {
     setBreathSeconds(pace);
@@ -99,6 +113,25 @@ function App() {
   const handleBackHome = () => setScreen('home');
   const handleBackOverview = () => setScreen('overview');
   const handleStartGuided = () => setScreen('guided');
+
+  // DEV-ONLY: render the Guided completion screen directly for `/?complete`,
+  // inside the normal app shell (so the MusicPanel + container styling apply).
+  if (devComplete && devPractice) {
+    return (
+      <main className="app">
+        <MusicPanel />
+        <div className="app__container">
+          <GuidedScreen
+            practice={devPractice}
+            breathSeconds={breathSeconds}
+            onExit={handleBackHome}
+            onComplete={handleBackHome}
+            startComplete
+          />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="app">

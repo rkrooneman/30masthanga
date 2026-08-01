@@ -38,6 +38,15 @@ const VOICE_BASE = '/audio/voice/';
 const MAX_UTTERANCE_MS = 8000;
 
 /**
+ * The currently-playing voice element and its one-shot duck release, tracked so
+ * `stopVoice()` can hard-stop an in-flight utterance and release the duck it
+ * holds. There is only ever one voice clip playing at a time in the guided
+ * player, so a single ref suffices. Both are null when nothing is playing.
+ */
+let currentAudio: HTMLAudioElement | null = null;
+let currentRelease: (() => void) | null = null;
+
+/**
  * Build the public URL for a voice clip. Ids are already safe snake_case slugs,
  * but encodeURIComponent is applied defensively (harmless for slugs, correct if
  * an id ever contained a reserved character).
@@ -65,6 +74,10 @@ function narrationEnabled(): boolean {
 function playClip(src: string): void {
   if (!narrationEnabled()) return;
 
+  // Never let two voice clips overlap: hard-stop and un-duck any in-flight one
+  // before starting this one.
+  stopVoice();
+
   try {
     const audio = new Audio(src);
     // Speed is baked into the files — do NOT set playbackRate.
@@ -75,6 +88,12 @@ function playClip(src: string): void {
       if (released) return;
       released = true;
       window.clearTimeout(timeoutId);
+      // Clear the module refs if they still point at THIS clip (a later clip
+      // may have already replaced them).
+      if (currentAudio === audio) {
+        currentAudio = null;
+        currentRelease = null;
+      }
       releaseDuck();
     };
 
@@ -83,6 +102,9 @@ function playClip(src: string): void {
 
     // Duck first, then play, so the music is already dipping as the clip starts.
     requestDuck();
+    // Track this as the current clip so stopVoice() can interrupt it.
+    currentAudio = audio;
+    currentRelease = release;
 
     // Safety net: if the element never fires ended/error (stalled decode), make
     // sure the music un-ducks anyway. (clearTimeout on an already-fired id is a
@@ -120,6 +142,53 @@ export function speakPose(poseId: string): void {
  */
 export function speakNamaste(): void {
   playClip(voiceSrc('namaste'));
+}
+
+/**
+ * Speak the "Switch sides" cue, played at the start of a same-pose side/round
+ * transition (instead of re-announcing the pose name). No-op unless both sound
+ * and voice are on.
+ */
+export function speakSwitchSides(): void {
+  playClip(voiceSrc('switch_sides'));
+}
+
+/**
+ * Hard-stop any voice clip currently playing: pause it, detach its handlers,
+ * and release the duck it holds so the background music is not left dipped.
+ *
+ * Safe to call at any time (including when nothing is playing — a no-op then).
+ * Used by the guided player when the practitioner skips to another pose, so the
+ * previous announcement is cut immediately before the new one is scheduled.
+ *
+ * The duck release goes through the same guarded `release` closure the clip
+ * registered, so the ref-count is decremented EXACTLY once regardless of
+ * whether `ended`/`error`/the timeout would also have fired — no stuck-ducked
+ * music and no double-release.
+ */
+export function stopVoice(): void {
+  const audio = currentAudio;
+  const release = currentRelease;
+  // Clear refs first so a re-entrant call (e.g. from within release) is a no-op.
+  currentAudio = null;
+  currentRelease = null;
+  if (audio) {
+    try {
+      audio.pause();
+      // Detach so the paused element's own events can't double-release later.
+      audio.src = '';
+    } catch {
+      /* ignore — best-effort stop */
+    }
+  }
+  // Release the duck this clip requested (guarded: fires at most once).
+  if (release) {
+    try {
+      release();
+    } catch {
+      /* ignore — best-effort release */
+    }
+  }
 }
 
 /**

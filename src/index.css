@@ -1599,6 +1599,44 @@ body {
   color: var(--color-text-muted);
 }
 
+/* End-of-practice summary: three calm, centred rows (Poses / Breaths /
+   Duration), each a prominent value over a small muted label. A <dl> for
+   semantics; the value (<dd>) leads visually and the label (<dt>) sits beneath
+   in the app's uppercase section-label style. */
+.guided-complete__summary {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.guided-complete__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.guided-complete__stat-value {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.guided-complete__stat-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
 /* Reduced motion: hold the breathing disc at a calm steady size and never
    scale it. Only the phase word / countdown changes; a short opacity settle
    keeps it from feeling frozen without introducing translation or scaling. */

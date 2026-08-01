@@ -42,26 +42,47 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GuidedScreenProps } from '../types/navigation';
+import type { Pose } from '../types/pose';
 import type { GuidedPhase, GuidedStep } from '../lib/guidedPlan';
 import { buildGuidedPlan } from '../lib/guidedPlan';
 import BreathingCircle from '../components/BreathingCircle';
 import NamasteMark from '../components/NamasteMark';
 import PoseGraphic from '../components/PoseGraphic';
 import { unlockAudio, playCompletionBell } from '../lib/chime';
-import { speakPose, speakNamaste, unlockVoice } from '../lib/voice';
+import {
+  speakPose,
+  speakNamaste,
+  speakSwitchSides,
+  stopVoice,
+  unlockVoice,
+} from '../lib/voice';
 import { loadSoundEnabled } from '../lib/preferences';
+import { OPENING_COUNTDOWN_SECONDS, formatDuration } from '../lib/timing';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
 const UNVERIFIED = '__UNVERIFIED__';
 
-/** Seconds of "get ready" countdown before the first breath of the practice. */
-const OPENING_COUNTDOWN_SECONDS = 5;
+/**
+ * How long after landing on a manually-skipped pose (prev/next) to announce its
+ * name. The announcement is cut immediately (`stopVoice`) on each skip and then
+ * scheduled after this delay, so rapid consecutive skips only ever announce the
+ * FINAL landed pose once the practitioner pauses skipping.
+ */
+const SKIP_ANNOUNCE_DELAY_MS = 1000;
+
+/**
+ * How long after the opening "get ready" countdown starts to announce the first
+ * pose's name — ~1s in, so the name lands before the first breath rather than
+ * on it.
+ */
+const FIRST_POSE_ANNOUNCE_DELAY_MS = 1000;
 
 function GuidedScreen({
   practice,
   breathSeconds,
   onExit,
   onComplete,
+  startComplete = false,
 }: GuidedScreenProps) {
   // The plan is pure and deterministic for a given practice + pace, so memoise
   // it once. Rebuild only if the practice or pace identity changes.
@@ -74,7 +95,10 @@ function GuidedScreen({
 
   const [stepIndex, setStepIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [complete, setComplete] = useState(stepCount === 0);
+  // `startComplete` (DEV-only, from the `?complete` hatch) mounts straight into
+  // the completion screen so the Namaste mark + summary can be reviewed without
+  // playing a whole practice.
+  const [complete, setComplete] = useState(stepCount === 0 || startComplete);
   const [phase, setPhase] = useState<GuidedPhase>('inhale');
   // Remaining whole seconds shown during a transition countdown.
   const [countdown, setCountdown] = useState(0);
@@ -87,6 +111,21 @@ function GuidedScreen({
   // Every active timeout id lives here so cleanup can clear them all. Using a
   // ref (not state) means scheduling/clearing never triggers a re-render.
   const timeoutsRef = useRef<number[]>([]);
+
+  // Pending manual-skip announcement timer (see goToPoseOrdinal). Held apart
+  // from timeoutsRef because it must survive the stepping effect's own cleanup
+  // (it schedules across step changes) yet still be cancelable on each skip and
+  // cleared on unmount.
+  const skipAnnounceTimerRef = useRef<number | null>(null);
+
+  // One-shot guard so the first pose is announced exactly once during the
+  // opening countdown, never re-firing on pause/resume of that countdown.
+  const firstPoseAnnouncedRef = useRef(false);
+
+  // The last pose index whose name we announced. Declared here (rather than at
+  // the narration effect) because both the manual-skip handler and the opening
+  // countdown record into it. See the narration effect for the full contract.
+  const lastAnnouncedPoseIndexRef = useRef<number | null>(null);
 
   const clearTimers = useCallback(() => {
     for (const id of timeoutsRef.current) window.clearTimeout(id);
@@ -121,6 +160,15 @@ function GuidedScreen({
   // pose starts at or before the current step). Works for transitions too: a
   // transition's toPose is the pose we're heading into.
   const totalPoses = poseStarts.length;
+
+  // Total breaths practised across the whole plan — one per 'breath' step.
+  // Shown on the completion summary. Memoised over the steps, which only change
+  // when the plan itself is rebuilt.
+  const totalBreaths = useMemo(
+    () => steps.reduce((n, step) => (step.kind === 'breath' ? n + 1 : n), 0),
+    [steps],
+  );
+
   const currentPoseOrdinal = useMemo(() => {
     // Find the last pose-start whose index is <= stepIndex.
     let ordinal = 0;
@@ -139,10 +187,40 @@ function GuidedScreen({
       const clamped = Math.max(1, Math.min(totalPoses, ordinal));
       const target = poseStarts[clamped - 1];
       if (target === undefined) return;
+
+      // --- manual-skip announce debounce ---
+      // Cut any in-flight announcement immediately so a stale pose name doesn't
+      // play over the jump.
+      stopVoice();
+      // Cancel a previously-scheduled skip announcement; rapid consecutive skips
+      // keep cancelling so only the FINAL landed pose is announced.
+      if (skipAnnounceTimerRef.current !== null) {
+        window.clearTimeout(skipAnnounceTimerRef.current);
+        skipAnnounceTimerRef.current = null;
+      }
+
+      // Suppress the auto-advance narration effect's IMMEDIATE announce for this
+      // jump by pre-recording the landed pose as "already announced". The
+      // debounced timer below does the actual (delayed) announcement instead.
+      const landedStep = steps[target];
+      const landedPoseIndex =
+        landedStep && landedStep.kind === 'breath'
+          ? landedStep.poseIndex
+          : null;
+      if (landedPoseIndex !== null) {
+        lastAnnouncedPoseIndexRef.current = landedPoseIndex;
+        const landedPose = (landedStep as { pose: Pose }).pose;
+        skipAnnounceTimerRef.current = window.setTimeout(() => {
+          skipAnnounceTimerRef.current = null;
+          // speakPose self-guards on the voice + sound toggles.
+          speakPose(landedPose.id);
+        }, SKIP_ANNOUNCE_DELAY_MS);
+      }
+
       setPhase('inhale');
       setStepIndex(target);
     },
-    [poseStarts, totalPoses],
+    [poseStarts, totalPoses, steps],
   );
 
   const goPrevPose = useCallback(
@@ -222,12 +300,45 @@ function GuidedScreen({
       schedule(() => setOpeningCount(OPENING_COUNTDOWN_SECONDS - s), s * 1000);
     }
     schedule(() => setStarting(false), OPENING_COUNTDOWN_SECONDS * 1000);
+
+    // Announce the FIRST pose a moment into the get-ready countdown so its name
+    // lands before the first breath, not on it. One-shot (ref-guarded) so it
+    // fires exactly once and never double-fires across a pause/resume of the
+    // opening countdown. Recording its index in the shared announce ref means
+    // the auto-advance narration effect won't re-announce it when `starting`
+    // flips false.
+    if (!firstPoseAnnouncedRef.current) {
+      const firstStep = steps[0];
+      if (firstStep && firstStep.kind === 'breath') {
+        const firstPose = firstStep.pose;
+        schedule(() => {
+          if (firstPoseAnnouncedRef.current) return;
+          firstPoseAnnouncedRef.current = true;
+          lastAnnouncedPoseIndexRef.current = firstStep.poseIndex;
+          // speakPose self-guards on the voice + sound toggles.
+          speakPose(firstPose.id);
+        }, FIRST_POSE_ANNOUNCE_DELAY_MS);
+      }
+    }
+
     return clearTimers;
-  }, [starting, paused, complete, schedule, clearTimers]);
+  }, [starting, paused, complete, schedule, clearTimers, steps]);
 
   // Belt-and-braces: clear any stray timers on unmount (the effect cleanup above
-  // already covers this, but this guards against future refactors).
-  useEffect(() => clearTimers, [clearTimers]);
+  // already covers this, but this guards against future refactors). Also clears
+  // the standalone manual-skip announce timer and hard-stops any in-flight voice
+  // so nothing leaks or plays after the screen is gone.
+  useEffect(
+    () => () => {
+      clearTimers();
+      if (skipAnnounceTimerRef.current !== null) {
+        window.clearTimeout(skipAnnounceTimerRef.current);
+        skipAnnounceTimerRef.current = null;
+      }
+      stopVoice();
+    },
+    [clearTimers],
+  );
 
   // --- completion bell --------------------------------------------------------
   // Unlock the AudioContext on mount: this screen only mounts after the user
@@ -250,21 +361,43 @@ function GuidedScreen({
   // a not-just-announced pose. This makes each pose announced exactly once even
   // across pause/resume (which re-runs effects but leaves the index unchanged),
   // and correctly re-announces when prev/next-pose navigation jumps to a
-  // different pose. Same-pose transitions (switch sides / next round) keep the
-  // same target index, so they never trigger a re-announcement.
+  // different pose.
   //
-  // The first pose is deliberately held until the opening "get ready" countdown
-  // ends (`starting` flips to false), so its name lands just as the first breath
-  // begins rather than during the settle-in.
-  const lastAnnouncedPoseIndexRef = useRef<number | null>(null);
+  // Same-pose transitions (switch sides / next round) keep the same target
+  // index, so they never trigger a pose re-announcement — instead, at the START
+  // of such a transition we play the dedicated "Switch sides" cue.
+  //
+  // The first pose is announced DURING the opening "get ready" countdown (see
+  // the opening-countdown effect below), so by the time `starting` flips false
+  // its index is already recorded (in lastAnnouncedPoseIndexRef, declared with
+  // the other refs above) and it is not re-announced.
   useEffect(() => {
     if (complete) return;
-    if (starting) return; // wait for the opening countdown to finish
+    if (starting) return; // first pose is handled by the opening countdown
     const step = steps[stepIndex];
     if (!step) return;
+
     const enteredPoseIndex =
       step.kind === 'breath' ? step.poseIndex : step.toPoseIndex;
-    if (enteredPoseIndex === lastAnnouncedPoseIndexRef.current) return;
+
+    if (enteredPoseIndex === lastAnnouncedPoseIndexRef.current) {
+      // Same pose as last announced. If we're at the start of a SAME-pose
+      // transition (switch sides / next round — not entering a new pose), play
+      // the switch-sides cue instead of re-announcing the pose name.
+      if (step.kind === 'transition') {
+        const isSamePoseTransition =
+          step.fromPoseIndex === step.toPoseIndex || step.cue === 'Switch sides';
+        if (isSamePoseTransition) {
+          // Self-guards on the voice + sound toggles.
+          speakSwitchSides();
+        }
+      }
+      return;
+    }
+
+    // A genuinely new pose: announce it. This covers normal auto-advance
+    // transitions (announced at transition start, WITHOUT the manual-skip
+    // debounce) and any programmatic index change that lands on a new pose.
     lastAnnouncedPoseIndexRef.current = enteredPoseIndex;
     const pose = step.kind === 'breath' ? step.pose : step.toPose;
     // speakPose self-guards on the voice + sound toggles, so call unconditionally.
@@ -275,6 +408,9 @@ function GuidedScreen({
   // unless the user has muted sound. A ref guard ensures it fires exactly once.
   // AFTER the bell has had a moment to establish, speak the closing "Namaste"
   // (its own toggle-guard applies), sequenced so the two cues don't collide.
+  // These fire on completion whether reached normally OR via the DEV-only
+  // `?complete` hatch (so that hatch can be used to preview the completion
+  // sounds); refreshing it simply replays them.
   const bellPlayedRef = useRef(false);
   const namastePlayedRef = useRef(false);
   useEffect(() => {
@@ -356,6 +492,11 @@ function GuidedScreen({
   // --- exit: stop everything, then hand back to the shell ---------------------
   const handleExit = useCallback(() => {
     clearTimers();
+    if (skipAnnounceTimerRef.current !== null) {
+      window.clearTimeout(skipAnnounceTimerRef.current);
+      skipAnnounceTimerRef.current = null;
+    }
+    stopVoice();
     onExit();
   }, [clearTimers, onExit]);
 
@@ -391,6 +532,22 @@ function GuidedScreen({
           <NamasteMark size={112} className="guided-complete__mark" />
           <h1 className="guided-complete__heading">Namaste</h1>
           <p className="guided-complete__message">Your practice is complete.</p>
+          <dl className="guided-complete__summary">
+            <div className="guided-complete__stat">
+              <dd className="guided-complete__stat-value">{totalPoses}</dd>
+              <dt className="guided-complete__stat-label">Poses</dt>
+            </div>
+            <div className="guided-complete__stat">
+              <dd className="guided-complete__stat-value">{totalBreaths}</dd>
+              <dt className="guided-complete__stat-label">Breaths</dt>
+            </div>
+            <div className="guided-complete__stat">
+              <dd className="guided-complete__stat-value">
+                {formatDuration(plan.totalMs / 1000)}
+              </dd>
+              <dt className="guided-complete__stat-label">Duration</dt>
+            </div>
+          </dl>
         </div>
         <button
           type="button"

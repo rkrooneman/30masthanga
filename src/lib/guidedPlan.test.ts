@@ -17,7 +17,7 @@ import { buildGuidedPlan } from './guidedPlan';
 import type { BreathStep, TransitionStep } from './guidedPlan';
 import {
   DEFAULT_BREATH_SECONDS,
-  TRANSITION_SECONDS,
+  TRANSITION_SAME_POSE_SECONDS,
   sequenceDurationSeconds,
 } from './timing';
 
@@ -141,8 +141,9 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
     breaths.every((b) => b.segmentCount === 2),
     `2-sided: segmentCount must be 2`,
   );
-  // totalMs = 10 breaths * 5000 + 1 transition * 3000 = 50000 + 3000 = 53000
-  check(plan.totalMs === 53000, `2-sided: totalMs expected 53000, got ${plan.totalMs}`);
+  // totalMs = 10 breaths * 5000 + 1 same-pose (switch-sides) transition * 1000
+  //         = 50000 + 1000 = 51000
+  check(plan.totalMs === 51000, `2-sided: totalMs expected 51000, got ${plan.totalMs}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -189,10 +190,11 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
       `salutation: segmentCount must be 3`,
     );
   }
-  // totalMs = 27 breaths * 5000 + 2 transitions * 3000 = 135000 + 6000 = 141000
+  // totalMs = 27 breaths * 5000 + 2 same-pose (next-round) transitions * 1000
+  //         = 135000 + 2000 = 137000
   check(
-    plan.totalMs === 141000,
-    `salutation: totalMs expected 141000, got ${plan.totalMs}`,
+    plan.totalMs === 137000,
+    `salutation: totalMs expected 137000, got ${plan.totalMs}`,
   );
 }
 
@@ -242,14 +244,19 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
 
 // ---------------------------------------------------------------------------
 // 5. totalMs consistency against sequenceDurationSeconds, with the EXACT
-//    side-transition delta computed from the catalog.
+//    side-transition delta computed from the catalog under the VARIABLE model.
+//
+//    The between-pose transitions are identical in both computations (same
+//    `transitionSecondsBetween` model, same 3s/8s tiers), so they cancel. The
+//    only delta is the extra SAME-pose side/round transitions the guided plan
+//    inserts between segments of a multi-segment pose, at 1s each:
 //
 //    guidedTotalSeconds
 //      === sequenceDurationSeconds(poses, bs)
-//        + (Σ repeat * (sides - 1)) * TRANSITION_SECONDS
+//        + (Σ repeat * (sides - 1)) * TRANSITION_SAME_POSE_SECONDS
 //
 //    In the current catalog every 2-sided pose has repeat === 1, so the delta
-//    is simply (number of 2-sided poses) * TRANSITION_SECONDS.
+//    is simply (number of 2-sided poses) * TRANSITION_SAME_POSE_SECONDS.
 // ---------------------------------------------------------------------------
 {
   const bs = DEFAULT_BREATH_SECONDS;
@@ -260,7 +267,8 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
   const guidedSeconds = plan.totalMs / 1000;
   const baseSeconds = sequenceDurationSeconds(poses, bs);
 
-  // extra side-transitions the guided plan inserts that timing.ts does not.
+  // extra same-pose side/round transitions the guided plan inserts that
+  // timing.ts does not.
   let extraSideTransitions = 0;
   for (const p of poses) extraSideTransitions += p.repeat * (p.sides - 1);
   const twoSidedCount = poses.filter((p) => p.sides === 2).length;
@@ -273,12 +281,14 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
       `have repeat === 1`,
   );
 
-  const expectedSeconds = baseSeconds + extraSideTransitions * TRANSITION_SECONDS;
+  const expectedSeconds =
+    baseSeconds + extraSideTransitions * TRANSITION_SAME_POSE_SECONDS;
   check(
     guidedSeconds === expectedSeconds,
     `catalog: guided totalMs/1000 (${guidedSeconds}) must equal ` +
       `sequenceDurationSeconds (${baseSeconds}) + ${extraSideTransitions} ` +
-      `side-transitions * ${TRANSITION_SECONDS}s (= ${expectedSeconds})`,
+      `same-pose side-transitions * ${TRANSITION_SAME_POSE_SECONDS}s ` +
+      `(= ${expectedSeconds})`,
   );
 
   // totalMs must equal the independent sum of every step's own duration.
@@ -296,8 +306,9 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
   // report the reconciliation for the human reading test output
   console.log(
     `reconciliation @ ${bs}s/breath: guided=${guidedSeconds}s, ` +
-      `base=${baseSeconds}s, delta=${extraSideTransitions} side-transitions ` +
-      `x ${TRANSITION_SECONDS}s = ${extraSideTransitions * TRANSITION_SECONDS}s ` +
+      `base=${baseSeconds}s, delta=${extraSideTransitions} same-pose ` +
+      `side-transitions x ${TRANSITION_SAME_POSE_SECONDS}s = ` +
+      `${extraSideTransitions * TRANSITION_SAME_POSE_SECONDS}s ` +
       `(2-sided poses in catalog: ${twoSidedCount})`,
   );
 }
