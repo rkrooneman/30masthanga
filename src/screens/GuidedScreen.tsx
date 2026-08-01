@@ -53,6 +53,7 @@ import {
   speakPose,
   speakNamaste,
   speakSwitchSides,
+  speakCue,
   stopVoice,
   unlockVoice,
 } from '../lib/voice';
@@ -405,6 +406,38 @@ function GuidedScreen({
     speakPose(pose.id);
   }, [stepIndex, starting, complete, steps]);
 
+  // --- prerecorded vinyasa voice cues ----------------------------------------
+  // The salutation flow tags certain BREATH steps with a `voiceCueId`:
+  // `last_breath` on the Down Dog hold's 5th breath, and `step_jump_forward` on
+  // the jump-forward (Ardha Uttanasana) exit step's first breath. Fire that clip
+  // exactly once when its step becomes current. Only breath steps carry cues —
+  // transitions never do.
+  //
+  // A ref of the last step index we cued guards against double-firing across
+  // pause/resume (which re-runs effects but leaves `stepIndex` unchanged). This
+  // is independent of the pose-name narration above: `speakCue` and `speakPose`
+  // both go through the same single-voice channel (playClip → stopVoice), so at
+  // most one clip plays at a time and toggles are respected. A cue breath is not
+  // a pose entry (its poseIndex was already announced), so the two effects never
+  // target the same step with conflicting audio.
+  const lastCuedStepIndexRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (complete) return;
+    if (starting) return;
+    const step = steps[stepIndex];
+    if (!step) return;
+
+    // Only breath steps carry a `voiceCueId`.
+    const cueId = step.kind === 'breath' ? step.voiceCueId : undefined;
+    if (!cueId) return;
+
+    // Fire once per landing on this step.
+    if (lastCuedStepIndexRef.current === stepIndex) return;
+    lastCuedStepIndexRef.current = stepIndex;
+    // speakCue self-guards on the voice + sound toggles.
+    speakCue(cueId);
+  }, [stepIndex, starting, complete, steps]);
+
   // Play a single soft bell the moment the practice completes (Namaste screen),
   // unless the user has muted sound. A ref guard ensures it fires exactly once.
   // AFTER the bell has had a moment to establish, speak the closing "Namaste"
@@ -609,6 +642,18 @@ function GuidedScreen({
   const drishtiVerified =
     shownPose !== undefined && shownPose.drishti !== UNVERIFIED;
 
+  // During a salutation breath the current flow step tags a `subPoseLabel`
+  // (e.g. "Adho Mukha Svanasana"). When present, show the sub-pose large (as the
+  // primary Sanskrit name) and the salutation name small underneath, so the
+  // screen tracks the vinyasa. Otherwise fall back to the pose's own names.
+  const subPoseLabel =
+    currentStep?.kind === 'breath' ? currentStep.subPoseLabel : undefined;
+  const primaryName = subPoseLabel ?? shownPose?.sanskrit ?? '\u00a0';
+  // Secondary line: the salutation name while in a flow, else the English name.
+  const secondaryName = subPoseLabel
+    ? shownPose?.sanskrit
+    : shownPose?.english;
+
   // Phase word over the circle (breath only).
   const phaseWord = phase === 'inhale' ? 'Inhale' : 'Exhale';
 
@@ -648,11 +693,9 @@ function GuidedScreen({
               className="guided-player__pose-icon"
             />
           )}
-          <h2 className="guided-player__primary-name">
-            {shownPose?.sanskrit ?? '\u00a0'}
-          </h2>
-          {shownPose?.english && (
-            <p className="guided-player__secondary-name">{shownPose.english}</p>
+          <h2 className="guided-player__primary-name">{primaryName}</h2>
+          {secondaryName && (
+            <p className="guided-player__secondary-name">{secondaryName}</p>
           )}
           {isBreath && drishtiVerified && (
             <p className="guided-player__drishti">Gaze: {shownPose?.drishti}</p>

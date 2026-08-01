@@ -323,6 +323,253 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
   check(plan.breathSeconds === 5, `empty: breathSeconds must be echoed back`);
 }
 
+// ---------------------------------------------------------------------------
+// 7. Salutation vinyasa flow expansion (Surya A, 13 breaths): sub-pose labels in
+//    order, per-flow-step breath counts, the `last_breath` cue on the Down Dog
+//    hold's 5th breath, and the `step_jump_forward` cue now on the jump-forward
+//    BREATH step (flow step 7) rather than the transition.
+// ---------------------------------------------------------------------------
+{
+  const suryaA = poses.find((p) => p.id === 'surya_namaskara_a');
+  check(suryaA !== undefined, `flow: surya_namaskara_a must exist in the catalog`);
+  check(
+    !!suryaA && suryaA.flow !== undefined && suryaA.flow.length === 9,
+    `flow: surya_namaskara_a should carry a 9-entry flow`,
+  );
+  // Invariant the whole feature rests on: flow breaths sum to pose.breaths (13).
+  const flowSumA =
+    suryaA?.flow?.reduce((n, s) => n + s.breaths, 0) ?? -1;
+  check(
+    flowSumA === (suryaA?.breaths ?? -2),
+    `flow: Surya A flow breaths (${flowSumA}) must equal pose.breaths ` +
+      `(${suryaA?.breaths})`,
+  );
+  check(flowSumA === 13, `flow: Surya A flow must sum to 13 breaths (got ${flowSumA})`);
+
+  // Flow labels are exactly the authentic choreography, in order.
+  check(
+    suryaA?.flow?.map((s) => s.label).join('|') ===
+      [
+        'Urdhva Hastasana',
+        'Uttanasana',
+        'Ardha Uttanasana',
+        'Chaturanga Dandasana',
+        'Urdhva Mukha Svanasana',
+        'Adho Mukha Svanasana',
+        'Ardha Uttanasana',
+        'Uttanasana',
+        'Urdhva Hastasana',
+      ].join('|'),
+    `flow: Surya A flow labels must match the authentic choreography in order`,
+  );
+  // Per-flow-step breath counts: all 1 except the Down Dog hold (5).
+  check(
+    suryaA?.flow?.map((s) => s.breaths).join(',') === '1,1,1,1,1,5,1,1,1',
+    `flow: Surya A per-step breaths must be 1,1,1,1,1,5,1,1,1`,
+  );
+
+  const plan = buildGuidedPlan([suryaA as Pose], 5);
+  const breaths = plan.steps.filter(isBreath);
+  const transitions = plan.steps.filter(isTransition);
+
+  // 3 rounds x 13 breaths = 39 breath steps; 2 between-round transitions.
+  check(breaths.length === 39, `flow: Surya A expands to 39 breath steps, got ${breaths.length}`);
+  check(
+    transitions.length === 2,
+    `flow: Surya A should have 2 between-round transitions, got ${transitions.length}`,
+  );
+
+  // Every salutation breath carries a subPoseLabel.
+  check(
+    breaths.every((b) => typeof b.subPoseLabel === 'string' && b.subPoseLabel.length > 0),
+    `flow: every Surya A breath must carry a non-empty subPoseLabel`,
+  );
+
+  // The Down Dog hold is flow step 6: 5 breaths per round, all labelled
+  // "Adho Mukha Svanasana", counted 1..5 of 5. (Surya A has a single Down Dog.)
+  const holdBreaths = breaths.filter((b) => b.subPoseLabel === 'Adho Mukha Svanasana');
+  check(
+    holdBreaths.length === 15,
+    `flow: Surya A Down Dog hold should be 5 breaths x 3 rounds = 15, got ${holdBreaths.length}`,
+  );
+  check(
+    holdBreaths.every((b) => b.breathCount === 5),
+    `flow: Down Dog hold breaths must read "of 5"`,
+  );
+  const firstRoundHold = breaths.filter(
+    (b) => b.segmentIndex === 0 && b.subPoseLabel === 'Adho Mukha Svanasana',
+  );
+  check(
+    firstRoundHold.map((b) => b.breathNumber).join(',') === '1,2,3,4,5',
+    `flow: Down Dog hold must count 1..5 within the step ` +
+      `(got ${firstRoundHold.map((b) => b.breathNumber).join(',')})`,
+  );
+
+  // `last_breath` fires on the LAST (5th) breath of each Down Dog hold — exactly
+  // once per round (3 total), and only on hold breaths.
+  const lastBreathCues = breaths.filter((b) => b.voiceCueId === 'last_breath');
+  check(
+    lastBreathCues.length === 3,
+    `flow: last_breath cue should fire once per round (3 total), got ${lastBreathCues.length}`,
+  );
+  check(
+    lastBreathCues.every(
+      (b) => b.subPoseLabel === 'Adho Mukha Svanasana' && b.breathNumber === 5,
+    ),
+    `flow: last_breath must land on the Down Dog hold's 5th breath`,
+  );
+
+  // `step_jump_forward` is now a BREATH cue on the jump-forward step (flow step
+  // 7 = the exit Ardha Uttanasana), fired once per round (3 total) on that
+  // step's FIRST (and only) breath. NO transition carries a voice cue any more.
+  const jumpForwardCues = breaths.filter(
+    (b) => b.voiceCueId === 'step_jump_forward',
+  );
+  check(
+    jumpForwardCues.length === 3,
+    `flow: step_jump_forward should fire once per round (3 total) on a breath, ` +
+      `got ${jumpForwardCues.length}`,
+  );
+  check(
+    jumpForwardCues.every(
+      (b) => b.subPoseLabel === 'Ardha Uttanasana' && b.breathNumber === 1,
+    ),
+    `flow: step_jump_forward must land on the jump-forward Ardha Uttanasana ` +
+      `breath (breath 1 of that step)`,
+  );
+  // Only the 3 last_breath + 3 step_jump_forward cues are tagged on breaths.
+  check(
+    breaths.filter((b) => b.voiceCueId !== undefined).length === 6,
+    `flow: exactly 6 breath cues expected (3 last_breath + 3 step_jump_forward)`,
+  );
+
+  // Non-flow legacy expansion is unchanged: a plain flow-less pose emits no
+  // subPoseLabel / voiceCueId and keeps whole-segment counts.
+  const plain = buildGuidedPlan([makePose({ breaths: 5 })], 5).steps.filter(isBreath);
+  check(
+    plain.every((b) => b.subPoseLabel === undefined && b.voiceCueId === undefined),
+    `flow: flow-less poses must not carry subPoseLabel/voiceCueId`,
+  );
+  check(
+    plain.every((b) => b.breathCount === 5),
+    `flow: flow-less pose keeps whole-segment breathCount`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 8. Surya B flow (21 breaths): the FINAL Down Dog is the 5-breath hold, BOTH
+//    intermediate Down Dogs are present, both Warrior A sides are labelled
+//    (right / left), and `step_jump_forward` fires on the jump-forward BREATH
+//    step (flow step 15) — NOT on any transition.
+// ---------------------------------------------------------------------------
+{
+  const suryaB = poses.find((p) => p.id === 'surya_namaskara_b');
+  check(
+    !!suryaB && suryaB.flow !== undefined && suryaB.flow.length === 17,
+    `flow: surya_namaskara_b should carry a 17-entry flow`,
+  );
+  const flowSumB = suryaB?.flow?.reduce((n, s) => n + s.breaths, 0) ?? -1;
+  check(flowSumB === 21, `flow: Surya B flow must sum to 21 breaths (got ${flowSumB})`);
+  check(
+    flowSumB === (suryaB?.breaths ?? -2),
+    `flow: Surya B flow breaths (${flowSumB}) must equal pose.breaths (${suryaB?.breaths})`,
+  );
+
+  // The final flow step is the 5-breath Down Dog hold carrying last_breath.
+  const lastFlow = suryaB?.flow?.[suryaB.flow.length - 1];
+  check(
+    !!lastFlow && lastFlow.label === 'Utkatasana' && lastFlow.breaths === 1,
+    `flow: Surya B's final flow step must be the closing Utkatasana (chair) breath`,
+  );
+  // The 5-breath hold is flow index 13 (14th entry), with last_breath on 'last'.
+  const holdStep = suryaB?.flow?.[13];
+  check(
+    !!holdStep &&
+      holdStep.label === 'Adho Mukha Svanasana' &&
+      holdStep.hold === true &&
+      holdStep.breaths === 5 &&
+      holdStep.cueId === 'last_breath' &&
+      holdStep.cueOn === 'last',
+    `flow: Surya B's 14th flow step must be the 5-breath Down Dog hold with ` +
+      `last_breath on its last breath`,
+  );
+
+  // Both intermediate Down Dogs are present: three "Adho Mukha Svanasana" steps
+  // total (two single intermediates + the final 5-breath hold).
+  const downDogSteps =
+    suryaB?.flow?.filter((s) => s.label === 'Adho Mukha Svanasana') ?? [];
+  check(
+    downDogSteps.length === 3,
+    `flow: Surya B must have 3 Down Dog steps (2 intermediate + 1 hold), got ` +
+      `${downDogSteps.length}`,
+  );
+
+  // Both Warrior A sides are present and distinctly labelled.
+  check(
+    !!suryaB?.flow?.some((s) => s.label === 'Virabhadrasana A (right)') &&
+      !!suryaB?.flow?.some((s) => s.label === 'Virabhadrasana A (left)'),
+    `flow: Surya B must label both Warrior A sides "(right)" and "(left)"`,
+  );
+
+  // The jump-forward exit step (flow index 14, the 15th entry) carries
+  // step_jump_forward on its first breath.
+  const jumpForwardStep = suryaB?.flow?.[14];
+  check(
+    !!jumpForwardStep &&
+      jumpForwardStep.label === 'Ardha Uttanasana' &&
+      jumpForwardStep.breaths === 1 &&
+      jumpForwardStep.cueId === 'step_jump_forward' &&
+      jumpForwardStep.cueOn === 'first',
+    `flow: Surya B's 15th flow step must be the jump-forward Ardha Uttanasana ` +
+      `carrying step_jump_forward on its first breath`,
+  );
+
+  // A salutation followed by a plain pose: NO transition carries a voice cue,
+  // and step_jump_forward fires once per round on the jump-forward breath.
+  const next = makePose({ id: 'after_b', english: 'After B', breaths: 5 });
+  const plan = buildGuidedPlan([suryaB as Pose, next], 5);
+  const transitions = plan.steps.filter(isTransition);
+  // 2 between-round transitions + 1 between-pose transition = 3.
+  check(
+    transitions.length === 3,
+    `flow: Surya B (x3) + next pose should have 3 transitions, got ${transitions.length}`,
+  );
+  check(
+    transitions.every((t) => (t as { voiceCueId?: string }).voiceCueId === undefined),
+    `flow: no Surya B transition should carry a voice cue any more`,
+  );
+  const exitTransition = transitions[transitions.length - 1];
+  check(
+    exitTransition.cue.startsWith('Next:'),
+    `flow: the between-pose exit transition should still cue "Next: ..."`,
+  );
+
+  const b = plan.steps.filter(isBreath);
+  // step_jump_forward fires once per Surya B round (3 total), on the jump-forward
+  // Ardha Uttanasana breath, all within Surya B (poseIndex 0).
+  const jumpForwardCues = b.filter((s) => s.voiceCueId === 'step_jump_forward');
+  check(
+    jumpForwardCues.length === 3,
+    `flow: step_jump_forward should fire 3 times (once per Surya B round), got ` +
+      `${jumpForwardCues.length}`,
+  );
+  check(
+    jumpForwardCues.every(
+      (s) =>
+        s.poseIndex === 0 &&
+        s.subPoseLabel === 'Ardha Uttanasana' &&
+        s.breathNumber === 1,
+    ),
+    `flow: step_jump_forward must land on Surya B's jump-forward Ardha ` +
+      `Uttanasana breath`,
+  );
+  // The next (flow-less) pose's breaths never carry a voice cue.
+  check(
+    b.filter((s) => s.poseIndex === 1).every((s) => s.voiceCueId === undefined),
+    `flow: the following plain pose must not inherit any voice cue`,
+  );
+}
+
 // --- report ---
 if (failures.length > 0) {
   console.error(`\n=== GUIDED PLAN TESTS FAILED (${failures.length}) ===`);

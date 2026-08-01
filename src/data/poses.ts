@@ -40,7 +40,8 @@
  *
  * === breaths ===
  * Most held asanas = 5 breaths (traditional). Salutation cards carry the whole
- * flow's breath count (Surya A ~9, Surya B ~17 — may be tuned). Longer holds
+ * flow's breath count — the full authentic vinyasa incl. the exit (Surya A = 13,
+ * Surya B = 21). Longer holds
  * (shoulderstand, headstand, savasana) use longer counts. Where a count is
  * genuinely ambiguous, 5 is used as a tunable default (numeric fields are never
  * marked NEEDS VERIFICATION).
@@ -77,13 +78,46 @@ export const poses: Pose[] = [
     category: 'sun_a',
     group: 'salutation',
     order: 10,
-    breaths: 9,
+    // 13 breaths per round — the FULL authentic Surya A vinyasa, exit included.
+    // 5 single lead-in movement breaths + the 5-breath Downward Dog hold + 3
+    // single exit movement breaths (jump forward / fold / rise up to Samasthiti),
+    // which are now COUNTED as breaths rather than folded into the transition
+    // out. `last_breath` fires on the LAST (5th) breath of the Down Dog hold;
+    // `step_jump_forward` fires on the FIRST breath of the jump-forward step (see
+    // its flow entry below). Must equal sum(flow.breaths) below. See flow.
+    breaths: 13,
     sides: 1,
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
     drishti: 'Nasagrai (tip of the nose) — varies through the flow',
     isBasic: true,
+    // Surya A vinyasa = 5 single movement breaths + the 5-breath Down Dog hold +
+    // 3 single exit breaths = 13 breaths. `last_breath` plays on the LAST (5th)
+    // breath of the hold; `step_jump_forward` plays on the FIRST breath of the
+    // jump-forward (Ardha Uttanasana) step as the data-driven breath cue.
+    flow: [
+      { label: 'Urdhva Hastasana', breaths: 1 }, // 1 reach up
+      { label: 'Uttanasana', breaths: 1 }, // 2 fold
+      { label: 'Ardha Uttanasana', breaths: 1 }, // 3 halfway lift
+      { label: 'Chaturanga Dandasana', breaths: 1 }, // 4 jump back
+      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 5 up dog
+      {
+        label: 'Adho Mukha Svanasana', // 6 down dog — the 5-breath hold
+        breaths: 5,
+        hold: true,
+        cueId: 'last_breath',
+        cueOn: 'last',
+      },
+      {
+        label: 'Ardha Uttanasana', // 7 jump forward, halfway lift
+        breaths: 1,
+        cueId: 'step_jump_forward',
+        cueOn: 'first',
+      },
+      { label: 'Uttanasana', breaths: 1 }, // 8 fold
+      { label: 'Urdhva Hastasana', breaths: 1 }, // 9 rise up, to Samasthiti
+    ],
   },
   {
     id: 'surya_namaskara_b',
@@ -93,13 +127,54 @@ export const poses: Pose[] = [
     category: 'sun_b',
     group: 'salutation',
     order: 20,
-    breaths: 17,
+    // 21 breaths per round — the FULL authentic Surya B vinyasa, fully modeled
+    // (both intermediate Down Dogs INCLUDED, exit counted). Must equal
+    // sum(flow.breaths) below. See flow for the exact 21-breath structure.
+    breaths: 21,
     sides: 1,
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
     drishti: 'Nasagrai (tip of the nose) — varies through the flow',
     isBasic: true,
+    // Surya B vinyasa = 16 single movement breaths + the 5-breath FINAL Downward
+    // Dog hold = 21 breaths. This is now the strict canonical B: BOTH
+    // intermediate Down Dogs are present (one after each Warrior A side), the two
+    // Warrior A steps are side-labelled (right / left), and the exit (jump
+    // forward / fold / chair to Samasthiti) is counted as breaths. `last_breath`
+    // plays on the LAST (5th) breath of the final Down Dog hold;
+    // `step_jump_forward` plays on the FIRST breath of the jump-forward (Ardha
+    // Uttanasana) exit step as the data-driven breath cue.
+    flow: [
+      { label: 'Utkatasana', breaths: 1 }, // 1  chair
+      { label: 'Uttanasana', breaths: 1 }, // 2  fold
+      { label: 'Ardha Uttanasana', breaths: 1 }, // 3  halfway lift
+      { label: 'Chaturanga Dandasana', breaths: 1 }, // 4  jump back
+      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 5  up dog
+      { label: 'Adho Mukha Svanasana', breaths: 1 }, // 6  down dog (single)
+      { label: 'Virabhadrasana A (right)', breaths: 1 }, // 7  warrior 1 right
+      { label: 'Chaturanga Dandasana', breaths: 1 }, // 8  jump back
+      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 9  up dog
+      { label: 'Adho Mukha Svanasana', breaths: 1 }, // 10 down dog (intermediate)
+      { label: 'Virabhadrasana A (left)', breaths: 1 }, // 11 warrior 1 left
+      { label: 'Chaturanga Dandasana', breaths: 1 }, // 12 jump back
+      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 13 up dog
+      {
+        label: 'Adho Mukha Svanasana', // 14 final downward dog — the 5-breath hold
+        breaths: 5,
+        hold: true,
+        cueId: 'last_breath',
+        cueOn: 'last',
+      },
+      {
+        label: 'Ardha Uttanasana', // 15 jump forward, halfway lift
+        breaths: 1,
+        cueId: 'step_jump_forward',
+        cueOn: 'first',
+      },
+      { label: 'Uttanasana', breaths: 1 }, // 16 fold
+      { label: 'Utkatasana', breaths: 1 }, // 17 chair, to Samasthiti
+    ],
   },
 
   // ----- Standing sequence -----

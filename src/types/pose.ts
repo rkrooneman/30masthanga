@@ -54,7 +54,47 @@ export type PoseCategory =
  * - `isBasic`       true = a curated root/basic pose included in "Basics only"
  *                   (Smart Start) mode; false = only appears in the full "All
  *                   poses" mode.
+ * - `flow`          Optional ordered vinyasa breakdown of a multi-breath card
+ *                   (currently the two Sun Salutations). When present, the
+ *                   guided player walks the `flow` instead of emitting `breaths`
+ *                   identical breaths, so it can show the current sub-pose name
+ *                   on screen and fire prerecorded voice cues at exact breaths.
+ *                   INVARIANT: the sum of the flow's `breaths` MUST equal the
+ *                   card's `breaths` (enforced by validate-poses.ts) so the
+ *                   timing budget is unchanged. Cards WITHOUT a `flow` behave
+ *                   exactly as before.
  */
+
+/**
+ * One movement (or hold) within a salutation's vinyasa `flow`.
+ *
+ * Each entry lasts `breaths` breaths: 1 for a single movement, 5 for the
+ * Downward Dog hold. At most a handful of entries carry a voice cue; the rest
+ * are silent (breath-timed only). Every entry has a `label` shown on screen
+ * during that step (Sanskrit sub-pose name, matching the app's Sanskrit-primary
+ * styling).
+ *
+ * Field guide:
+ * - `label`   Sub-pose name shown on screen during this step, e.g.
+ *             "Adho Mukha Svanasana". Sanskrit for consistency with the app.
+ * - `breaths` How many breaths this step lasts (1 for a movement, 5 for the
+ *             Down Dog hold). The on-screen "Breath N of M" counts within the
+ *             step, so the hold reads "Breath 1..5 of 5".
+ * - `hold`    true for the multi-breath Downward Dog hold (informational).
+ * - `cueId`   Voice clip id to play during this step, e.g. `'last_breath'`.
+ *             Omitted for silent steps. Maps to `/audio/voice/<cueId>.mp3`.
+ * - `cueOn`   Which breath of the step fires `cueId`: `'last'` plays it on the
+ *             LAST breath (used for `last_breath` on the Down Dog's 5th breath);
+ *             `'first'` plays it on the first breath.
+ */
+export interface FlowStep {
+  label: string;
+  breaths: number;
+  hold?: boolean;
+  cueId?: string;
+  cueOn?: 'first' | 'last';
+}
+
 export interface Pose {
   id: string;
   sanskrit: string;
@@ -70,4 +110,9 @@ export interface Pose {
   selectable: boolean;
   drishti: string;
   isBasic: boolean;
+  /**
+   * Optional vinyasa breakdown (see FlowStep). Present on the two Sun
+   * Salutations. When set, sum(flow[].breaths) === breaths (validated).
+   */
+  flow?: FlowStep[];
 }

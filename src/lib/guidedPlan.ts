@@ -46,6 +46,32 @@
  *
  * The unit test asserts this exact delta from the catalog. Everything here is
  * PURE so it stays fully unit-testable.
+ *
+ * === salutation vinyasa flows (voice cues + sub-pose labels) ===
+ * A pose MAY carry an ordered `flow` (see FlowStep) — currently the two Sun
+ * Salutations. When it does, each SEGMENT (round) is expanded by walking the
+ * flow rather than emitting `pose.breaths` identical breaths:
+ *   - each flow step contributes its own `breaths` BreathSteps, tagged with
+ *     `subPoseLabel = flowStep.label` so the guided screen can show the current
+ *     sub-pose ("Adho Mukha Svanasana") instead of just "Surya Namaskara A";
+ *   - `breathNumber`/`breathCount` count WITHIN the flow step, so the Down Dog
+ *     hold reads "Breath 1..5 of 5" (chosen for a meaningful on-screen counter
+ *     during the hold — this is the ONLY behavioural change to those fields, and
+ *     only for flow poses; non-flow poses keep whole-segment counts);
+ *   - a flow step's `cueId` is placed on the FIRST or LAST breath of that step
+ *     per `cueOn`, as `BreathStep.voiceCueId`, to fire a prerecorded clip at
+ *     that exact breath (used for `last_breath` on the Down Dog's 5th breath).
+ *
+ * The `step_jump_forward` cue is a data-driven BREATH cue: the salutation flow
+ * places it on the jump-forward (Ardha Uttanasana) exit step with
+ * `cueOn: 'first'`, so `emitSegmentBreaths` tags it onto the FIRST breath of
+ * that step (like any other flow-step cue). It therefore fires once per round,
+ * on the jump-forward breath itself, rather than on a TransitionStep. No
+ * transition carries a voice cue.
+ *
+ * Because sum(flow.breaths) === pose.breaths (validated in validate-poses.ts),
+ * the breath COUNT per segment is unchanged, so `totalMs` and the timing.ts
+ * reconciliation identity are entirely unaffected by the flow expansion.
  */
 
 import type { Pose } from '../types/pose';
@@ -66,14 +92,34 @@ export interface BreathStep {
   segmentCount: number;
   /** Human label for the segment, e.g. "First side", "Round 2 of 3", or null. */
   segmentLabel: string | null;
-  /** 1-based breath number within the segment. */
+  /**
+   * 1-based breath number. For a flow pose this counts WITHIN the current flow
+   * step (so the Down Dog hold reads 1..5); otherwise it counts within the
+   * whole segment.
+   */
   breathNumber: number;
-  /** Total breaths in the segment (= pose.breaths). */
+  /**
+   * Total breaths for the counter. For a flow pose this is the current flow
+   * step's `breaths` (5 for the Down Dog hold); otherwise it is `pose.breaths`.
+   */
   breathCount: number;
   /** Inhale duration in ms (breathSeconds / 2 * 1000). */
   inhaleMs: number;
   /** Exhale duration in ms (breathSeconds / 2 * 1000). */
   exhaleMs: number;
+  /**
+   * For a flow (salutation) pose: the current flow step's label, shown on
+   * screen as the sub-pose name (e.g. "Adho Mukha Svanasana"). Undefined for
+   * non-flow poses.
+   */
+  subPoseLabel?: string;
+  /**
+   * A prerecorded voice cue id to play WHEN this breath begins (maps to
+   * `/audio/voice/<id>.mp3`). Set on the flow step's cue breath (per `cueOn`) —
+   * e.g. `'last_breath'` on the Down Dog's 5th breath. Undefined for silent
+   * breaths.
+   */
+  voiceCueId?: string;
 }
 
 /** A countdown gap shown before entering the next segment/pose. */
@@ -165,11 +211,88 @@ function cueFor(
 }
 
 /**
+ * Emit the BreathSteps for ONE segment (round) of a pose.
+ *
+ * - If the pose has a `flow`, walk it: each flow step contributes its own
+ *   `breaths` BreathSteps, with `subPoseLabel` set to the step's label,
+ *   per-flow-step `breathNumber`/`breathCount`, and the step's `cueId` placed on
+ *   the first or last breath per `cueOn` (`voiceCueId`) — e.g. `last_breath` on
+ *   the Down Dog hold's last breath and `step_jump_forward` on the jump-forward
+ *   step's first breath.
+ * - Otherwise, emit `pose.breaths` plain BreathSteps with whole-segment
+ *   `breathNumber`/`breathCount` (unchanged legacy behaviour).
+ *
+ * Returns the added milliseconds so the caller can keep `totalMs` exact.
+ */
+function emitSegmentBreaths(
+  steps: GuidedStep[],
+  pose: Pose,
+  poseIndex: number,
+  segmentIndex: number,
+  segmentCount: number,
+  segmentLabel: string | null,
+  halfMs: number,
+): number {
+  let addedMs = 0;
+
+  const pushBreath = (
+    breathNumber: number,
+    breathCount: number,
+    extras: Pick<BreathStep, 'subPoseLabel' | 'voiceCueId'>,
+  ): void => {
+    steps.push({
+      kind: 'breath',
+      poseIndex,
+      pose,
+      segmentIndex,
+      segmentCount,
+      segmentLabel,
+      breathNumber,
+      breathCount,
+      inhaleMs: halfMs,
+      exhaleMs: halfMs,
+      ...extras,
+    });
+    addedMs += halfMs * 2;
+  };
+
+  if (pose.flow && pose.flow.length > 0) {
+    // Flow-driven expansion: per-flow-step counts so a hold reads "N of 5".
+    for (const flowStep of pose.flow) {
+      for (let b = 1; b <= flowStep.breaths; b++) {
+        const isCueBreath =
+          flowStep.cueId !== undefined &&
+          (flowStep.cueOn === 'first'
+            ? b === 1
+            : // default / 'last' → last breath of the step
+              b === flowStep.breaths);
+        pushBreath(b, flowStep.breaths, {
+          subPoseLabel: flowStep.label,
+          voiceCueId: isCueBreath ? flowStep.cueId : undefined,
+        });
+      }
+    }
+    return addedMs;
+  }
+
+  // Legacy expansion: flat, whole-segment counts.
+  for (let breath = 1; breath <= pose.breaths; breath++) {
+    pushBreath(breath, pose.breaths, {});
+  }
+  return addedMs;
+}
+
+/**
  * Build the flat guided timeline for a sequence at a given breath pace.
  *
  * Emits, per pose, `sides * repeat` segments of `breaths` breaths, with a
  * `TransitionStep` before every segment EXCEPT the very first segment of the
  * whole practice. `totalMs` is the exact sum of every step's duration.
+ *
+ * Salutation poses carry a `flow`; those segments are expanded via
+ * `emitSegmentBreaths` (sub-pose labels + per-breath voice cues, including
+ * `step_jump_forward` on the jump-forward exit breath). Transitions never carry
+ * a voice cue.
  */
 export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPlan {
   const halfMs = (breathSeconds / 2) * 1000;
@@ -200,6 +323,9 @@ export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPla
           pose,
           samePose,
         );
+        // Transitions carry no voice cue: the `step_jump_forward` cue is now a
+        // data-driven breath cue on the salutation's jump-forward flow step (see
+        // emitSegmentBreaths), not a transition cue.
         const transition: TransitionStep = {
           kind: 'transition',
           seconds,
@@ -216,22 +342,15 @@ export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPla
 
       const segmentLabel = segmentLabelFor(pose, segmentIndex);
 
-      for (let breath = 1; breath <= pose.breaths; breath++) {
-        const step: BreathStep = {
-          kind: 'breath',
-          poseIndex,
-          pose,
-          segmentIndex,
-          segmentCount,
-          segmentLabel,
-          breathNumber: breath,
-          breathCount: pose.breaths,
-          inhaleMs: halfMs,
-          exhaleMs: halfMs,
-        };
-        steps.push(step);
-        totalMs += halfMs * 2;
-      }
+      totalMs += emitSegmentBreaths(
+        steps,
+        pose,
+        poseIndex,
+        segmentIndex,
+        segmentCount,
+        segmentLabel,
+        halfMs,
+      );
     }
   }
 

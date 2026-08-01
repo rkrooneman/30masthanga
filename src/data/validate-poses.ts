@@ -78,6 +78,47 @@ for (const p of poses) {
   }
 }
 
+// --- flow: if a pose carries a vinyasa `flow`, its breaths must sum to the
+// card's `breaths` so the timing budget (poseHoldSeconds / sequenceDuration) is
+// unaffected by the flow expansion. Also sanity-check each flow step's fields. ---
+for (const p of poses) {
+  if (!p.flow) continue;
+  if (p.flow.length === 0) {
+    errors.push(`Pose "${p.id}" has an empty flow array`);
+    continue;
+  }
+  let flowBreaths = 0;
+  for (const [i, step] of p.flow.entries()) {
+    if (!step.label || step.label.trim() === '') {
+      errors.push(`Pose "${p.id}" flow[${i}] has an empty label`);
+    }
+    if (!Number.isInteger(step.breaths) || step.breaths <= 0) {
+      errors.push(
+        `Pose "${p.id}" flow[${i}] breaths must be a positive integer ` +
+          `(got ${step.breaths})`,
+      );
+    } else {
+      flowBreaths += step.breaths;
+    }
+    if (
+      step.cueOn !== undefined &&
+      step.cueOn !== 'first' &&
+      step.cueOn !== 'last'
+    ) {
+      errors.push(
+        `Pose "${p.id}" flow[${i}] cueOn must be 'first' or 'last' ` +
+          `(got ${String(step.cueOn)})`,
+      );
+    }
+  }
+  if (flowBreaths !== p.breaths) {
+    errors.push(
+      `Pose "${p.id}" flow breaths sum (${flowBreaths}) must equal ` +
+        `pose.breaths (${p.breaths})`,
+    );
+  }
+}
+
 // --- repeat: a known set of poses are repeated in traditional Ashtanga, each
 // with its own expected count. The two Sun Salutations (x3), plus Navasana
 // (Boat, x5) and Setu Bandhasana (Bridge, x3). Every other pose must be x1. ---

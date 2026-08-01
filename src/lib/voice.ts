@@ -154,6 +154,22 @@ export function speakSwitchSides(): void {
 }
 
 /**
+ * Play an arbitrary prerecorded voice cue by its clip id (maps to
+ * `/audio/voice/<cueId>.mp3`), with the same toggle-guarding, ducking, and
+ * stop-tracking as the other speak* functions. No-op unless both sound and
+ * voice are on.
+ *
+ * Used by the guided player for the salutation vinyasa cues: `'last_breath'`
+ * (on the Down Dog hold's final breath) and `'step_jump_forward'` (on the
+ * jump-forward (Ardha Uttanasana) exit step's first breath). The clip files must
+ * exist under `public/audio/voice/`; a missing clip simply stays silent
+ * (best-effort).
+ */
+export function speakCue(cueId: string): void {
+  playClip(voiceSrc(cueId));
+}
+
+/**
  * Hard-stop any voice clip currently playing: pause it, detach its handlers,
  * and release the duck it holds so the background music is not left dipped.
  *

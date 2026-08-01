@@ -36,6 +36,16 @@ import type { Pose } from '../types/pose';
 /** Same pose, other side / next round of the same card. */
 export const TRANSITION_SAME_POSE_SECONDS = 1;
 
+/**
+ * Between rounds of a SALUTATION (a pose with a `flow`). The exit choreography
+ * (jump forward, fold, rise up / chair to Samasthiti) is now a COUNTED breath
+ * step at the END of each flow, so by the time a round finishes the practitioner
+ * is already standing at the front of the mat. The between-round gap is
+ * therefore just a short settling pause before the next round's lead-in, not the
+ * whole exit-and-restart — 3s, the same as the medium in-section gap.
+ */
+export const TRANSITION_SALUTATION_ROUND_SECONDS = 3;
+
 /** New pose, same display section (similar or same-section-different-group). */
 export const TRANSITION_SIMILAR_SECONDS = 3;
 
@@ -101,11 +111,14 @@ export function displaySection(pose: Pose): string {
  * consecutive poses, used by BOTH the guided plan and the generator budget.
  *
  * Rules, in order:
- *   1. `samePose` true  → the same card, other side / next round → 1s
+ *   1. `samePose` true and the pose is a SALUTATION (has a `flow`) → a short
+ *      settling pause between rounds (the exit is a counted breath step) → 3s
+ *      (`TRANSITION_SALUTATION_ROUND_SECONDS`).
+ *   2. `samePose` true otherwise → the same card, other side / next round → 1s
  *      (`TRANSITION_SAME_POSE_SECONDS`).
- *   2. Different display section → a big change → 8s
+ *   3. Different display section → a big change → 8s
  *      (`TRANSITION_SECTION_CHANGE_SECONDS`).
- *   3. Otherwise (a new pose within the same section, whether the same `group`
+ *   4. Otherwise (a new pose within the same section, whether the same `group`
  *      "similar" or a different group) → 3s (`TRANSITION_SIMILAR_SECONDS`).
  *
  * Note Sun A → Sun B are both section 'sun', so they get the 3s in-section gap.
@@ -115,7 +128,13 @@ export function transitionSecondsBetween(
   nextPose: Pose,
   samePose: boolean,
 ): number {
-  if (samePose) return TRANSITION_SAME_POSE_SECONDS;
+  if (samePose) {
+    // A salutation round repeat is just a short settling pause: the exit
+    // choreography is now a counted breath step at the end of the flow.
+    return prevPose.flow && prevPose.flow.length > 0
+      ? TRANSITION_SALUTATION_ROUND_SECONDS
+      : TRANSITION_SAME_POSE_SECONDS;
+  }
   if (displaySection(prevPose) !== displaySection(nextPose)) {
     return TRANSITION_SECTION_CHANGE_SECONDS;
   }
@@ -136,17 +155,23 @@ export function transitionSecondsBetween(
  * Internal repeat transitions: a card performed `repeat` times is `repeat`
  * back-to-back flows with a transition gap BETWEEN each pair — i.e.
  * (repeat - 1) gaps. Those gaps are SAME-pose repeats (next round of the same
- * card), so they cost `TRANSITION_SAME_POSE_SECONDS` (1s) each under the
- * variable transition model — NOT the between-pose rate. That internal
- * transition time is folded into this card's total here (e.g. Sun A ×3 = 3
- * flows + 2 internal 1s gaps). The between-card gap that follows this card is
- * NOT included here — `sequenceDurationSeconds` adds the (n-1) between-card gaps
- * separately (via `transitionSecondsBetween`), so there is no double counting.
+ * card): a normal card's cost `TRANSITION_SAME_POSE_SECONDS` (1s) each, but a
+ * SALUTATION round repeat costs `TRANSITION_SALUTATION_ROUND_SECONDS` (3s) each
+ * — a short settling pause between rounds (the exit is a counted breath step) —
+ * the same per-round rate the guided plan uses, so the two stay reconciled. That
+ * internal transition time is folded into this card's total here (e.g. Sun A ×3
+ * = 3 flows + 2 internal 3s gaps). The between-card gap that follows this card
+ * is NOT included here —
+ * `sequenceDurationSeconds` adds the (n-1) between-card gaps separately (via
+ * `transitionSecondsBetween`), so there is no double counting.
  */
 export function poseHoldSeconds(pose: Pose, breathSeconds: number): number {
   const hold = pose.breaths * pose.sides * pose.repeat * breathSeconds;
-  const internalTransitions =
-    (pose.repeat - 1) * TRANSITION_SAME_POSE_SECONDS;
+  const isSalutationFlow = Boolean(pose.flow && pose.flow.length > 0);
+  const perRoundGap = isSalutationFlow
+    ? TRANSITION_SALUTATION_ROUND_SECONDS
+    : TRANSITION_SAME_POSE_SECONDS;
+  const internalTransitions = (pose.repeat - 1) * perRoundGap;
   return hold + internalTransitions;
 }
 
