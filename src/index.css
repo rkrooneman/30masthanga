@@ -248,10 +248,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
+  gap: 2rem;
   min-height: calc(100vh - var(--space-page-vertical));
   justify-content: center;
   text-align: center;
+  /* Reserve room for the absolutely-positioned footer (copyright) at the bottom
+     so the vertically-centred content never overlaps it as the Home content
+     grows (practice week, toggles, Generate button). */
+  padding-bottom: 2rem;
 }
 
 /* Info button — small, subtle, calm. Sits in the top corner of the Home
