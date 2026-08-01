@@ -8,7 +8,7 @@
  * for real screens without touching this wiring.
  */
 
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import type { Screen } from './types/navigation';
 import type { GeneratedPractice } from './lib/generatePractice';
 import { poses } from './data/poses';
@@ -24,11 +24,17 @@ import {
 } from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
-import GuidedScreen from './screens/GuidedScreen';
 import MusicPanel from './components/MusicPanel';
 // DEV-ONLY (pose-icon contact sheet): reached via the `?pilot` query string.
 // Gated behind import.meta.env.DEV so it is tree-shaken out of production.
 import PosePilot from './components/poses/PosePilot';
+
+// GuidedScreen is heavy (buildGuidedPlan, BreathingCircle, PoseGraphic + its 58
+// pose-icon SVGs, voice/chime, etc.) and is only needed once a practice starts
+// (screen === 'guided', or the DEV-only `?complete` hatch). Lazy-loading it lets
+// vite/rollup split it into its own chunk so Home/Overview don't pay for it up
+// front. It has a default export, which React.lazy requires.
+const GuidedScreen = lazy(() => import('./screens/GuidedScreen'));
 
 // DEV-ONLY seed guard: ensures the `?seedweek` hatch seeds the practice log at
 // most once per page load (module scope survives re-renders, unlike a ref that
@@ -152,13 +158,29 @@ function App() {
       <main className="app">
         <MusicPanel />
         <div className="app__container">
-          <GuidedScreen
-            practice={devPractice}
-            breathSeconds={breathSeconds}
-            onExit={handleBackHome}
-            onComplete={handleBackHome}
-            startComplete
-          />
+          {/*
+            GuidedScreen is lazy-loaded (its own chunk). The Suspense fallback is
+            a quiet, empty guided-player screen — matching the guided layout so
+            there's no jarring flash of text while the chunk resolves (near-instant
+            from the same origin on a warm cache). aria-busy announces the wait.
+          */}
+          <Suspense
+            fallback={
+              <section
+                className="screen guided-player"
+                aria-busy="true"
+                aria-label="Loading practice"
+              />
+            }
+          >
+            <GuidedScreen
+              practice={devPractice}
+              breathSeconds={breathSeconds}
+              onExit={handleBackHome}
+              onComplete={handleBackHome}
+              startComplete
+            />
+          </Suspense>
         </div>
       </main>
     );
@@ -197,12 +219,25 @@ function App() {
         )}
 
         {screen === 'guided' && practice && (
-          <GuidedScreen
-            practice={practice}
-            breathSeconds={breathSeconds}
-            onExit={handleBackOverview}
-            onComplete={handleBackHome}
-          />
+          // GuidedScreen is lazy-loaded; the Suspense fallback is a quiet, empty
+          // guided-player screen matching the guided layout (no text flash) while
+          // its chunk resolves. aria-busy announces the brief wait.
+          <Suspense
+            fallback={
+              <section
+                className="screen guided-player"
+                aria-busy="true"
+                aria-label="Loading practice"
+              />
+            }
+          >
+            <GuidedScreen
+              practice={practice}
+              breathSeconds={breathSeconds}
+              onExit={handleBackOverview}
+              onComplete={handleBackHome}
+            />
+          </Suspense>
         )}
       </div>
     </main>
