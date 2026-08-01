@@ -15,6 +15,7 @@ import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
 import { swapPose } from './lib/swapPose';
 import { seedFakePractice } from './lib/practiceLog';
+import { requestAmbientPlay } from './lib/ambientPref';
 import {
   loadBreathSeconds,
   saveBreathSeconds,
@@ -86,6 +87,10 @@ function App() {
 
   // Generate a real (randomised) practice and advance to the overview.
   const handleGenerate = (pace: number) => {
+    // This tap is a genuine user gesture — use it to start ambient sound if the
+    // preference is enabled, since the initial autoplay on load was blocked and
+    // this may be the user's first interaction. No-op when ambient is disabled.
+    requestAmbientPlay();
     const generated = generatePractice(poses, {
       breathSeconds: pace,
       basicsOnly,
@@ -132,7 +137,13 @@ function App() {
 
   const handleBackHome = () => setScreen('home');
   const handleBackOverview = () => setScreen('overview');
-  const handleStartGuided = () => setScreen('guided');
+  const handleStartGuided = () => {
+    // Also a genuine gesture: ensure ambient is playing (if enabled) by the time
+    // the guided run begins, in case the user reached here without an earlier tap
+    // that started it.
+    requestAmbientPlay();
+    setScreen('guided');
+  };
 
   // DEV-ONLY: render the Guided completion screen directly for `/?complete`,
   // inside the normal app shell (so the MusicPanel + container styling apply).

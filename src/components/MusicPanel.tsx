@@ -46,7 +46,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { TRACKS } from '../lib/music';
 import { subscribeDuck } from '../lib/audioBus';
-import { subscribeAmbient } from '../lib/ambientPref';
+import {
+  subscribeAmbient,
+  subscribeAmbientPlayRequest,
+} from '../lib/ambientPref';
 
 /** Volume while ducked (ambient dipped so a cue can be heard over it). */
 const DUCK_VOLUME = 0.15;
@@ -153,8 +156,18 @@ function MusicPanel() {
       }
     });
 
+    // Explicit play requests fired from real user gestures (Generate / Start
+    // practice). This is the reliable path when the preference is already enabled
+    // on load with no prior interaction: the initial autoplay is blocked, and the
+    // user's first tap must start playback. Calling play() synchronously inside
+    // that gesture-driven request satisfies the browser's autoplay policy.
+    const unsubscribePlayRequest = subscribeAmbientPlayRequest(() => {
+      if (enabledRef.current && audio.paused) tryPlay();
+    });
+
     return () => {
       unsubscribe();
+      unsubscribePlayRequest();
       clearGestureRetry();
     };
   }, []);
