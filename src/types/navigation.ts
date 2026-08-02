@@ -22,33 +22,55 @@ export interface HomeScreenProps {
   onGenerate: (breathSeconds: number) => void;
 }
 
-/** Props for the Overview screen (Slice 4 replaces the placeholder body). */
+/** Props for the Overview screen (a user-editable selection over the catalog). */
 export interface OverviewScreenProps {
-  /** The generated practice to preview. */
+  /**
+   * The DERIVED practice — every catalog pose currently selected, in canonical
+   * order, with a recomputed total. Flows to the guided run and the totals.
+   */
   practice: GeneratedPractice;
   /** The breath pace this practice was generated at. */
   breathSeconds: number;
+  /**
+   * The set of currently-selected pose ids. The Overview renders the WHOLE
+   * catalog; poses whose id is in this set are "in" the practice (checked +
+   * normal), the rest are dimmed. Fixed-frame poses are always in the set.
+   */
+  selectedIds: ReadonlySet<string>;
+  /**
+   * Toggle a pose in/out of the selection. The shell ignores fixed-frame poses
+   * (they can never be unchecked) and rebuilds the derived practice.
+   */
+  onToggleSelected: (poseId: string) => void;
   /** Return to the Home screen. */
   onBack: () => void;
   /** Advance to the Guided screen. */
   onStartGuided: () => void;
-  /** Generate a fresh practice at the same breath pace. */
+  /**
+   * Wipe the current selection and generate a fresh <=30-min set (New
+   * sequence). Also turns "Full series" off.
+   */
   onRegenerate: () => void;
   /**
-   * Swap the given pose out of the practice for a valid same-category
-   * alternative (see swapPose). No-op if the pose is fixed or has no candidate.
-   */
-  onSwapPose: (poseId: string) => void;
-  /**
-   * Whether "Basics only" (Smart Start) mode is active. Drives the header
-   * switch and is threaded down so swap candidacy matches the current mode.
+   * Whether "Basics only" (Smart Start) mode is active. Drives the toggle;
+   * mutually exclusive with "Full series".
    */
   basicsOnly: boolean;
   /**
    * Toggle "Basics only" mode. The shell persists the choice and regenerates
-   * the current practice in the new mode.
+   * the current practice in the new mode (turning "Full series" off).
    */
   onToggleBasics: (next: boolean) => void;
+  /**
+   * Whether "Full series" mode is active (every catalog pose selected). Drives
+   * the toggle; mutually exclusive with "Basics only".
+   */
+  fullSeries: boolean;
+  /**
+   * Toggle "Full series" mode. ON selects every catalog pose (and turns Basics
+   * off); OFF regenerates a fresh <=30-min set. The shell persists the choice.
+   */
+  onToggleFullSeries: (next: boolean) => void;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */

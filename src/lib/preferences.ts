@@ -19,6 +19,7 @@ const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
 const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
 const BREATH_CUES_ENABLED_KEY = 'ashtanga30.breathCuesEnabled';
 const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
+const FULL_SERIES_KEY = 'ashtanga30.fullSeries';
 
 /**
  * Load the saved breath pace, clamped to the valid slider range. Returns the
@@ -151,6 +152,31 @@ export function loadBasicsOnly(): boolean {
 export function saveBasicsOnly(enabled: boolean): void {
   try {
     window.localStorage.setItem(BASICS_ONLY_KEY, enabled ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Whether "Full series" mode is enabled. Full series selects EVERY catalog pose
+ * on the Overview (the practitioner can still uncheck individual non-fixed poses
+ * to customise). Defaults to false (OFF); only an explicit stored "1" enables
+ * it. Mutually exclusive with "Basics only" in the UI, but the two are stored
+ * independently — the exclusion is enforced by the shell's toggle handlers, not
+ * here. Safe on storage failure.
+ */
+export function loadFullSeriesEnabled(): boolean {
+  try {
+    return window.localStorage.getItem(FULL_SERIES_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Persist the full-series preference. Silently no-ops on storage failure. */
+export function saveFullSeriesEnabled(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(FULL_SERIES_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
   }

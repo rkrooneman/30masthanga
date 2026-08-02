@@ -8,12 +8,11 @@
  * for real screens without touching this wiring.
  */
 
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import type { Screen } from './types/navigation';
-import type { GeneratedPractice } from './lib/generatePractice';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
-import { swapPose } from './lib/swapPose';
+import { buildSelectedPractice } from './lib/selectedPractice';
 import { seedFakePractice } from './lib/practiceLog';
 import { requestAmbientPlay } from './lib/ambientPref';
 import {
@@ -21,6 +20,8 @@ import {
   saveBreathSeconds,
   loadBasicsOnly,
   saveBasicsOnly,
+  loadFullSeriesEnabled,
+  saveFullSeriesEnabled,
 } from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
@@ -43,11 +44,40 @@ let seedWeekApplied = false;
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
-  const [practice, setPractice] = useState<GeneratedPractice | null>(null);
+  // The practice is a user-editable SELECTION over the full catalog: a Set of
+  // selected pose ids. The generator seeds it (its chosen poses = initially
+  // checked); toggling a card adds/removes an id. `null` means "not generated
+  // yet" (Home hasn't handed off a practice). The fixed frame (alwaysInclude)
+  // is always present in the set and can never be unchecked. The DERIVED
+  // practice (poses in canonical order + recomputed total) is memoised below.
+  const [selectedIds, setSelectedIds] = useState<Set<string> | null>(null);
   // Breath pace is remembered across visits (persisted to localStorage).
   const [breathSeconds, setBreathSeconds] = useState<number>(loadBreathSeconds);
   // "Basics only" (Smart Start) mode, also remembered across visits.
   const [basicsOnly, setBasicsOnly] = useState<boolean>(loadBasicsOnly);
+  // "Full series" mode (every catalog pose selected), remembered across visits.
+  // Mutually exclusive with "Basics only" (enforced by the toggle handlers).
+  const [fullSeries, setFullSeries] = useState<boolean>(loadFullSeriesEnabled);
+
+  // The fixed frame — poses that must always be included and are NOT toggleable
+  // (Sun Salutations A/B, Shoulderstand, Savasana). Derived once from the
+  // catalog; used to seed selections and to guard the toggle handler.
+  const fixedFrameIds = useMemo(
+    () => new Set(poses.filter((p) => p.alwaysInclude).map((p) => p.id)),
+    [],
+  );
+
+  // The DERIVED practice the Overview + Guided run consume: all catalog poses
+  // whose id is in the selection, in canonical order, with a recomputed total
+  // (no 30-min ceiling — a manual selection may exceed it, shown honestly).
+  // Null until Home generates the first practice.
+  const practice = useMemo(
+    () =>
+      selectedIds
+        ? buildSelectedPractice(poses, selectedIds, breathSeconds)
+        : null,
+    [selectedIds, breathSeconds],
+  );
 
   // DEV-ONLY pilot escape hatch: visiting `/?pilot` renders the pose-icon
   // contact sheet instead of the normal app. Computed after hooks (Rules of
@@ -91,54 +121,80 @@ function App() {
     saveBreathSeconds(pace);
   };
 
+  // Seed the selection from a freshly generated <=30-min practice: the
+  // generator's chosen poses become the initially-checked set (the fixed frame
+  // is included among them). Also clears "Full series" (persisted): a generated
+  // set is capped at 30 min, so Full series can no longer be on.
+  const seedFromGenerated = (pace: number, basics: boolean) => {
+    const generated = generatePractice(poses, {
+      breathSeconds: pace,
+      basicsOnly: basics,
+    });
+    setSelectedIds(new Set(generated.poses.map((p) => p.id)));
+    setFullSeries(false);
+    saveFullSeriesEnabled(false);
+  };
+
   // Generate a real (randomised) practice and advance to the overview.
   const handleGenerate = (pace: number) => {
     // This tap is a genuine user gesture — use it to start ambient sound if the
     // preference is enabled, since the initial autoplay on load was blocked and
     // this may be the user's first interaction. No-op when ambient is disabled.
     requestAmbientPlay();
-    const generated = generatePractice(poses, {
-      breathSeconds: pace,
-      basicsOnly,
-    });
-    setPractice(generated);
+    seedFromGenerated(pace, basicsOnly);
     setBreathSeconds(pace);
     saveBreathSeconds(pace);
     setScreen('overview');
   };
 
-  // Regenerate a fresh practice at the same breath pace (from the Overview map).
+  // "New sequence": wipe the current selection and generate a fresh <=30-min set
+  // at the same breath pace (re-seeding the selected set), turning Full series
+  // off. Manual customisation is discarded — this is a clean regenerate.
   const handleRegenerate = () => {
-    setPractice(generatePractice(poses, { breathSeconds, basicsOnly }));
+    seedFromGenerated(breathSeconds, basicsOnly);
   };
 
-  // Swap one pose in the current practice for a valid same-category alternative.
-  // Lives here (the practice owner) so the swapped sequence flows to BOTH the
-  // Overview (map + carousel) and the Guided run. A null result (fixed pose or
-  // no fitting candidate) leaves the practice untouched — the UI disables the
-  // control in those cases, so this is a defensive no-op.
-  const handleSwapPose = (poseId: string) => {
-    setPractice((prev) => {
-      if (!prev) return prev;
-      const result = swapPose(prev.poses, prev.breathSeconds, poseId, {
-        basicsOnly,
-      });
-      if (!result) return prev;
-      return {
-        poses: result.poses,
-        totalSeconds: result.totalSeconds,
-        breathSeconds: prev.breathSeconds,
-      };
+  // Toggle a single pose in/out of the selection. Fixed-frame poses are never
+  // toggleable (the checkbox is locked in the UI); guarded here defensively so a
+  // stray call can never remove Savasana / Shoulderstand / the Salutations.
+  const handleToggleSelected = (poseId: string) => {
+    if (fixedFrameIds.has(poseId)) return;
+    setSelectedIds((prev) => {
+      const base = prev ?? new Set<string>();
+      const next = new Set(base);
+      if (next.has(poseId)) next.delete(poseId);
+      else next.add(poseId);
+      return next;
     });
   };
 
-  // Toggle "Basics only" mode: remember the choice and immediately rebuild the
-  // current practice in the new mode so the Overview reflects it right away.
-  // Uses `next` (not the state, which updates asynchronously) for the rebuild.
+  // Toggle "Basics only" mode: remember the choice and re-seed the selection
+  // from a fresh generated set in the new mode, so the Overview reflects it
+  // right away. Mutually exclusive with Full series — seedFromGenerated turns
+  // Full series off. Uses `next` (not the async state) for the rebuild.
   const handleToggleBasics = (next: boolean) => {
     setBasicsOnly(next);
     saveBasicsOnly(next);
-    setPractice(generatePractice(poses, { breathSeconds, basicsOnly: next }));
+    seedFromGenerated(breathSeconds, next);
+  };
+
+  // Toggle "Full series" mode.
+  //   ON  → select EVERY catalog pose (Basics off, both persisted). The user can
+  //         still uncheck individual non-fixed poses on the Overview.
+  //   OFF → regenerate a fresh <=30-min set (consistent with New sequence).
+  // Persisted either way. Kept mutually exclusive with Basics.
+  const handleToggleFullSeries = (next: boolean) => {
+    setFullSeries(next);
+    saveFullSeriesEnabled(next);
+    if (next) {
+      setBasicsOnly(false);
+      saveBasicsOnly(false);
+      setSelectedIds(new Set(poses.map((p) => p.id)));
+    } else {
+      // Regenerate a fresh <=30-min set. seedFromGenerated also clears Full
+      // series (already false here) — harmless and keeps the invariant.
+      seedFromGenerated(breathSeconds, basicsOnly);
+    }
   };
 
   const handleBackHome = () => setScreen('home');
@@ -205,16 +261,19 @@ function App() {
           />
         )}
 
-        {screen === 'overview' && practice && (
+        {screen === 'overview' && practice && selectedIds && (
           <OverviewScreen
             practice={practice}
             breathSeconds={breathSeconds}
+            selectedIds={selectedIds}
+            onToggleSelected={handleToggleSelected}
             onBack={handleBackHome}
             onStartGuided={handleStartGuided}
             onRegenerate={handleRegenerate}
-            onSwapPose={handleSwapPose}
             basicsOnly={basicsOnly}
             onToggleBasics={handleToggleBasics}
+            fullSeries={fullSeries}
+            onToggleFullSeries={handleToggleFullSeries}
           />
         )}
 

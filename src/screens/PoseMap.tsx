@@ -1,29 +1,41 @@
 /**
- * PoseMap — the Overview MAP landing (a scannable grid of the whole practice).
+ * PoseMap — the Overview MAP landing (a scannable, EDITABLE grid of the whole
+ * catalog).
  *
- * Replaces the carousel as the FIRST thing the practitioner sees. The generated
- * practice is laid out as a grid of pose thumbnails, grouped into the familiar
- * Primary Series sections (Sun Salutations / Standing / Seated / Closing /
- * Rest). Tapping a thumbnail opens the DETAIL carousel (PoseCarousel) at that
- * pose's index. A persistent "Start practice" button advances to the guided run.
+ * The practice is a user-editable SELECTION over the full catalog. This map
+ * lays out EVERY pose grouped into the familiar Primary Series sections (Sun
+ * Salutations / Standing / Seated / Closing / Rest). Each pose card carries a
+ * CHECKBOX toggling it in/out of the practice:
+ *   - SELECTED poses render normally;
+ *   - UNSELECTED poses render DIMMED (`pose-map__cell--inactive`) — clearly an
+ *     inactive state;
+ *   - FIXED-FRAME poses (`alwaysInclude`: Sun Salutations, Shoulderstand,
+ *     Savasana) render with the checkbox checked AND disabled (locked) so the
+ *     practitioner can never build an unsafe practice.
+ * Tapping a card's body still opens the DETAIL carousel (PoseCarousel) at that
+ * pose's catalog index; the checkbox is a SEPARATE, sibling tap target (not
+ * nested in the open button, which would be invalid HTML). A persistent "Start
+ * practice" button advances to the guided run.
  *
- * Grouping: poses arrive in canonical `order`, and each catalog category sits in
- * a contiguous canonical block, so mapping each pose's `category` to a display
- * section and grouping CONSECUTIVE poses by that mapped section preserves order
- * both within and across sections. Only sections with ≥1 pose are rendered.
+ * Grouping: the catalog is in canonical `order`, and each category sits in a
+ * contiguous canonical block, so mapping each pose's `category` to a display
+ * section and grouping poses by that mapped section preserves order both within
+ * and across sections. Only sections with ≥1 pose are rendered.
  *
- * Section time: computed as the sum of `poseHoldSeconds` for the section's poses
- * plus one in-section transition gap between each consecutive pair within the
- * section — i.e. `sum(hold) + (count - 1) * TRANSITION_SIMILAR_SECONDS`. Every
- * pose in a display section shares that section, so the in-section "similar"
- * rate (3s) is exactly the between-pose gap the guided plan uses here. This
- * mirrors the app's own `sequenceDurationSeconds` model applied to the section
- * in isolation (it deliberately ignores the single cross-section transition, so
- * the per-section figures are a calm approximation, not a strict partition of
- * the grand total).
+ * Per-section counts/times reflect the CURRENTLY SELECTED poses in that section
+ * (shown as "selected-of-total" poses), and update live as checkboxes change.
+ * Section time is the sum of `poseHoldSeconds` for the section's SELECTED poses
+ * plus one in-section transition gap between each consecutive selected pair —
+ * i.e. `sum(hold) + (selectedCount - 1) * TRANSITION_SIMILAR_SECONDS`. This
+ * mirrors the app's `sequenceDurationSeconds` model applied to the section in
+ * isolation (a calm approximation, not a strict partition of the grand total).
+ *
+ * The grand total at the bottom (`.pose-map__total`) comes straight from the
+ * derived practice, so it is honest even past 30:00 (no cap, no warning).
  */
 
 import type { GeneratedPractice } from '../lib/generatePractice';
+import { poses as catalog } from '../data/poses';
 import type { Pose, PoseCategory } from '../types/pose';
 import {
   formatDuration,
@@ -31,6 +43,9 @@ import {
   TRANSITION_SIMILAR_SECONDS,
 } from '../lib/timing';
 import PoseGraphic from '../components/PoseGraphic';
+
+/** The full catalog in canonical order — the grid renders every pose. */
+const CATALOG_IN_ORDER = catalog.slice().sort((a, b) => a.order - b.order);
 
 /** Icon size (px) for each thumbnail. */
 const THUMB_ICON_SIZE = 72;
@@ -48,17 +63,21 @@ const SECTIONS: ReadonlyArray<{
 ];
 
 interface PoseMapProps {
-  /** The generated practice to lay out. */
+  /** The DERIVED practice (selected poses in order + total) for the grand total. */
   practice: GeneratedPractice;
   /** The breath pace this practice was generated at (drives section times). */
   breathSeconds: number;
-  /** Open the DETAIL carousel at the given absolute practice index. */
+  /** The set of currently-selected pose ids (drives checked/dimmed state). */
+  selectedIds: ReadonlySet<string>;
+  /** Toggle a pose in/out of the selection (parent guards the fixed frame). */
+  onToggleSelected: (poseId: string) => void;
+  /** Open the DETAIL carousel at the given absolute catalog index. */
   onOpenPose: (index: number) => void;
   /** Return to the Home screen. */
   onBack: () => void;
   /** Advance to the Guided screen. */
   onStartGuided: () => void;
-  /** Generate a fresh practice at the same breath pace. */
+  /** Wipe the selection and generate a fresh <=30-min set (New sequence). */
   onRegenerate: () => void;
   /**
    * When true, the sections grid replays a quiet cross-fade on mount — used to
@@ -72,25 +91,35 @@ interface PoseMapProps {
   basicsOnly: boolean;
   /** Toggle "Basics only" mode (parent persists + regenerates). */
   onToggleBasics: (next: boolean) => void;
+  /** Whether "Full series" mode is active (drives the switch). */
+  fullSeries: boolean;
+  /** Toggle "Full series" mode (parent persists + selects all / regenerates). */
+  onToggleFullSeries: (next: boolean) => void;
 }
 
-/** A pose paired with its absolute index in the full practice sequence. */
+/** A pose paired with its absolute index in the full catalog. */
 interface IndexedPose {
   pose: Pose;
   index: number;
 }
 
 /**
- * Per-section time (whole seconds): sum of hold times plus one transition gap
- * between each consecutive pair within the section. Empty section = 0s.
+ * Per-section time (whole seconds) for the SELECTED poses in a section: sum of
+ * their hold times plus one in-section transition gap between each consecutive
+ * selected pair. No selected poses = 0s.
  */
-function sectionSeconds(items: IndexedPose[], breathSeconds: number): number {
-  if (items.length === 0) return 0;
+function sectionSeconds(
+  items: IndexedPose[],
+  selectedIds: ReadonlySet<string>,
+  breathSeconds: number,
+): number {
+  const selected = items.filter(({ pose }) => selectedIds.has(pose.id));
+  if (selected.length === 0) return 0;
   let total = 0;
-  for (const { pose } of items) {
+  for (const { pose } of selected) {
     total += poseHoldSeconds(pose, breathSeconds);
   }
-  total += (items.length - 1) * TRANSITION_SIMILAR_SECONDS;
+  total += (selected.length - 1) * TRANSITION_SIMILAR_SECONDS;
   return total;
 }
 
@@ -105,6 +134,8 @@ function badgeFor(pose: Pose): string | null {
 function PoseMap({
   practice,
   breathSeconds,
+  selectedIds,
+  onToggleSelected,
   onOpenPose,
   onBack,
   onStartGuided,
@@ -112,13 +143,20 @@ function PoseMap({
   animateRefresh = false,
   basicsOnly,
   onToggleBasics,
+  fullSeries,
+  onToggleFullSeries,
 }: PoseMapProps) {
-  const { poses, totalSeconds } = practice;
-  const count = poses.length;
+  // The grand total comes from the DERIVED practice (selected poses only), so it
+  // is honest even past 30:00 — no cap, no warning.
+  const { totalSeconds } = practice;
+  const selectedCount = practice.poses.length;
 
-  // Pair each pose with its absolute index up-front so grouping/filtering never
+  // Pair each catalog pose with its absolute index up-front so grouping never
   // loses the index the carousel needs to open at.
-  const indexed: IndexedPose[] = poses.map((pose, index) => ({ pose, index }));
+  const indexed: IndexedPose[] = CATALOG_IN_ORDER.map((pose, index) => ({
+    pose,
+    index,
+  }));
 
   return (
     <section className="screen overview pose-map">
@@ -132,7 +170,7 @@ function PoseMap({
           &larr;
         </button>
         <p className="overview__summary">
-          {count} poses &middot; {formatDuration(totalSeconds)}
+          {selectedCount} poses &middot; {formatDuration(totalSeconds)}
         </p>
       </header>
 
@@ -155,6 +193,25 @@ function PoseMap({
         </p>
       </div>
 
+      <div className="basics-toggle pose-map__full-series-toggle">
+        <label className="basics-toggle__label" htmlFor="full-series-switch">
+          <span className="basics-toggle__text">Full series</span>
+          <input
+            type="checkbox"
+            id="full-series-switch"
+            className="basics-toggle__input"
+            checked={fullSeries}
+            onChange={(e) => onToggleFullSeries(e.target.checked)}
+          />
+          <span className="basics-toggle__track" aria-hidden="true">
+            <span className="basics-toggle__thumb" />
+          </span>
+        </label>
+        <p className="basics-toggle__hint">
+          Select every pose. Uncheck any you want to skip.
+        </p>
+      </div>
+
       <div
         className={
           animateRefresh
@@ -168,21 +225,35 @@ function PoseMap({
           );
           if (items.length === 0) return null;
 
-          const seconds = sectionSeconds(items, breathSeconds);
-          const poseLabel = items.length === 1 ? 'pose' : 'poses';
+          const seconds = sectionSeconds(items, selectedIds, breathSeconds);
+          const sectionSelected = items.filter(({ pose }) =>
+            selectedIds.has(pose.id),
+          ).length;
 
           return (
             <section key={section.title} className="pose-map__section">
               <h2 className="pose-map__section-header">
-                {section.title} &middot; {items.length} {poseLabel} &middot;{' '}
-                {formatDuration(seconds)}
+                {section.title} &middot; {sectionSelected}/{items.length} poses
+                &middot; {formatDuration(seconds)}
               </h2>
 
               <ul className="pose-map__grid">
                 {items.map(({ pose, index }) => {
                   const badge = badgeFor(pose);
+                  const isSelected = selectedIds.has(pose.id);
+                  // Fixed-frame poses are always included and can never be
+                  // unchecked: checked + disabled (locked).
+                  const isFixed = pose.alwaysInclude;
+                  const checkboxId = `pose-select-${pose.id}`;
                   return (
-                    <li key={pose.id} className="pose-map__cell">
+                    <li
+                      key={pose.id}
+                      className={
+                        isSelected
+                          ? 'pose-map__cell'
+                          : 'pose-map__cell pose-map__cell--inactive'
+                      }
+                    >
                       <button
                         type="button"
                         className="pose-map__thumb"
@@ -202,6 +273,39 @@ function PoseMap({
                         </span>
                         <span className="pose-map__name">{pose.sanskrit}</span>
                       </button>
+                      {/*
+                        The checkbox is a SIBLING of the open button (not nested
+                        inside it — a button may not contain a labelled
+                        checkbox), so opening the card and toggling selection are
+                        distinct tap targets. Fixed-frame poses are locked.
+                      */}
+                      <label
+                        className="pose-map__select"
+                        htmlFor={checkboxId}
+                        title={
+                          isFixed
+                            ? 'Always included — cannot be removed'
+                            : undefined
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          id={checkboxId}
+                          className="pose-map__select-input"
+                          checked={isSelected}
+                          disabled={isFixed}
+                          onChange={() => onToggleSelected(pose.id)}
+                          aria-label={
+                            isFixed
+                              ? `${pose.sanskrit} (always included)`
+                              : `Include ${pose.sanskrit}`
+                          }
+                        />
+                        <span
+                          className="pose-map__select-box"
+                          aria-hidden="true"
+                        />
+                      </label>
                     </li>
                   );
                 })}
@@ -211,7 +315,8 @@ function PoseMap({
         })}
 
         <p className="pose-map__total">
-          Total &middot; {count} poses &middot; {formatDuration(totalSeconds)}
+          Total &middot; {selectedCount} poses &middot;{' '}
+          {formatDuration(totalSeconds)}
         </p>
       </div>
 
