@@ -212,6 +212,9 @@ function PoseMap({
         </p>
       </div>
 
+      {/* Divides the settings toggles from the practice content below. */}
+      <hr className="overview__divider" />
+
       <div
         className={
           animateRefresh
