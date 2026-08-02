@@ -16,7 +16,7 @@ The full Ashtanga Primary Series takes well over an hour, which makes a daily pr
 - **Guided practice.** A breathing circle paces every inhale and exhale at your chosen breath speed (a 4-7s slider), with calm transition countdowns between poses and traditional repeats (Navasana ×5, Setu Bandhasana ×3) counted in full. It finishes with a Namaste mark, a short summary (poses, breaths, duration), a soft bell, and a spoken "Namaste". The screen stays awake throughout.
 - **Optional sound, your way.** Persisted toggles for spoken pose names and cues, soft inhale/exhale breath tones, and a looping CC0 ambient track. The layers mix gracefully: breath tones blend with the ambient bed, and everything dips politely under a voice cue, then returns.
 - **A gentle record of your week.** Home shows the last seven days as small leaves that fill in sage on the days you practice: a quiet, pressure-free nudge rather than a streak counter. Everything stays on-device.
-- **Made to keep.** Sanskrit-first pose names with English and drishti, original hand-drawn pose art, and an installable, offline-capable PWA.
+- **Made to keep.** Sanskrit-first pose names with English, drishti, and a tap-to-hear pronunciation button, original hand-drawn pose art, and an installable, offline-capable PWA.
 
 ## Tech stack
 
