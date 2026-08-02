@@ -8,10 +8,11 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: lying on the back along the floor. One leg stays flat on the ground
- * extending away from the hips; the OTHER leg raises straight up toward the head,
- * and the arm reaches up along it with the hand holding the big toe at the raised
- * foot. Clear one-leg-down, one-leg-up supine shape.
+ * Composition: lying on the back along the floor, head to the left, traced from
+ * the reference photo (frame A). One leg stays flat on the ground extending away
+ * from the hips (to the right); the OTHER leg raises straight and draws back toward
+ * the head, and BOTH hands reach up to hold the big toe at the raised foot near the
+ * head. Clear one-leg-down, one-leg-up-toward-the-head supine shape.
  */
 
 interface PoseIconProps {
@@ -39,21 +40,22 @@ function SuptaPadangusthasana({ size = 120, className }: PoseIconProps) {
       {/* Faint floor line the back and lower leg rest on. */}
       <line x1="10" y1="92" x2="90" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Torso: lying flat on the floor, head end to the hips. */}
-      <line x1="26" y1="86" x2="56" y2="86" />
+      {/* Torso: lying flat on the floor, head end (left) to the hips. */}
+      <line x1="26" y1="86" x2="58" y2="86" />
 
       {/* Lower leg: stays flat on the ground, extending away from the hips. */}
-      <line x1="56" y1="86" x2="86" y2="86" />
+      <line x1="58" y1="86" x2="86" y2="86" />
 
-      {/* Raised leg: from the hips straight up toward the head to the lifted
-          foot. */}
-      <line x1="56" y1="86" x2="52" y2="26" />
+      {/* Raised leg: from the hips straight up and drawing back over toward the
+          head to the lifted foot. */}
+      <line x1="58" y1="86" x2="30" y2="30" />
 
-      {/* Arm: reaches up along the raised leg, hand holding the big toe. */}
-      <path d="M34 84 C40 62 46 44 51 30" />
+      {/* Arms: both reach up to hold the big toe at the raised foot by the head. */}
+      <path d="M28 82 C26 60 26 44 29 32" />
+      <path d="M34 84 C34 62 30 46 30 34" />
 
-      {/* Head: on the floor at the top end of the torso. */}
-      <circle cx="20.5" cy="86" r="6.5" />
+      {/* Head: on the floor at the top end of the torso, below the raised foot. */}
+      <circle cx="22" cy="86" r="6.5" />
     </svg>
   );
 }

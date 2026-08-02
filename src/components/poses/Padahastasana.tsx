@@ -8,11 +8,12 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: the deep standing forward fold, distinguished from Padangusthasana
- * by the hands. The legs stay straight and vertical, the torso folds low over
- * them, the head drops near the shins — but here the arms reach down and the
- * hands tuck UNDER the soles of the feet, curling in at the floor beneath the
- * toes rather than gripping the big toes on top.
+ * Composition: the same deep standing forward fold as Padangusthasana — feet
+ * together, straight vertical legs, torso folded flat against the shins with the
+ * head dropped all the way down to the ankles — distinguished only by the hands.
+ * Here the arms reach down past the toes and the hands tuck UNDER the soles of
+ * the feet, the wrists curling in beneath the toes rather than gripping the big
+ * toes on top.
  */
 
 interface PoseIconProps {
@@ -38,22 +39,23 @@ function Padahastasana({ size = 120, className }: PoseIconProps) {
       aria-label="Hand Under Foot Pose"
     >
       {/* Faint floor line under the feet. */}
-      <line x1="30" y1="92" x2="70" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="38" y1="92" x2="62" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Legs: straight and vertical from the folded hips down to the feet. */}
-      <line x1="48" y1="40" x2="46" y2="92" />
-      <line x1="52" y1="40" x2="54" y2="92" />
+      {/* Legs: straight and vertical from the high folded hips down to the feet. */}
+      <line x1="47" y1="30" x2="46" y2="90" />
+      <line x1="53" y1="30" x2="54" y2="90" />
 
-      {/* Torso: folds deep down over the straight legs from the hips. */}
-      <path d="M50 40 C50 58 48 70 44 78" />
+      {/* Torso: folds flat against the legs from the high hips, the spine dropping
+          straight down the front of the shins to the head at the ankles. */}
+      <path d="M50 30 C51 52 50 68 47 80" />
 
-      {/* Arms: reach down past the feet, the hands hooking UNDER the soles — the
-          wrists curl in at the floor beneath the toes. */}
-      <path d="M45 66 L47 90 L52 90" />
-      <path d="M48 67 L54 90 L50 90" />
+      {/* Arms: hang down past the toes, the hands tucking UNDER the soles — the
+          wrists curling in at the floor beneath the feet. */}
+      <path d="M42 60 L44 89 L50 91" />
+      <path d="M45 61 L52 89 L46 91" />
 
-      {/* Head: dropped low near the shins at the end of the folded torso. */}
-      <circle cx="42.5" cy="82" r="6.5" />
+      {/* Head: dropped all the way down to the ankles at the end of the fold. */}
+      <circle cx="44.5" cy="82" r="6.5" />
     </svg>
   );
 }

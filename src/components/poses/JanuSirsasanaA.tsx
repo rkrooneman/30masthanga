@@ -8,13 +8,14 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: seated side profile, forward fold over ONE extended leg. The
- * extended leg lies flat forward (to the right). The bent leg opens out to the
- * side: the shin lies flat back along the floor and the foot draws in to the
- * inner thigh (an open ~90° knee, foot flat and low). The torso folds forward
- * over the extended leg, head to the knee, hands reaching the foot. Variant A is
- * the OPEN, FLAT bent-knee position — foot sole flat against the inner thigh,
- * heel down. (Distinguishes from B: foot under, and C: foot up on the toes.)
+ * Composition: seated side profile facing right, traced from the reference photo —
+ * a deep forward fold over ONE extended leg. The extended leg lies flat forward
+ * (to the right) to the flexed foot. The bent leg opens out with the knee lifted
+ * into a low peak near the hip and the foot drawn in to the inner thigh (the small
+ * raised triangle back-left). The torso folds all the way down flat over the
+ * extended leg so the head drops to the shin and the hands clasp past the flexed
+ * foot. Variant A is the OPEN bent-knee position — sole flat against the inner
+ * thigh, heel down. (Distinguishes from B: foot under, and C: foot up on toes.)
  */
 
 interface PoseIconProps {
@@ -39,25 +40,25 @@ function JanuSirsasanaA({ size = 120, className }: PoseIconProps) {
       role="img"
       aria-label="Head-to-Knee A pose"
     >
-      {/* Faint floor line the legs rest along. */}
-      <line x1="10" y1="92" x2="86" y2="92" strokeWidth={2} opacity={0.35} />
+      {/* Faint floor line the legs and seat rest along. */}
+      <line x1="10" y1="92" x2="84" y2="92" strokeWidth={2} opacity={0.35} />
 
       {/* Extended leg: flat along the floor to the flexed foot. */}
-      <line x1="38" y1="88" x2="82" y2="88" />
-      <line x1="82" y1="88" x2="82" y2="80" />
+      <line x1="38" y1="88" x2="80" y2="88" />
+      <line x1="80" y1="88" x2="80" y2="78" />
 
-      {/* Bent leg: opened out to the side, shin flat back along the floor with the
-          foot (sole flat, heel down) drawn in toward the inner thigh. */}
-      <path d="M38 88 L16 88 L28 84" />
+      {/* Bent leg: knee lifted into a low peak near the hip, the foot drawn back
+          in to the inner thigh (sole flat, heel down). */}
+      <path d="M38 88 L26 78 L20 88" />
 
-      {/* Torso: folds forward over the extended leg. */}
-      <path d="M38 88 C40 66 48 60 60 62" />
+      {/* Torso: folds all the way down flat over the extended leg. */}
+      <path d="M38 88 C40 74 52 73 60 76" />
 
-      {/* Arm: reaches on along the shin toward the foot. */}
-      <path d="M48 62 C60 62 70 70 78 80" />
+      {/* Arm: reaches the length of the leg and clasps the flexed foot. */}
+      <path d="M54 75 C64 75 74 80 80 84" />
 
-      {/* Head: dropped to the knee at the end of the fold. */}
-      <circle cx="66.5" cy="63" r="6.5" />
+      {/* Head: dropped low to the shin at the end of the fold. */}
+      <circle cx="64.5" cy="78" r="6.5" />
     </svg>
   );
 }

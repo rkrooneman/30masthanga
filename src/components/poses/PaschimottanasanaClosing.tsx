@@ -10,10 +10,12 @@
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
  * Composition: the same asana as Paschimottanasana, reused here as the closing
- * counter-pose. Seated side profile: the legs lie flat along the floor extended
- * forward from the sitting bones to the feet, the torso folds down over the legs
- * with the head dropping near the shins, and the arm reaches along the legs to
- * the feet.
+ * counter-pose, and traced from the same reference photo. Seated side profile
+ * facing right: the legs lie flat along the floor extended forward from the
+ * sitting bones to the flexed feet; the torso folds all the way down over the
+ * legs — rounded back low and nearly horizontal, chest on the thighs — so the
+ * head drops near the shins; the arms reach the full length of the legs and hook
+ * past the flexed foot, hands clasping around it.
  */
 
 interface PoseIconProps {
@@ -38,22 +40,22 @@ function PaschimottanasanaClosing({ size = 120, className }: PoseIconProps) {
       role="img"
       aria-label="Seated Forward Fold pose"
     >
-      {/* Faint floor line the legs rest along. */}
-      <line x1="14" y1="92" x2="86" y2="92" strokeWidth={2} opacity={0.35} />
+      {/* Faint floor line the legs and folded seat rest along. */}
+      <line x1="12" y1="92" x2="84" y2="92" strokeWidth={2} opacity={0.35} />
 
       {/* Legs: flat along the floor, from the sitting bones out to the feet. */}
-      <line x1="20" y1="88" x2="80" y2="88" />
-      {/* Small upturned feet at the far end. */}
-      <line x1="80" y1="88" x2="80" y2="78" />
+      <line x1="18" y1="88" x2="78" y2="88" />
+      {/* Flexed feet at the far end. */}
+      <line x1="78" y1="88" x2="78" y2="76" />
 
-      {/* Torso: folds down over the legs from the hips toward the feet. */}
-      <path d="M20 88 C22 66 30 58 46 60" />
+      {/* Torso: rounded back folding low and flat over the legs, chest on thighs. */}
+      <path d="M18 88 C20 70 34 68 54 71" />
 
-      {/* Arm: reaches on along the shins toward the feet. */}
-      <path d="M40 62 C56 62 70 70 76 80" />
+      {/* Arm: runs the length of the legs and hooks past the flexed foot. */}
+      <path d="M46 70 C60 70 76 74 82 76" />
 
-      {/* Head: dropped low over the legs at the end of the folded torso. */}
-      <circle cx="52.5" cy="61" r="6.5" />
+      {/* Head: dropped low over the shins between the reaching arms. */}
+      <circle cx="60.5" cy="73" r="6.5" />
     </svg>
   );
 }

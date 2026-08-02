@@ -8,13 +8,14 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: seated side profile, forward fold over ONE extended leg — as in
- * variant A, but the bent leg is tucked UNDER the body. The practitioner sits
- * up ON the heel: the hips are lifted a touch off the floor and the bent foot
- * points forward directly beneath the sitting bone (a short vertical shin dropping
- * to a foot under the pelvis), rather than lying flat out to the side. The torso
- * folds forward over the extended leg, head to the knee, hands to the foot. The
- * distinguishing feature: the bent foot tucked UNDER, hips raised on the heel.
+ * Composition: seated side profile facing right, traced from the reference photo —
+ * a deep forward fold over ONE extended leg, as in variant A but sitting UP on the
+ * bent-leg heel. The hips are lifted off the floor and the bent foot tucks in
+ * under the perineum (the short shin dropping from the raised hip to the foot
+ * beneath the sitting bone), the bent knee lifting into a peak in front. The torso
+ * folds all the way down flat over the extended leg so the head drops to the shin
+ * and the hands clasp past the flexed foot. The distinguishing feature: the hips
+ * raised, sitting on the tucked-under heel.
  */
 
 interface PoseIconProps {
@@ -40,25 +41,24 @@ function JanuSirsasanaB({ size = 120, className }: PoseIconProps) {
       aria-label="Head-to-Knee B pose"
     >
       {/* Faint floor line the extended leg and tucked foot rest along. */}
-      <line x1="14" y1="92" x2="86" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="14" y1="92" x2="84" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Hips raised a touch off the floor, sitting up on the tucked heel. */}
       {/* Extended leg: from the lifted hip down to the floor and out to the foot. */}
-      <path d="M40 82 L48 88 L82 88" />
-      <line x1="82" y1="88" x2="82" y2="80" />
+      <path d="M38 82 L46 88 L80 88" />
+      <line x1="80" y1="88" x2="80" y2="78" />
 
-      {/* Bent leg tucked UNDER: short shin dropping from the hip straight down to a
-          foot pointing forward directly beneath the sitting bone. */}
-      <path d="M40 82 L38 88 L48 88" />
+      {/* Bent leg tucked UNDER: shin dropping from the raised hip to the foot
+          beneath the sitting bone, the knee lifting into a peak in front. */}
+      <path d="M38 82 L34 88 L46 88" />
 
-      {/* Torso: folds forward from the raised hip over the extended leg. */}
-      <path d="M40 82 C42 62 50 56 62 58" />
+      {/* Torso: folds all the way down flat from the raised hip over the leg. */}
+      <path d="M38 82 C40 70 52 71 60 74" />
 
-      {/* Arm: reaches on along the shin toward the foot. */}
-      <path d="M50 58 C62 58 72 66 78 78" />
+      {/* Arm: reaches the length of the leg and clasps the flexed foot. */}
+      <path d="M54 73 C64 73 74 78 80 84" />
 
-      {/* Head: dropped to the knee at the end of the fold. */}
-      <circle cx="68.5" cy="59" r="6.5" />
+      {/* Head: dropped low to the shin at the end of the fold. */}
+      <circle cx="64.5" cy="76" r="6.5" />
     </svg>
   );
 }

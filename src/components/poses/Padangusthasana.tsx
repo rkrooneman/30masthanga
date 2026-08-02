@@ -8,10 +8,12 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: a standing deep forward fold seen from the side. The legs are
- * straight and vertical from the hips to the feet. The torso folds all the way
- * down over the legs, the head dropping low near the shins, and both arms reach
- * straight down so the hands catch the big toes at the feet.
+ * Composition: a deep standing forward fold seen from the side, feet together.
+ * The legs are straight and vertical from the high folded hips down to the feet.
+ * The torso folds completely flat against the legs so the head drops all the way
+ * down to the ankles, tucked in at the shins. Both arms hang straight down and
+ * the hands hook around the big toes at the very base of the feet — the fingers
+ * curling over the toes in the toe-grip that names the pose.
  */
 
 interface PoseIconProps {
@@ -37,21 +39,23 @@ function Padangusthasana({ size = 120, className }: PoseIconProps) {
       aria-label="Big Toe Pose"
     >
       {/* Faint floor line under the feet. */}
-      <line x1="30" y1="92" x2="70" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="38" y1="92" x2="62" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Legs: straight and vertical from the folded hips down to the feet. */}
-      <line x1="48" y1="40" x2="46" y2="92" />
-      <line x1="52" y1="40" x2="54" y2="92" />
+      {/* Legs: straight and vertical from the high folded hips down to the feet. */}
+      <line x1="47" y1="30" x2="46" y2="90" />
+      <line x1="53" y1="30" x2="54" y2="90" />
 
-      {/* Torso: folds deep down over the straight legs from the hips. */}
-      <path d="M50 40 C50 58 48 70 44 78" />
+      {/* Torso: folds flat against the legs from the high hips, the spine dropping
+          straight down the front of the shins to the head at the ankles. */}
+      <path d="M50 30 C51 52 50 68 47 80" />
 
-      {/* Arms: reach straight down so the hands catch the big toes at the feet. */}
-      <line x1="45" y1="66" x2="47" y2="90" />
-      <line x1="48" y1="67" x2="53" y2="90" />
+      {/* Arms: hang straight down and the hands hook around the big toes at the
+          base of the feet — the fingers curling over the toes. */}
+      <path d="M42 60 L44 86 L49 88" />
+      <path d="M45 61 L52 86 L47 88" />
 
-      {/* Head: dropped low near the shins at the end of the folded torso. */}
-      <circle cx="42.5" cy="82" r="6.5" />
+      {/* Head: dropped all the way down to the ankles at the end of the fold. */}
+      <circle cx="44.5" cy="82" r="6.5" />
     </svg>
   );
 }

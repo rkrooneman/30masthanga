@@ -8,12 +8,13 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: lying on the back with the hips lifted — a bridge. The shoulders
- * and head rest on the floor at the left; the feet are planted flat on the floor
- * at the right with the knees bent up. Between them the torso lifts up off the
- * ground so the underside arches high from the shoulders to the raised hips and
- * back down the shins to the feet. The arms rest flat along the floor by the
- * shoulders. The signature: a high arched underside anchored at both ends.
+ * Composition: the primary-series bridge, traced from the reference photo — a
+ * backbend arching onto the CROWN of the head. The head presses into the floor at
+ * the left and the neck arches; from there the chest and hips lift high off the
+ * ground into a smooth arch that runs down the near-straight legs to the feet
+ * planted on the floor at the right. The arm crosses over the lifted chest (hands
+ * to the shoulders, not on the floor). The signature: crown-down neck arch with a
+ * high open chest anchored between head and feet.
  */
 
 interface PoseIconProps {
@@ -38,21 +39,23 @@ function SetuBandhasana({ size = 120, className }: PoseIconProps) {
       role="img"
       aria-label="Bridge Pose"
     >
-      {/* Faint floor line the shoulders, arms and feet rest along. */}
+      {/* Faint floor line the crown of the head and the feet press into. */}
       <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Torso: lifts off the floor from the shoulders up to the raised hips. */}
-      <path d="M28 88 C36 62 54 58 66 60" />
+      {/* Neck/torso: from the crown on the floor the neck arches up and the chest
+          and hips lift high into a smooth arch. */}
+      <path d="M28 84 C34 54 52 52 66 58" />
 
-      {/* Bent legs: thigh down from the raised hips to the knees, vertical shins
-          to feet planted flat on the floor. */}
-      <path d="M66 60 L72 78 L72 88" />
+      {/* Legs: near-straight from the lifted hips down to the feet planted on the
+          floor at the right, with a small flexed foot. */}
+      <path d="M66 58 L84 84" />
+      <line x1="84" y1="84" x2="78" y2="80" />
 
-      {/* Arm: rests flat along the floor by the shoulders. */}
-      <line x1="28" y1="88" x2="46" y2="88" />
+      {/* Arm: crosses over the lifted chest, hand up toward the shoulder. */}
+      <path d="M40 66 C48 66 52 62 52 56" />
 
-      {/* Head: resting on the floor at the shoulder end. */}
-      <circle cx="20.5" cy="86" r="6.5" />
+      {/* Head: pressing into the floor on its crown at the left end. */}
+      <circle cx="24.5" cy="84" r="6.5" />
     </svg>
   );
 }

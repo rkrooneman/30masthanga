@@ -9,10 +9,12 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: a tall one-legged balance. The standing (left) leg is straight and
- * vertical to the floor; the torso rises upright above it. The other (right) leg
- * lifts straight out to the front, and the same-side hand reaches forward to hold
- * the big toe of that lifted foot — the free arm steadies at the hip.
+ * Composition: a tall one-legged balance, figure facing right. The standing
+ * (left) leg is straight and vertical to the floor and the torso rises upright
+ * above it. The other (right) leg extends straight out to the front, lifted to
+ * about hip height, and the same-side hand reaches forward along it to hook the
+ * big toe of the lifted foot. The free (left) arm bends with the hand planted on
+ * the hip, steadying the balance.
  */
 
 interface PoseIconProps {
@@ -38,24 +40,25 @@ function UtthitaHastaPadangusthasana({ size = 120, className }: PoseIconProps) {
       aria-label="Extended Hand-to-Big-Toe pose"
     >
       {/* Faint floor line under the single standing foot. */}
-      <line x1="18" y1="92" x2="82" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="24" y1="92" x2="52" y2="92" strokeWidth={2} opacity={0.35} />
 
       {/* Standing (left) leg: straight and vertical from the hips to the floor. */}
-      <line x1="40" y1="52" x2="40" y2="92" />
-      {/* Lifted (right) leg: straight out to the front toward the raised foot. */}
-      <line x1="40" y1="52" x2="82" y2="58" />
+      <line x1="38" y1="52" x2="38" y2="92" />
+      {/* Lifted (right) leg: straight out to the front, level at about hip
+          height, to the raised foot. */}
+      <line x1="38" y1="52" x2="84" y2="50" />
 
       {/* Torso: upright from the hips to the shoulders. */}
-      <line x1="40" y1="52" x2="42" y2="28" />
+      <line x1="38" y1="52" x2="40" y2="28" />
 
-      {/* Reaching arm: same-side hand forward to hold the big toe of the lifted
-          foot. */}
-      <line x1="42" y1="32" x2="80" y2="56" />
-      {/* Free arm: steadies at the hip. */}
-      <path d="M42 32 L34 44 L40 50" />
+      {/* Reaching (right) arm: from the shoulder forward along the lifted leg to
+          hook the big toe of the raised foot. */}
+      <line x1="40" y1="31" x2="82" y2="49" />
+      {/* Free (left) arm: bends with the hand planted on the hip. */}
+      <path d="M40 31 L31 42 L37 51" />
 
       {/* Head: above the shoulders at the top of the upright torso. */}
-      <circle cx="42.5" cy="21.5" r="6.5" />
+      <circle cx="40.5" cy="21.5" r="6.5" />
     </svg>
   );
 }

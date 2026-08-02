@@ -9,12 +9,14 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: seated side profile. ONE leg extends flat forward (to the right)
- * along the floor to the foot. The OTHER leg is drawn in as a half-lotus — a short
- * bent shin whose foot rests high on the opposite thigh (the small triangle near
- * the hip). The torso folds forward low over the extended leg, head dropping near
- * the shin. The distinguishing feature: the binding arm reaches BEHIND the back to
- * catch the lifted lotus foot (a stroke curving round the back to the hip).
+ * Composition: seated side profile facing right, traced from the reference photo.
+ * ONE leg extends flat forward (to the right) along the floor to the flexed foot.
+ * The OTHER leg is drawn in as a half-lotus — a short bent shin whose foot rests
+ * high on the opposite thigh (the small triangle near the hip). The torso folds
+ * all the way down flat over the extended leg so the head drops close to the
+ * shin, the front hand reaching the foot. The distinguishing feature: the binding
+ * arm reaches BEHIND the back to catch the lifted lotus foot (a stroke curving
+ * round behind the hip).
  */
 
 interface PoseIconProps {
@@ -39,24 +41,27 @@ function ArdhaBaddhaPadmaPaschimottanasana({ size = 120, className }: PoseIconPr
       role="img"
       aria-label="Half Bound Lotus Seated Forward Fold pose"
     >
-      {/* Faint floor line the extended leg rests along. */}
-      <line x1="18" y1="92" x2="86" y2="92" strokeWidth={2} opacity={0.35} />
+      {/* Faint floor line the extended leg and seat rest along. */}
+      <line x1="16" y1="92" x2="86" y2="92" strokeWidth={2} opacity={0.35} />
 
       {/* Extended leg: flat along the floor to the flexed foot. */}
       <line x1="30" y1="88" x2="82" y2="88" />
-      <line x1="82" y1="88" x2="82" y2="80" />
+      <line x1="82" y1="88" x2="82" y2="78" />
 
       {/* Half-lotus leg: short bent shin with the foot up on the opposite thigh. */}
-      <path d="M30 88 L44 80 L34 74" />
+      <path d="M30 88 L42 79 L32 74" />
 
-      {/* Torso: folds forward low over the extended leg. */}
-      <path d="M30 88 C34 66 44 60 58 62" />
+      {/* Torso: folds all the way down flat over the extended leg. */}
+      <path d="M30 88 C32 74 46 73 62 76" />
 
-      {/* Head: dropped near the shin at the end of the fold. */}
-      <circle cx="64.5" cy="63" r="6.5" />
+      {/* Front arm: reaches along the shin and clasps the flexed foot. */}
+      <path d="M54 75 C66 75 76 80 82 84" />
+
+      {/* Head: dropped low near the shin at the end of the fold. */}
+      <circle cx="66.5" cy="78" r="6.5" />
 
       {/* Binding arm: curves behind the back to catch the lifted lotus foot. */}
-      <path d="M32 66 C20 72 24 82 34 76" />
+      <path d="M34 76 C20 78 22 88 33 82" />
     </svg>
   );
 }

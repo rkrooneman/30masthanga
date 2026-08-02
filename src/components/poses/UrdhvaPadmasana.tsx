@@ -9,10 +9,11 @@
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
  * Composition: from a shoulderstand the legs fold into lotus while balanced UP in
- * the air. The head and shoulders rest on the floor (left); the torso rises
- * vertically like a shoulderstand; at the TOP the legs cross into a lotus knot,
- * and the hands reach up to support the knees. Distinguished from Pindasana (lotus
- * lowered DOWN over the face) by the lotus held high at the top.
+ * the air. The head and shoulders rest on the floor at the baseline; the torso
+ * rises straight up the centre like a shoulderstand; at the TOP the crossed shins
+ * form a lotus knot, and the hands reach up from the floor to cradle the knees.
+ * Distinguished from Pindasana (lotus lowered DOWN over the face) by the lotus held
+ * high at the top.
  */
 
 interface PoseIconProps {
@@ -37,29 +38,25 @@ function UrdhvaPadmasana({ size = 120, className }: PoseIconProps) {
       role="img"
       aria-label="Upward Lotus pose"
     >
-      {/* Faint floor line the head and shoulders rest on. */}
-      <line x1="14" y1="92" x2="78" y2="92" strokeWidth={2} opacity={0.35} />
+      {/* Faint floor line the head, shoulders and elbows rest on. */}
+      <line x1="28" y1="90" x2="72" y2="90" strokeWidth={2} opacity={0.35} />
 
-      {/* Shoulders on the floor: short horizontal from beside the head to the base
-          of the vertical body. */}
-      <line x1="34" y1="88" x2="52" y2="88" />
+      {/* Torso: rises straight up the centre from the shoulders on the floor toward
+          the lotus at the top. */}
+      <line x1="50" y1="86" x2="50" y2="36" />
 
-      {/* Torso: rises vertically from the shoulders straight up toward the lotus. */}
-      <line x1="52" y1="88" x2="52" y2="34" />
+      {/* Lotus knot at the top: the crossed folded shins held up in the air. */}
+      <line x1="36" y1="32" x2="64" y2="32" />
+      <line x1="36" y1="32" x2="50" y2="22" />
+      <line x1="64" y1="32" x2="50" y2="22" />
 
-      {/* Lotus knot at the top: the crossed folded legs held up in the air. */}
-      <line x1="38" y1="30" x2="66" y2="30" />
-      <line x1="38" y1="30" x2="52" y2="20" />
-      <line x1="66" y1="30" x2="52" y2="20" />
+      {/* Supporting arms: reach up from the elbows on the floor to cradle the
+          raised knees on either side. */}
+      <path d="M40 88 L38 34" />
+      <path d="M60 88 L62 34" />
 
-      {/* Supporting hands/arms: reach up from the back to brace the raised knees. */}
-      <path d="M40 88 L40 32" />
-
-      {/* Head: rests on the floor to the left of the shoulders. */}
-      <circle cx="24.5" cy="86" r="6.5" />
-
-      {/* Neck: joins the head to the shoulders along the floor. */}
-      <line x1="31" y1="86.5" x2="34" y2="88" />
+      {/* Head: rests on the floor just below the shoulders at the base. */}
+      <circle cx="50" cy="87" r="6.5" />
     </svg>
   );
 }

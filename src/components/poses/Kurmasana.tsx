@@ -8,10 +8,11 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: seated, very low and wide. The legs splay out low to each side.
- * The torso presses forward and DOWN flat to the floor between the legs, head
- * dropped low at the front. The arms thread OUT sideways UNDERNEATH the knees,
- * extending beyond the legs on each side — a flat, wide, ground-hugging shape.
+ * Composition: seated, very low and wide, seen from the front and symmetric. The
+ * legs splay out low to each side from the seat, feet flexed up at the far ends.
+ * The torso presses forward and DOWN flat, dropping the head low at the front
+ * centre between the legs. The arms thread OUT sideways UNDERNEATH the knees,
+ * running flat beyond the feet on each side — a flat, wide, ground-hugging shape.
  */
 
 interface PoseIconProps {
@@ -37,23 +38,22 @@ function Kurmasana({ size = 120, className }: PoseIconProps) {
       aria-label="Tortoise Pose pose"
     >
       {/* Faint wide floor line — everything is low and flat. */}
-      <line x1="8" y1="92" x2="92" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="8" y1="90" x2="92" y2="90" strokeWidth={2} opacity={0.35} />
 
-      {/* Legs: splay out low and wide to each side from the seat at centre. */}
-      <line x1="50" y1="80" x2="16" y2="72" />
-      <line x1="50" y1="80" x2="84" y2="72" />
+      {/* Legs: splay out low and wide to each side from the seat, feet flexed up. */}
+      <path d="M50 74 L18 66 L13 60" />
+      <path d="M50 74 L82 66 L87 60" />
 
-      {/* Torso: presses forward and down flat toward the floor at the front. */}
-      <line x1="50" y1="80" x2="50" y2="84" />
-      <path d="M50 82 C46 86 42 86 34 85" />
+      {/* Torso: presses forward and down flat, dropping to the head at the front. */}
+      <line x1="50" y1="74" x2="50" y2="82" />
 
-      {/* Arms: thread OUT sideways underneath the knees, reaching beyond the legs
-          on each side, low to the floor. */}
-      <line x1="44" y1="83" x2="12" y2="85" />
-      <line x1="56" y1="83" x2="88" y2="85" />
+      {/* Arms: thread OUT sideways underneath the knees, flat beyond the feet on
+          each side, low to the floor. */}
+      <line x1="42" y1="80" x2="9" y2="85" />
+      <line x1="58" y1="80" x2="91" y2="85" />
 
-      {/* Head: dropped low at the front, between/beyond the legs. */}
-      <circle cx="27" cy="84.5" r="6.5" />
+      {/* Head: dropped low at the front centre, between the legs. */}
+      <circle cx="50" cy="86.5" r="6.5" />
     </svg>
   );
 }

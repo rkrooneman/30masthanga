@@ -8,11 +8,14 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: a wide stance with the front (right) knee bent deeply to a
- * vertical shin, the back (left) leg long and straight. The torso leans out over
- * the front thigh; the bottom hand drops to the floor beside the front foot,
- * while the top arm sweeps up and over the head — making one long diagonal line
- * from the back heel all the way to the reaching top hand.
+ * Composition: a wide split stance, figure facing right. The front (right) knee
+ * bends deeply to roughly a right angle over a vertical shin; the back (left) leg
+ * rakes out long and straight to the floor. The torso lays down along the front
+ * thigh and the bottom (right) hand drops to the floor beside the front foot,
+ * while the top (left) arm sweeps up and over the ear — so the back foot, the
+ * straight back leg, the torso and the top arm all fall on ONE long unbroken
+ * diagonal from the bottom-left heel up to the top-right reaching hand, the
+ * signature Extended Side Angle line.
  */
 
 interface PoseIconProps {
@@ -38,24 +41,27 @@ function UtthitaParsvakonasana({ size = 120, className }: PoseIconProps) {
       aria-label="Extended Side Angle pose"
     >
       {/* Faint floor line under both feet and the bottom hand. */}
-      <line x1="10" y1="92" x2="90" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="8" y1="92" x2="82" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Front (right) leg: deep bent knee — thigh out to the right, vertical
-          shin down to the front foot. */}
-      <path d="M52 58 L72 74 L72 92" />
-      {/* Back (left) leg: long and straight from the hips down to the back foot. */}
-      <line x1="52" y1="58" x2="16" y2="92" />
+      {/* Front (right) leg: deep bent knee at a right angle — thigh out to the
+          right from the hips, vertical shin down to the planted front foot. */}
+      <path d="M56 62 L74 74 L74 92" />
+      {/* Back (left) leg: long and straight, raked out low to the back foot — the
+          start of the one long diagonal. */}
+      <line x1="56" y1="62" x2="14" y2="90" />
 
-      {/* Torso: leans out over the front thigh toward the bottom hand. */}
-      <line x1="52" y1="58" x2="64" y2="70" />
+      {/* Torso: lays down along the front thigh, out toward the front foot, so the
+          shoulders reach past the bent knee. */}
+      <line x1="56" y1="62" x2="70" y2="70" />
 
-      {/* Bottom arm: drops to the floor beside the front foot. */}
-      <line x1="64" y1="70" x2="66" y2="90" />
-      {/* Top arm: sweeps up and over the head, extending the back-leg diagonal. */}
-      <line x1="64" y1="70" x2="44" y2="46" />
+      {/* Bottom (right) arm: drops to the floor beside the front foot. */}
+      <line x1="70" y1="70" x2="72" y2="90" />
+      {/* Top (left) arm: sweeps up and over the ear, continuing the back-leg
+          diagonal all the way to the top-right reaching hand. */}
+      <line x1="70" y1="70" x2="90" y2="40" />
 
-      {/* Head: alongside the reaching top arm, above the torso. */}
-      <circle cx="55" cy="60" r="6.5" />
+      {/* Head: alongside the reaching top arm, just past the shoulders. */}
+      <circle cx="64.5" cy="61" r="6.5" />
     </svg>
   );
 }

@@ -38,21 +38,22 @@ function UttanaPadasana({ size = 120, className }: PoseIconProps) {
       aria-label="Extended Leg pose"
     >
       {/* Faint floor line the crown and hips rest on. */}
-      <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="14" y1="88" x2="86" y2="88" strokeWidth={2} opacity={0.35} />
 
-      {/* Arched upper body: crown on the floor (left), chest lifts in an arch to
-          the hips resting on the floor. */}
-      <path d="M28 86 C30 60 42 60 48 88" />
+      {/* Arched upper body: crown on the floor (left), chest lifts high in an arch
+          down to the hips resting on the floor. */}
+      <path d="M28 82 C32 54 44 56 50 84" />
 
       {/* Legs: both lifted straight off the floor at a forward-up diagonal from the
           hips. */}
-      <line x1="48" y1="88" x2="86" y2="52" />
+      <line x1="50" y1="84" x2="88" y2="48" />
 
-      {/* Arms: reach parallel to the legs at the same diagonal from the chest. */}
-      <line x1="36" y1="66" x2="72" y2="42" />
+      {/* Arms: reach parallel to the legs at the same diagonal from the chest,
+          palms together. */}
+      <line x1="38" y1="62" x2="74" y2="34" />
 
       {/* Head: tipped back so the crown rests on the floor at the top of the arch. */}
-      <circle cx="24.5" cy="80" r="6.5" />
+      <circle cx="24" cy="82" r="6.5" />
     </svg>
   );
 }

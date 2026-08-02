@@ -38,21 +38,21 @@ function Utpluthih({ size = 120, className }: PoseIconProps) {
       aria-label="Scales pose"
     >
       {/* Faint floor line the hands press into. */}
-      <line x1="20" y1="92" x2="80" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="22" y1="88" x2="78" y2="88" strokeWidth={2} opacity={0.35} />
 
       {/* Straight arms: from the hands on the floor straight up to the shoulders,
           lifting the whole seat off the ground. */}
-      <line x1="34" y1="88" x2="38" y2="46" />
-      <line x1="66" y1="88" x2="62" y2="46" />
+      <line x1="32" y1="84" x2="40" y2="44" />
+      <line x1="68" y1="84" x2="60" y2="44" />
 
       {/* Compact lotus base: crossed folded legs lifted in the air between the
-          hands. */}
-      <line x1="40" y1="70" x2="60" y2="70" />
-      <line x1="40" y1="70" x2="50" y2="80" />
-      <line x1="60" y1="70" x2="50" y2="80" />
+          hands, clear of the floor. */}
+      <line x1="40" y1="72" x2="60" y2="72" />
+      <line x1="40" y1="72" x2="50" y2="80" />
+      <line x1="60" y1="72" x2="50" y2="80" />
 
       {/* Torso: rises from the lifted seat up the centre to the head. */}
-      <line x1="50" y1="68" x2="50" y2="40" />
+      <line x1="50" y1="70" x2="50" y2="40" />
 
       {/* Head: upright at the top of the vertical torso. */}
       <circle cx="50" cy="33" r="6.5" />

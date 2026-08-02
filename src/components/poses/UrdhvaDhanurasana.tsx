@@ -8,11 +8,12 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: a full backbend arched into a dome. The hands press the floor on
- * the left and the feet press the floor on the right; between them the whole body
- * arches high toward the ceiling so the belly is the apex of a big dome. Arms run
- * up from the hands to the shoulders, the arched torso sweeps over the top, the
- * bent legs run down to the feet, and the head hangs low between the arms.
+ * Composition: a full backbend arched into a high dome. The hands press the floor
+ * on the left and the feet press the floor on the right. The arms run almost
+ * vertically up from the hands to the shoulders; from there the arched torso sweeps
+ * up and over so the hips are the apex of the dome (set right of centre); the bent
+ * legs then run down from the hips to the planted feet. The head hangs low between
+ * the arms just inside the hands.
  */
 
 interface PoseIconProps {
@@ -38,21 +39,22 @@ function UrdhvaDhanurasana({ size = 120, className }: PoseIconProps) {
       aria-label="Upward Bow pose"
     >
       {/* Faint floor line the hands and feet press into. */}
-      <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="14" y1="90" x2="82" y2="90" strokeWidth={2} opacity={0.35} />
 
-      {/* Big arched body: from the shoulders (over the hands) up and over the
-          high dome to the raised hips (over the feet). */}
-      <path d="M26 76 C34 24 66 24 74 66" />
+      {/* Arms: almost vertical from the hands on the floor (left) up to the
+          shoulders. */}
+      <line x1="22" y1="86" x2="28" y2="52" />
 
-      {/* Arms: straight down from the shoulders to the hands on the floor. */}
-      <line x1="26" y1="76" x2="22" y2="88" />
+      {/* Big arched body: from the shoulders up and over the high dome to the
+          raised hips, the apex set right of centre. */}
+      <path d="M28 52 C40 18 66 22 72 58" />
 
-      {/* Bent legs: thigh down from the raised hips, shin to the feet planted on
-          the floor. */}
-      <path d="M74 66 L80 80 L78 88" />
+      {/* Bent legs: thigh down and forward from the raised hips to the knee, then
+          the shin drops to the feet planted on the floor (right). */}
+      <path d="M72 58 L78 78 L76 86" />
 
-      {/* Head: hangs low between the arms near the hands. */}
-      <circle cx="33.5" cy="80" r="6.5" />
+      {/* Head: hangs low between the arms just inside the hands. */}
+      <circle cx="34" cy="66" r="6.5" />
     </svg>
   );
 }

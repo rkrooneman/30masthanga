@@ -8,13 +8,14 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: seated side profile — a TWIST with a bind, like C, but the lower
- * leg is in HALF-LOTUS instead of extended. The bottom leg folds in as a lotus (a
- * short bent shin with the foot up at the opposite hip — the small triangle near
- * the floor). The other knee is bent up TALL, foot flat near the sitting bone. The
- * torso stays UPRIGHT and rotates toward the bent knee, the opposite arm hooking
- * across the raised knee while the other binds behind the back. The distinguishing
- * feature: the twist PLUS the folded lotus lower leg (versus C's extended leg).
+ * Composition: seated side profile facing right, traced from the reference photo —
+ * a TWIST with a bind, like C, but the lower leg is in HALF-LOTUS instead of
+ * extended. The bottom leg folds in as a lotus (a short bent shin with the foot up
+ * at the opposite hip — the small triangle near the floor). The other knee is bent
+ * up TALL, foot flat near the sitting bone. The torso stays UPRIGHT and rotates
+ * toward the bent knee, the head turning back over the shoulder, the opposite arm
+ * hooking across the raised knee while the other binds behind the back. The
+ * distinguishing feature: the twist PLUS the folded lotus lower leg (versus C).
  */
 
 interface PoseIconProps {
@@ -44,22 +45,22 @@ function MarichyasanaD({ size = 120, className }: PoseIconProps) {
 
       {/* Lower leg in HALF-LOTUS: short bent shin folded in, foot up at the hip
           crease (the small triangle low near the floor). */}
-      <path d="M42 88 L62 88 L48 78 Z" />
+      <path d="M42 88 L62 88 L48 79 Z" />
 
-      {/* Bent leg: knee up tall, vertical shin from a flat foot near the hip. */}
-      <path d="M42 88 L34 88 L36 54" />
+      {/* Bent leg: knee up tall, near-vertical shin from a flat foot near the hip. */}
+      <path d="M42 88 L34 88 L37 52" />
 
       {/* Torso: stays UPRIGHT, rotating toward the bent knee. */}
-      <line x1="42" y1="88" x2="44" y2="46" />
+      <line x1="42" y1="88" x2="45" y2="46" />
 
-      {/* Head: above the shoulders at the top of the upright twisting torso. */}
-      <circle cx="45" cy="39.5" r="6.5" />
+      {/* Head: turned back over the shoulder at the top of the twisting torso. */}
+      <circle cx="41.5" cy="39.5" r="6.5" />
 
       {/* Twisting arm: hooks ACROSS the outside of the raised knee. */}
-      <path d="M44 52 C34 52 28 56 30 62" />
+      <path d="M45 54 C34 52 28 58 32 64" />
 
       {/* Binding arm: sweeps behind the back to meet the other hand. */}
-      <path d="M44 56 C56 62 54 78 40 78" />
+      <path d="M45 58 C57 62 55 80 40 80" />
     </svg>
   );
 }

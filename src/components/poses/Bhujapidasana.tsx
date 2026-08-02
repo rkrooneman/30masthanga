@@ -8,10 +8,12 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: an arm balance. Two arms drop as near-vertical supports from the
- * lifted body down to the hands planted on the floor. The hips are lifted between
- * the hands; the legs thread forward AROUND the upper arms and cross at the ankles
- * out in front, all held off the ground. The head tips forward at the top.
+ * Composition: an arm balance, traced from the reference photo (frame A, the
+ * clearest signature). The two arms drop as supports to the hands planted on the
+ * floor, the rounded back lifting up-and-back behind them. The legs drape forward
+ * OVER the upper arms and the feet cross at the ankles out in FRONT of the hands,
+ * hovering just off the floor. The head tips forward and down over the crossed
+ * feet. A low, compact, forward-leaning balance off the ground.
  */
 
 interface PoseIconProps {
@@ -37,24 +39,23 @@ function Bhujapidasana({ size = 120, className }: PoseIconProps) {
       aria-label="Shoulder-Pressing Pose pose"
     >
       {/* Faint floor line the hands press into. */}
-      <line x1="24" y1="92" x2="76" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="30" y1="92" x2="66" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Two arms: near-vertical supports from the lifted shoulders down to the
-          hands planted on the floor. */}
-      <line x1="38" y1="46" x2="34" y2="88" />
-      <line x1="60" y1="46" x2="64" y2="88" />
+      {/* Two arms: bent supports from the lifted shoulders down to the hands
+          planted close together on the floor. */}
+      <line x1="34" y1="52" x2="44" y2="88" />
+      <line x1="54" y1="50" x2="48" y2="88" />
 
-      {/* Shoulders/hips bundle: short bar linking the tops of the arms, the lifted
-          seat balanced between the hands. */}
-      <line x1="38" y1="46" x2="60" y2="46" />
+      {/* Rounded back: lifts up-and-back behind the arms, over toward the head. */}
+      <path d="M34 52 C26 60 30 44 44 40" />
 
-      {/* Legs thread forward around the upper arms and cross at the ankles out in
-          front, lifted off the floor. */}
-      <path d="M40 52 C30 58 34 66 50 64" />
-      <path d="M58 52 C68 58 64 66 48 64" />
+      {/* Legs drape OVER the upper arms and cross at the ankles out in front,
+          hovering just off the floor. */}
+      <path d="M38 58 C30 70 40 78 56 74" />
+      <path d="M52 56 C64 66 58 78 42 74" />
 
-      {/* Head: tips forward at the top of the shoulder bundle. */}
-      <circle cx="49" cy="38" r="6.5" />
+      {/* Head: tips forward and down over the crossed feet. */}
+      <circle cx="48" cy="38" r="6.5" />
     </svg>
   );
 }

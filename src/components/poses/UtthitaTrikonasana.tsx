@@ -8,11 +8,13 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: a wide-legged triangle. Both legs are straight, planted wide on
- * the floor from a high hip apex. The torso tilts sideways over the front (right)
- * leg; the bottom arm drops straight down to that shin/ankle while the top arm
- * reaches straight up — the two arms make one long vertical line, the signature
- * Triangle shape.
+ * Composition: a wide-legged triangle, figure facing left. The legs plant wide on
+ * the floor from the hips: the front (left) leg is near-vertical with the knee
+ * stacked over the ankle, the back (right) leg rakes out long and straight. The
+ * torso hinges at the hip out over the front leg down to the shoulder. From that
+ * shoulder the bottom arm drops straight down to the floor outside the front foot
+ * while the top arm reaches straight up — the two arms make one long vertical
+ * line, the signature Triangle shape. The head sits at the shoulder, gaze up.
  */
 
 interface PoseIconProps {
@@ -38,22 +40,23 @@ function UtthitaTrikonasana({ size = 120, className }: PoseIconProps) {
       aria-label="Extended Triangle pose"
     >
       {/* Faint floor line under both wide feet. */}
-      <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
+      <line x1="24" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Legs: straight and wide, from the hip apex out to both feet. */}
-      <line x1="50" y1="52" x2="18" y2="92" />
-      <line x1="50" y1="52" x2="82" y2="92" />
+      {/* Front (left) leg: near-vertical, knee stacked over the planted ankle. */}
+      <line x1="56" y1="55" x2="31" y2="90" />
+      {/* Back (right) leg: long and straight, raked out wide to the back foot. */}
+      <line x1="56" y1="55" x2="86" y2="90" />
 
-      {/* Torso: tilts sideways over the front (right) leg from the hips. */}
-      <line x1="50" y1="52" x2="66" y2="40" />
+      {/* Torso: hinges at the hip out over the front leg down to the shoulder. */}
+      <line x1="56" y1="55" x2="35" y2="63" />
 
-      {/* Bottom arm: drops straight down from the shoulder to the front shin. */}
-      <line x1="66" y1="40" x2="72" y2="72" />
-      {/* Top arm: reaches straight up, continuing the bottom arm's line. */}
-      <line x1="66" y1="40" x2="60" y2="14" />
+      {/* Bottom arm: drops straight down to the floor outside the front foot. */}
+      <line x1="35" y1="63" x2="29" y2="88" />
+      {/* Top arm: reaches straight up, continuing the bottom arm's vertical line. */}
+      <line x1="35" y1="63" x2="41" y2="22" />
 
-      {/* Head: beyond the shoulder along the tilted torso line. */}
-      <circle cx="73" cy="34" r="6.5" />
+      {/* Head: at the shoulder along the hinged torso line, gaze up. */}
+      <circle cx="30.5" cy="59" r="6.5" />
     </svg>
   );
 }

@@ -9,12 +9,14 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: seated side profile. ONE leg extends flat forward (to the right)
- * along the floor. The OTHER leg is folded straight BACK alongside the hip —
- * the thigh stays on the floor and the bent shin runs back to a foot beside the
- * sitting bone (the sharp V pointing left). The torso folds forward over the
- * extended leg, the head dropping near the shin and the arm reaching to the foot.
- * The distinguishing feature: the tightly folded-back knee/shin behind the hip.
+ * Composition: seated side profile facing right, traced from the reference photo.
+ * ONE leg extends flat forward (to the right) along the floor to the flexed foot.
+ * The OTHER leg is folded back alongside the hip — the thigh rests forward on the
+ * floor and the shin folds sharply back to a foot beside the sitting bone (the
+ * short spur pointing left). The torso folds all the way down flat over the
+ * extended leg so the head drops close to the shin, the arms reaching the length
+ * of the leg to clasp the foot. The distinguishing feature: the tightly
+ * folded-back knee/shin behind the hip.
  */
 
 interface PoseIconProps {
@@ -39,25 +41,25 @@ function TriangaMukhaikapadaPaschimottanasana({ size = 120, className }: PoseIco
       role="img"
       aria-label="Three-Limbs Forward Fold pose"
     >
-      {/* Faint floor line the legs rest along. */}
-      <line x1="12" y1="92" x2="86" y2="92" strokeWidth={2} opacity={0.35} />
+      {/* Faint floor line the legs and seat rest along. */}
+      <line x1="12" y1="92" x2="84" y2="92" strokeWidth={2} opacity={0.35} />
 
       {/* Extended leg: flat along the floor to the flexed foot. */}
-      <line x1="40" y1="88" x2="82" y2="88" />
-      <line x1="82" y1="88" x2="82" y2="80" />
+      <line x1="38" y1="88" x2="80" y2="88" />
+      <line x1="80" y1="88" x2="80" y2="78" />
 
       {/* Folded-back leg: thigh forward on the floor, shin folded sharply back
-          to a foot beside the hip (the V pointing left). */}
-      <path d="M40 88 L18 88" />
+          to a foot standing beside the hip (the short spur pointing up-left). */}
+      <path d="M38 88 L20 88 L22 80" />
 
-      {/* Torso: folds forward over the extended leg. */}
-      <path d="M40 88 C42 66 50 60 62 62" />
+      {/* Torso: folds all the way down flat over the extended leg. */}
+      <path d="M38 88 C40 74 54 73 62 76" />
 
-      {/* Arm: reaches on along the shin toward the foot. */}
-      <path d="M50 62 C62 62 72 70 78 80" />
+      {/* Arm: reaches the length of the leg and clasps the flexed foot. */}
+      <path d="M56 75 C66 75 76 80 80 84" />
 
-      {/* Head: dropped near the shin at the end of the fold. */}
-      <circle cx="68.5" cy="63" r="6.5" />
+      {/* Head: dropped low near the shin at the end of the fold. */}
+      <circle cx="66.5" cy="78" r="6.5" />
     </svg>
   );
 }

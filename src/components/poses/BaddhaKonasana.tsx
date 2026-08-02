@@ -8,11 +8,13 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: seated, a near-front feel. The soles of the feet press together at
- * the centre, drawn in close to the pelvis, and the knees drop out wide low to
- * both sides — the legs form a flat butterfly diamond along the floor. The torso
- * rises upright from the hips to the head, and the arms reach down to clasp the
- * feet at the centre. Symmetric: a low wide diamond of legs with feet joined.
+ * Composition: seated and seen from the FRONT, symmetric, traced from the
+ * reference photo (frame A). The soles of the feet press together at the centre,
+ * drawn in close to the pelvis, and the knees drop out very WIDE and low to both
+ * sides, resting near the floor — the legs form a broad butterfly diamond. The
+ * torso folds forward and down over the joined feet so the head drops low toward
+ * them, the arms clasping the feet at the centre. The signature: knees spread wide
+ * to the floor with the soles joined, folding down the middle.
  */
 
 interface PoseIconProps {
@@ -37,24 +39,26 @@ function BaddhaKonasana({ size = 120, className }: PoseIconProps) {
       role="img"
       aria-label="Bound Angle Pose"
     >
-      {/* Faint floor line the knees and feet rest along. */}
-      <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
+      {/* Faint floor line the wide knees and joined feet rest along. */}
+      <line x1="10" y1="92" x2="90" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Legs: butterfly diamond — thighs drop out wide to the knees, shins return
-          to the joined feet at the centre. Left half. */}
-      <path d="M50 74 L20 88 L50 84" />
+      {/* Legs: broad butterfly diamond — thighs drop out very wide to the knees
+          low on the floor, shins return to the joined feet at the centre front.
+          Left half. */}
+      <path d="M50 74 L14 88 L50 86" />
       {/* Right half — mirror. */}
-      <path d="M50 74 L80 88 L50 84" />
+      <path d="M50 74 L86 88 L50 86" />
 
-      {/* Torso: upright from the hips to the shoulders. */}
-      <line x1="50" y1="74" x2="50" y2="40" />
+      {/* Torso: the rounded back humps up behind, then the head drops down at the
+          front centre over the joined feet. */}
+      <path d="M50 74 C36 66 64 66 50 78" />
 
-      {/* Arms: reach down from the shoulders to clasp the joined feet at centre. */}
-      <path d="M50 44 C40 60 44 82 50 84" />
-      <path d="M50 44 C60 60 56 82 50 84" />
+      {/* Arms: sweep down and out over the wide thighs to clasp the joined feet. */}
+      <path d="M42 72 C34 78 34 84 48 85" />
+      <path d="M58 72 C66 78 66 84 52 85" />
 
-      {/* Head: above the shoulders at the top of the upright torso. */}
-      <circle cx="50" cy="33.5" r="6.5" />
+      {/* Head: dropped low over the joined feet at the front centre. */}
+      <circle cx="50" cy="83" r="6.5" />
     </svg>
   );
 }

@@ -8,10 +8,11 @@
  * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
  * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
  *
- * Composition: balancing UPRIGHT on the sitting bones (a single point on the
- * floor). Both legs extend straight up into a V, both hands reach up to hold both
- * big toes, and the torso lifts tall toward the feet — a balanced upright V, like
- * a bound Boat holding the toes.
+ * Composition: balancing on the sitting bones (a single point on the floor),
+ * traced from the reference photo. Both legs extend straight UP into a narrow V,
+ * both hands reach up to catch both big toes at the feet, and the torso leans
+ * slightly back with the head lifted, gaze up — a tall balanced V holding the
+ * toes, the chest open (contrast the closed Urdhva Mukha fold).
  */
 
 interface PoseIconProps {
@@ -39,19 +40,20 @@ function UbhayaPadangusthasana({ size = 120, className }: PoseIconProps) {
       {/* Faint floor line under the single balance point (the sitting bones). */}
       <line x1="30" y1="92" x2="70" y2="92" strokeWidth={2} opacity={0.35} />
 
-      {/* Torso: lifts tall and upright from the sitting bones toward the shoulders. */}
-      <line x1="50" y1="84" x2="44" y2="40" />
+      {/* Torso: lifts tall from the sitting bones and leans slightly back to the
+          shoulders. */}
+      <line x1="50" y1="84" x2="42" y2="42" />
 
-      {/* Legs: both extend straight up into a V toward the two lifted feet. */}
-      <line x1="50" y1="84" x2="34" y2="26" />
-      <line x1="50" y1="84" x2="66" y2="26" />
+      {/* Legs: both extend straight up into a narrow V toward the two lifted feet. */}
+      <line x1="50" y1="84" x2="36" y2="26" />
+      <line x1="50" y1="84" x2="64" y2="26" />
 
-      {/* Arms: reach up from the shoulders to hold both big toes at the feet. */}
-      <line x1="44" y1="44" x2="35" y2="30" />
-      <line x1="44" y1="44" x2="65" y2="30" />
+      {/* Arms: reach up from the shoulders to catch both big toes at the feet. */}
+      <line x1="42" y1="45" x2="36" y2="28" />
+      <line x1="42" y1="45" x2="64" y2="28" />
 
-      {/* Head: above the shoulders at the top of the lifted torso. */}
-      <circle cx="43" cy="33.5" r="6.5" />
+      {/* Head: lifted above the shoulders, gaze up, at the top of the torso. */}
+      <circle cx="40.5" cy="35" r="6.5" />
     </svg>
   );
 }
