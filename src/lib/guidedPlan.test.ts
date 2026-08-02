@@ -324,19 +324,20 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
 }
 
 // ---------------------------------------------------------------------------
-// 7. Salutation vinyasa flow expansion (Surya A, 13 breaths): sub-pose labels in
+// 7. Salutation vinyasa flow expansion (Surya A, 14 breaths): sub-pose labels in
 //    order, per-flow-step breath counts, the `last_breath` cue on the Down Dog
-//    hold's 5th breath, and the `step_jump_forward` cue now on the jump-forward
-//    BREATH step (flow step 7) rather than the transition.
+//    hold's 5th breath, the `step_jump_forward` cue on the jump-forward BREATH
+//    step (flow step 7), and the `samasthiti` cue on the closing Samasthiti
+//    return breath (flow step 10) — all data-driven breath cues.
 // ---------------------------------------------------------------------------
 {
   const suryaA = poses.find((p) => p.id === 'surya_namaskara_a');
   check(suryaA !== undefined, `flow: surya_namaskara_a must exist in the catalog`);
   check(
-    !!suryaA && suryaA.flow !== undefined && suryaA.flow.length === 9,
-    `flow: surya_namaskara_a should carry a 9-entry flow`,
+    !!suryaA && suryaA.flow !== undefined && suryaA.flow.length === 10,
+    `flow: surya_namaskara_a should carry a 10-entry flow`,
   );
-  // Invariant the whole feature rests on: flow breaths sum to pose.breaths (13).
+  // Invariant the whole feature rests on: flow breaths sum to pose.breaths (14).
   const flowSumA =
     suryaA?.flow?.reduce((n, s) => n + s.breaths, 0) ?? -1;
   check(
@@ -344,9 +345,10 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
     `flow: Surya A flow breaths (${flowSumA}) must equal pose.breaths ` +
       `(${suryaA?.breaths})`,
   );
-  check(flowSumA === 13, `flow: Surya A flow must sum to 13 breaths (got ${flowSumA})`);
+  check(flowSumA === 14, `flow: Surya A flow must sum to 14 breaths (got ${flowSumA})`);
 
-  // Flow labels are exactly the authentic choreography, in order.
+  // Flow labels are exactly the authentic choreography, in order, ending with
+  // the Samasthiti return breath.
   check(
     suryaA?.flow?.map((s) => s.label).join('|') ===
       [
@@ -359,21 +361,34 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
         'Ardha Uttanasana',
         'Uttanasana',
         'Urdhva Hastasana',
+        'Samasthiti',
       ].join('|'),
     `flow: Surya A flow labels must match the authentic choreography in order`,
   );
   // Per-flow-step breath counts: all 1 except the Down Dog hold (5).
   check(
-    suryaA?.flow?.map((s) => s.breaths).join(',') === '1,1,1,1,1,5,1,1,1',
-    `flow: Surya A per-step breaths must be 1,1,1,1,1,5,1,1,1`,
+    suryaA?.flow?.map((s) => s.breaths).join(',') === '1,1,1,1,1,5,1,1,1,1',
+    `flow: Surya A per-step breaths must be 1,1,1,1,1,5,1,1,1,1`,
+  );
+  // The final flow step is the Samasthiti return breath carrying the samasthiti
+  // cue on its first (only) breath.
+  const samasthitiStepA = suryaA?.flow?.[suryaA.flow.length - 1];
+  check(
+    !!samasthitiStepA &&
+      samasthitiStepA.label === 'Samasthiti' &&
+      samasthitiStepA.breaths === 1 &&
+      samasthitiStepA.cueId === 'samasthiti' &&
+      samasthitiStepA.cueOn === 'first',
+    `flow: Surya A's final flow step must be the Samasthiti return breath ` +
+      `carrying the samasthiti cue on its first breath`,
   );
 
   const plan = buildGuidedPlan([suryaA as Pose], 5);
   const breaths = plan.steps.filter(isBreath);
   const transitions = plan.steps.filter(isTransition);
 
-  // 3 rounds x 13 breaths = 39 breath steps; 2 between-round transitions.
-  check(breaths.length === 39, `flow: Surya A expands to 39 breath steps, got ${breaths.length}`);
+  // 3 rounds x 14 breaths = 42 breath steps; 2 between-round transitions.
+  check(breaths.length === 42, `flow: Surya A expands to 42 breath steps, got ${breaths.length}`);
   check(
     transitions.length === 2,
     `flow: Surya A should have 2 between-round transitions, got ${transitions.length}`,
@@ -437,10 +452,40 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
     `flow: step_jump_forward must land on the jump-forward Ardha Uttanasana ` +
       `breath (breath 1 of that step)`,
   );
-  // Only the 3 last_breath + 3 step_jump_forward cues are tagged on breaths.
+  // `samasthiti` fires on the closing Samasthiti return breath — once per round
+  // (3 total), on that step's FIRST (and only) breath, and it is the VERY LAST
+  // breath of each round.
+  const samasthitiCues = breaths.filter((b) => b.voiceCueId === 'samasthiti');
   check(
-    breaths.filter((b) => b.voiceCueId !== undefined).length === 6,
-    `flow: exactly 6 breath cues expected (3 last_breath + 3 step_jump_forward)`,
+    samasthitiCues.length === 3,
+    `flow: samasthiti cue should fire once per round (3 total), got ${samasthitiCues.length}`,
+  );
+  check(
+    samasthitiCues.every(
+      (b) => b.subPoseLabel === 'Samasthiti' && b.breathNumber === 1,
+    ),
+    `flow: samasthiti must land on the Samasthiti return breath (breath 1 of ` +
+      `that step)`,
+  );
+  // The samasthiti cue is the last breath step of each round: the 14th breath of
+  // each of the 3 segments carries it and is labelled Samasthiti.
+  for (let seg = 0; seg < 3; seg++) {
+    const segBreaths = breaths.filter((b) => b.segmentIndex === seg);
+    const lastBreath = segBreaths[segBreaths.length - 1];
+    check(
+      segBreaths.length === 14 &&
+        lastBreath.subPoseLabel === 'Samasthiti' &&
+        lastBreath.voiceCueId === 'samasthiti',
+      `flow: Surya A round ${seg + 1} must be 14 breaths ending on the ` +
+        `Samasthiti breath carrying the samasthiti cue`,
+    );
+  }
+  // Only the 3 last_breath + 3 step_jump_forward + 3 samasthiti cues are tagged
+  // on breaths.
+  check(
+    breaths.filter((b) => b.voiceCueId !== undefined).length === 9,
+    `flow: exactly 9 breath cues expected (3 last_breath + 3 step_jump_forward ` +
+      `+ 3 samasthiti)`,
   );
 
   // Non-flow legacy expansion is unchanged: a plain flow-less pose emits no
@@ -457,29 +502,43 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
 }
 
 // ---------------------------------------------------------------------------
-// 8. Surya B flow (21 breaths): the FINAL Down Dog is the 5-breath hold, BOTH
+// 8. Surya B flow (22 breaths): the FINAL Down Dog is the 5-breath hold, BOTH
 //    intermediate Down Dogs are present, both Warrior A sides are labelled
-//    (right / left), and `step_jump_forward` fires on the jump-forward BREATH
-//    step (flow step 15) — NOT on any transition.
+//    (right / left), `step_jump_forward` fires on the jump-forward BREATH step
+//    (flow step 15), and the round closes with the `samasthiti` cue on the
+//    Samasthiti return breath (flow step 18) — NOT on any transition.
 // ---------------------------------------------------------------------------
 {
   const suryaB = poses.find((p) => p.id === 'surya_namaskara_b');
   check(
-    !!suryaB && suryaB.flow !== undefined && suryaB.flow.length === 17,
-    `flow: surya_namaskara_b should carry a 17-entry flow`,
+    !!suryaB && suryaB.flow !== undefined && suryaB.flow.length === 18,
+    `flow: surya_namaskara_b should carry an 18-entry flow`,
   );
   const flowSumB = suryaB?.flow?.reduce((n, s) => n + s.breaths, 0) ?? -1;
-  check(flowSumB === 21, `flow: Surya B flow must sum to 21 breaths (got ${flowSumB})`);
+  check(flowSumB === 22, `flow: Surya B flow must sum to 22 breaths (got ${flowSumB})`);
   check(
     flowSumB === (suryaB?.breaths ?? -2),
     `flow: Surya B flow breaths (${flowSumB}) must equal pose.breaths (${suryaB?.breaths})`,
   );
 
-  // The final flow step is the 5-breath Down Dog hold carrying last_breath.
+  // The final flow step is now the Samasthiti return breath carrying the
+  // samasthiti cue on its first (only) breath.
   const lastFlow = suryaB?.flow?.[suryaB.flow.length - 1];
   check(
-    !!lastFlow && lastFlow.label === 'Utkatasana' && lastFlow.breaths === 1,
-    `flow: Surya B's final flow step must be the closing Utkatasana (chair) breath`,
+    !!lastFlow &&
+      lastFlow.label === 'Samasthiti' &&
+      lastFlow.breaths === 1 &&
+      lastFlow.cueId === 'samasthiti' &&
+      lastFlow.cueOn === 'first',
+    `flow: Surya B's final flow step must be the Samasthiti return breath ` +
+      `carrying the samasthiti cue on its first breath`,
+  );
+  // The closing chair (Utkatasana) is now the second-to-last flow step.
+  const chairFlow = suryaB?.flow?.[(suryaB?.flow?.length ?? 0) - 2];
+  check(
+    !!chairFlow && chairFlow.label === 'Utkatasana' && chairFlow.breaths === 1,
+    `flow: Surya B's second-to-last flow step must be the closing Utkatasana ` +
+      `(chair) breath`,
   );
   // The 5-breath hold is flow index 13 (14th entry), with last_breath on 'last'.
   const holdStep = suryaB?.flow?.[13];
@@ -563,6 +622,37 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
     `flow: step_jump_forward must land on Surya B's jump-forward Ardha ` +
       `Uttanasana breath`,
   );
+  // samasthiti fires once per Surya B round (3 total), on the closing Samasthiti
+  // return breath, all within Surya B (poseIndex 0).
+  const samasthitiCuesB = b.filter((s) => s.voiceCueId === 'samasthiti');
+  check(
+    samasthitiCuesB.length === 3,
+    `flow: samasthiti should fire 3 times (once per Surya B round), got ` +
+      `${samasthitiCuesB.length}`,
+  );
+  check(
+    samasthitiCuesB.every(
+      (s) =>
+        s.poseIndex === 0 &&
+        s.subPoseLabel === 'Samasthiti' &&
+        s.breathNumber === 1,
+    ),
+    `flow: samasthiti must land on Surya B's closing Samasthiti return breath`,
+  );
+  // The samasthiti cue is the VERY LAST breath of each Surya B round: each of the
+  // 3 segments is 22 breaths and ends on the Samasthiti breath carrying the cue.
+  const suryaBBreaths = b.filter((s) => s.poseIndex === 0);
+  for (let seg = 0; seg < 3; seg++) {
+    const segBreaths = suryaBBreaths.filter((s) => s.segmentIndex === seg);
+    const lastBreath = segBreaths[segBreaths.length - 1];
+    check(
+      segBreaths.length === 22 &&
+        lastBreath.subPoseLabel === 'Samasthiti' &&
+        lastBreath.voiceCueId === 'samasthiti',
+      `flow: Surya B round ${seg + 1} must be 22 breaths ending on the ` +
+        `Samasthiti breath carrying the samasthiti cue`,
+    );
+  }
   // The next (flow-less) pose's breaths never carry a voice cue.
   check(
     b.filter((s) => s.poseIndex === 1).every((s) => s.voiceCueId === undefined),

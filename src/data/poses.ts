@@ -40,8 +40,8 @@
  *
  * === breaths ===
  * Most held asanas = 5 breaths (traditional). Salutation cards carry the whole
- * flow's breath count — the full authentic vinyasa incl. the exit (Surya A = 13,
- * Surya B = 21). Longer holds
+ * flow's breath count — the full authentic vinyasa incl. the exit and the
+ * closing Samasthiti return breath (Surya A = 14, Surya B = 22). Longer holds
  * (shoulderstand, headstand, savasana) use longer counts. Where a count is
  * genuinely ambiguous, 5 is used as a tunable default (numeric fields are never
  * marked NEEDS VERIFICATION).
@@ -78,14 +78,16 @@ export const poses: Pose[] = [
     category: 'sun_a',
     group: 'salutation',
     order: 10,
-    // 13 breaths per round — the FULL authentic Surya A vinyasa, exit included.
-    // 5 single lead-in movement breaths + the 5-breath Downward Dog hold + 3
-    // single exit movement breaths (jump forward / fold / rise up to Samasthiti),
-    // which are now COUNTED as breaths rather than folded into the transition
+    // 14 breaths per round — the FULL authentic Surya A vinyasa, exit included,
+    // now ending with the Samasthiti return breath. 5 single lead-in movement
+    // breaths + the 5-breath Downward Dog hold + 3 single exit movement breaths
+    // (jump forward / fold / rise up) + the final Samasthiti settling breath,
+    // which are all COUNTED as breaths rather than folded into the transition
     // out. `last_breath` fires on the LAST (5th) breath of the Down Dog hold;
-    // `step_jump_forward` fires on the FIRST breath of the jump-forward step (see
-    // its flow entry below). Must equal sum(flow.breaths) below. See flow.
-    breaths: 13,
+    // `step_jump_forward` fires on the FIRST breath of the jump-forward step; the
+    // `samasthiti` cue fires on the FIRST (only) breath of the closing Samasthiti
+    // step (see its flow entry below). Must equal sum(flow.breaths) below. See flow.
+    breaths: 14,
     sides: 1,
     repeat: 3,
     alwaysInclude: true,
@@ -93,9 +95,11 @@ export const poses: Pose[] = [
     drishti: 'Nasagrai (tip of the nose) — varies through the flow',
     isBasic: true,
     // Surya A vinyasa = 5 single movement breaths + the 5-breath Down Dog hold +
-    // 3 single exit breaths = 13 breaths. `last_breath` plays on the LAST (5th)
-    // breath of the hold; `step_jump_forward` plays on the FIRST breath of the
-    // jump-forward (Ardha Uttanasana) step as the data-driven breath cue.
+    // 3 single exit breaths + 1 Samasthiti return breath = 14 breaths.
+    // `last_breath` plays on the LAST (5th) breath of the hold; `step_jump_forward`
+    // plays on the FIRST breath of the jump-forward (Ardha Uttanasana) step; the
+    // `samasthiti` cue plays on the FIRST (only) breath of the closing Samasthiti
+    // step — all data-driven breath cues.
     flow: [
       { label: 'Urdhva Hastasana', breaths: 1 }, // 1 reach up
       { label: 'Uttanasana', breaths: 1 }, // 2 fold
@@ -116,7 +120,13 @@ export const poses: Pose[] = [
         cueOn: 'first',
       },
       { label: 'Uttanasana', breaths: 1 }, // 8 fold
-      { label: 'Urdhva Hastasana', breaths: 1 }, // 9 rise up, to Samasthiti
+      { label: 'Urdhva Hastasana', breaths: 1 }, // 9 rise up
+      {
+        label: 'Samasthiti', // 10 exhale to standing stillness, closing the round
+        breaths: 1,
+        cueId: 'samasthiti',
+        cueOn: 'first',
+      },
     ],
   },
   {
@@ -127,10 +137,11 @@ export const poses: Pose[] = [
     category: 'sun_b',
     group: 'salutation',
     order: 20,
-    // 21 breaths per round — the FULL authentic Surya B vinyasa, fully modeled
-    // (both intermediate Down Dogs INCLUDED, exit counted). Must equal
-    // sum(flow.breaths) below. See flow for the exact 21-breath structure.
-    breaths: 21,
+    // 22 breaths per round — the FULL authentic Surya B vinyasa, fully modeled
+    // (both intermediate Down Dogs INCLUDED, exit counted), now ending with the
+    // Samasthiti return breath. Must equal sum(flow.breaths) below. See flow for
+    // the exact 22-breath structure.
+    breaths: 22,
     sides: 1,
     repeat: 3,
     alwaysInclude: true,
@@ -138,13 +149,15 @@ export const poses: Pose[] = [
     drishti: 'Nasagrai (tip of the nose) — varies through the flow',
     isBasic: true,
     // Surya B vinyasa = 16 single movement breaths + the 5-breath FINAL Downward
-    // Dog hold = 21 breaths. This is now the strict canonical B: BOTH
-    // intermediate Down Dogs are present (one after each Warrior A side), the two
-    // Warrior A steps are side-labelled (right / left), and the exit (jump
-    // forward / fold / chair to Samasthiti) is counted as breaths. `last_breath`
-    // plays on the LAST (5th) breath of the final Down Dog hold;
-    // `step_jump_forward` plays on the FIRST breath of the jump-forward (Ardha
-    // Uttanasana) exit step as the data-driven breath cue.
+    // Dog hold + 1 Samasthiti return breath = 22 breaths. This is now the strict
+    // canonical B: BOTH intermediate Down Dogs are present (one after each Warrior
+    // A side), the two Warrior A steps are side-labelled (right / left), and the
+    // exit (jump forward / fold / chair) is counted as breaths, closing with the
+    // Samasthiti return. `last_breath` plays on the LAST (5th) breath of the final
+    // Down Dog hold; `step_jump_forward` plays on the FIRST breath of the
+    // jump-forward (Ardha Uttanasana) exit step; the `samasthiti` cue plays on the
+    // FIRST (only) breath of the closing Samasthiti step — all data-driven breath
+    // cues.
     flow: [
       { label: 'Utkatasana', breaths: 1 }, // 1  chair
       { label: 'Uttanasana', breaths: 1 }, // 2  fold
@@ -173,7 +186,13 @@ export const poses: Pose[] = [
         cueOn: 'first',
       },
       { label: 'Uttanasana', breaths: 1 }, // 16 fold
-      { label: 'Utkatasana', breaths: 1 }, // 17 chair, to Samasthiti
+      { label: 'Utkatasana', breaths: 1 }, // 17 chair
+      {
+        label: 'Samasthiti', // 18 exhale to standing stillness, closing the round
+        breaths: 1,
+        cueId: 'samasthiti',
+        cueOn: 'first',
+      },
     ],
   },
 
