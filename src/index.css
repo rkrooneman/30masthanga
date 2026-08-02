@@ -831,6 +831,12 @@ body {
   margin-top: 0.75rem;
 }
 
+/* The breath-cues switch stacks under the ambient one with matching spacing, so
+   the sound toggles read as a consistent group. */
+.home__breath-toggle {
+  margin-top: 0.75rem;
+}
+
 /* --------------------------------------------------------------------------
    Overview MAP view (the scannable landing grid)
    A calm, sectioned grid of pose thumbnails. 3 columns on phone width; each

@@ -12,7 +12,12 @@ import { poses } from '../data/poses';
 import { generatePractice } from '../lib/generatePractice';
 import { formatDuration, MIN_BREATH_SECONDS, MAX_BREATH_SECONDS } from '../lib/timing';
 import { mulberry32 } from '../lib/mulberry32';
-import { loadVoiceEnabled, saveVoiceEnabled } from '../lib/preferences';
+import {
+  loadVoiceEnabled,
+  saveVoiceEnabled,
+  loadBreathCuesEnabled,
+  saveBreathCuesEnabled,
+} from '../lib/preferences';
 import { getAmbientEnabled, setAmbientEnabled } from '../lib/ambientPref';
 import LotusMark from '../components/LotusMark';
 import PracticeWeek from '../components/PracticeWeek';
@@ -55,6 +60,19 @@ function HomeScreen({
   const handleAmbientToggle = (next: boolean) => {
     setAmbientEnabledState(next);
     setAmbientEnabled(next);
+  };
+
+  // Breath-cues toggle. Like voice guidance, this is a purely Home-side control:
+  // breathCues.ts reads the preference fresh from storage at play time, so it
+  // never needs to thread through App or a pub/sub. Seeded from storage,
+  // persisted on change.
+  const [breathCuesEnabled, setBreathCuesEnabled] = useState<boolean>(
+    loadBreathCuesEnabled,
+  );
+
+  const handleBreathCuesToggle = (next: boolean) => {
+    setBreathCuesEnabled(next);
+    saveBreathCuesEnabled(next);
   };
 
   // Close the About dialog on Escape while it's open.
@@ -179,6 +197,25 @@ function HomeScreen({
           </label>
           <p className="basics-toggle__hint">
             Plays a calm ambient track during practice.
+          </p>
+        </div>
+
+        <div className="basics-toggle home__breath-toggle">
+          <label className="basics-toggle__label" htmlFor="breath-cues-switch">
+            <span className="basics-toggle__text">Breath cues</span>
+            <input
+              type="checkbox"
+              id="breath-cues-switch"
+              className="basics-toggle__input"
+              checked={breathCuesEnabled}
+              onChange={(e) => handleBreathCuesToggle(e.target.checked)}
+            />
+            <span className="basics-toggle__track" aria-hidden="true">
+              <span className="basics-toggle__thumb" />
+            </span>
+          </label>
+          <p className="basics-toggle__hint">
+            Soft inhale and exhale sounds as you breathe.
           </p>
         </div>
       </div>

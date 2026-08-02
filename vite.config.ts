@@ -47,11 +47,12 @@ export default defineConfig({
       },
       workbox: {
         // Precache the app shell plus the SMALL, essential audio: the spoken
-        // pose-name / switch-sides / Namaste voice clips and the completion bell
-        // (public/audio/**, ~1.3 MB total), so guided-practice audio works fully
-        // offline. The large background-music track (public/music/**, ~36 MB) is
-        // deliberately EXCLUDED from precache so first load stays light; it is
-        // runtime-cached on first play instead (see runtimeCaching below).
+        // pose-name / switch-sides / Namaste voice clips (.mp3), the completion
+        // bell (.mp3), and the soft inhale/exhale breath-cue tones (.wav) under
+        // public/audio/**, so guided-practice audio works fully offline. The
+        // large background-music track (public/music/**, ~36 MB) is deliberately
+        // EXCLUDED from precache so first load stays light; it is runtime-cached
+        // on first play instead (see runtimeCaching below).
         globPatterns: [
           '**/*.{js,css,html,svg,png,ico,woff2}',
           'audio/**/*.mp3',

@@ -57,6 +57,7 @@ import {
   stopVoice,
   unlockVoice,
 } from '../lib/voice';
+import { playInhale, playExhale, unlockBreathCues } from '../lib/breathCues';
 import { loadSoundEnabled } from '../lib/preferences';
 import { recordPractice } from '../lib/practiceLog';
 import { OPENING_COUNTDOWN_SECONDS, formatDuration } from '../lib/timing';
@@ -262,8 +263,21 @@ function GuidedScreen({
     if (step.kind === 'breath') {
       // Start expanding immediately.
       setPhase('inhale');
-      // Flip to exhale at the inhale/exhale boundary...
-      schedule(() => setPhase('exhale'), step.inhaleMs);
+      // Play the soft inhale tone at the START of the inhale. This is guarded to
+      // breath steps only (never transitions), and the effect's early returns
+      // above ensure it never fires during the opening "get ready" countdown
+      // (starting), while paused, or after completion. On resume the breath
+      // genuinely restarts from its inhale, so replaying the tone here is
+      // intentional. playInhale self-guards on the sound + breath-cues toggles.
+      playInhale();
+      // Flip to exhale at the inhale/exhale boundary, and play the exhale tone
+      // there — inside the scheduled callback, so it fires only when the exhale
+      // phase is actually reached (not immediately).
+      schedule(() => {
+        setPhase('exhale');
+        // playExhale self-guards on the sound + breath-cues toggles.
+        playExhale();
+      }, step.inhaleMs);
       // ...and advance when the whole breath is done.
       schedule(advance, step.inhaleMs + step.exhaleMs);
     } else {
@@ -351,6 +365,9 @@ function GuidedScreen({
     // Warm up MP3 <audio> playback within the same gesture window so the first
     // spoken pose name is more likely to be permitted on mobile.
     unlockVoice();
+    // Same warm-up for the breath-cue WAVs, so the first inhale tone is more
+    // likely to be permitted on mobile.
+    unlockBreathCues();
   }, []);
 
   // --- spoken pose-name narration --------------------------------------------

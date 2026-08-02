@@ -17,6 +17,7 @@ const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
 const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
 const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
+const BREATH_CUES_ENABLED_KEY = 'ashtanga30.breathCuesEnabled';
 const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
 
 /**
@@ -104,6 +105,30 @@ export function loadAmbientEnabled(): boolean {
 export function saveAmbientEnabled(enabled: boolean): void {
   try {
     window.localStorage.setItem(AMBIENT_ENABLED_KEY, enabled ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Whether the soft breath cues (inhale/exhale tones played on each guided
+ * breath) are enabled. Like ambient, this defaults to OFF (false): breath cues
+ * are an opt-in extra, so only an explicit stored "1" enables them. Safe on
+ * storage failure (returns false). Note that breath cues additionally require
+ * sound to be enabled (see breathCues.ts).
+ */
+export function loadBreathCuesEnabled(): boolean {
+  try {
+    return window.localStorage.getItem(BREATH_CUES_ENABLED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Persist the breath-cues-enabled preference. Silently no-ops on storage failure. */
+export function saveBreathCuesEnabled(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(BREATH_CUES_ENABLED_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
   }
