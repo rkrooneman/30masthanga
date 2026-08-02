@@ -40,9 +40,15 @@
  *
  * === breaths ===
  * Most held asanas = 5 breaths (traditional). Salutation cards carry the whole
- * flow's breath count — the full authentic vinyasa incl. the exit and the
- * closing Samasthiti return breath (Surya A = 14, Surya B = 22). Longer holds
- * (shoulderstand, headstand, savasana) use longer counts. Where a count is
+ * flow's WHOLE-BREATH-EQUIVALENT, under the half-breath movement model: each
+ * vinyasa MOVEMENT is a single breath PHASE (one inhale OR one exhale, lasting
+ * `breathSeconds / 2`), so it counts as HALF a breath; only the Downward Dog is
+ * HELD for whole breaths. A Surya A round is 9 movement half-breaths + a
+ * 5-breath Down Dog hold = 9.5 breaths; a Surya B round is 17 movement
+ * half-breaths + a 5-breath Down Dog hold = 13.5 breaths. These fractional
+ * counts are the real duration in breaths, so `poseHoldSeconds` (breaths *
+ * breathSeconds) stays correct with no special-casing. Longer holds
+ * (shoulderstand, headstand, savasana) use longer whole counts. Where a count is
  * genuinely ambiguous, 5 is used as a tunable default (numeric fields are never
  * marked NEEDS VERIFICATION).
  *
@@ -78,51 +84,55 @@ export const poses: Pose[] = [
     category: 'sun_a',
     group: 'salutation',
     order: 10,
-    // 14 breaths per round — the FULL authentic Surya A vinyasa, exit included,
-    // now ending with the Samasthiti return breath. 5 single lead-in movement
-    // breaths + the 5-breath Downward Dog hold + 3 single exit movement breaths
-    // (jump forward / fold / rise up) + the final Samasthiti settling breath,
-    // which are all COUNTED as breaths rather than folded into the transition
-    // out. `last_breath` fires on the LAST (5th) breath of the Down Dog hold;
-    // `step_jump_forward` fires on the FIRST breath of the jump-forward step; the
-    // `samasthiti` cue fires on the FIRST (only) breath of the closing Samasthiti
-    // step (see its flow entry below). Must equal sum(flow.breaths) below. See flow.
-    breaths: 14,
+    // 9.5 breaths per round (half-breath movement model) — the FULL authentic
+    // Surya A vinyasa. Each vinyasa MOVEMENT is a single breath PHASE (one inhale
+    // OR one exhale, `breathSeconds / 2`), so it counts as HALF a breath; only
+    // the Downward Dog is HELD for 5 whole breaths. 9 movement phases (=4.5
+    // breaths) + the 5-breath Down Dog hold = 9.5 whole-breath-equivalents.
+    // `last_breath` fires on the LAST (5th) breath of the Down Dog hold;
+    // `step_jump_forward` fires on the jump-forward inhale movement; the
+    // `samasthiti` cue fires on the final Samasthiti exhale movement. The flow's
+    // half-breaths (movements=1 each, hold=5*2) must equal breaths*2=19 (enforced
+    // by validate-poses.ts). See flow below.
+    breaths: 9.5,
     sides: 1,
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
     drishti: 'Nasagrai (tip of the nose) — varies through the flow',
     isBasic: true,
-    // Surya A vinyasa = 5 single movement breaths + the 5-breath Down Dog hold +
-    // 3 single exit breaths + 1 Samasthiti return breath = 14 breaths.
+    // Surya A vinyasa (half-breath movement model): 9 single-phase MOVEMENTS
+    // (alternating inhale/exhale) around a 5-breath Down Dog HOLD. Movement 6 is
+    // the EXHALE INTO Down Dog modelled AS the hold's first breath — i.e. the
+    // hold IS the Down Dog, entered on that exhale and held for 5 whole breaths.
     // `last_breath` plays on the LAST (5th) breath of the hold; `step_jump_forward`
-    // plays on the FIRST breath of the jump-forward (Ardha Uttanasana) step; the
-    // `samasthiti` cue plays on the FIRST (only) breath of the closing Samasthiti
-    // step — all data-driven breath cues.
+    // plays on the jump-forward inhale movement (step 7); the `samasthiti` cue
+    // plays on the closing Samasthiti exhale movement (step 10) — all data-driven.
     flow: [
-      { label: 'Urdhva Hastasana', breaths: 1 }, // 1 reach up
-      { label: 'Uttanasana', breaths: 1 }, // 2 fold
-      { label: 'Ardha Uttanasana', breaths: 1 }, // 3 halfway lift
-      { label: 'Chaturanga Dandasana', breaths: 1 }, // 4 jump back
-      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 5 up dog
+      { label: 'Urdhva Hastasana', phase: 'inhale', breaths: 1 }, // 1 inhale — reach up
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 2 exhale — fold
+      { label: 'Ardha Uttanasana', phase: 'inhale', breaths: 1 }, // 3 inhale — halfway lift
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 4 exhale — jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 5 inhale — up dog
       {
-        label: 'Adho Mukha Svanasana', // 6 down dog — the 5-breath hold
+        label: 'Adho Mukha Svanasana', // 6 down dog — the 5-breath HOLD (entered on the exhale)
         breaths: 5,
         hold: true,
         cueId: 'last_breath',
         cueOn: 'last',
       },
       {
-        label: 'Ardha Uttanasana', // 7 jump forward, halfway lift
+        label: 'Ardha Uttanasana', // 7 inhale — jump forward, halfway lift
+        phase: 'inhale',
         breaths: 1,
         cueId: 'step_jump_forward',
         cueOn: 'first',
       },
-      { label: 'Uttanasana', breaths: 1 }, // 8 fold
-      { label: 'Urdhva Hastasana', breaths: 1 }, // 9 rise up
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 8 exhale — fold
+      { label: 'Urdhva Hastasana', phase: 'inhale', breaths: 1 }, // 9 inhale — rise up
       {
-        label: 'Samasthiti', // 10 exhale to standing stillness, closing the round
+        label: 'Samasthiti', // 10 exhale — return to standing stillness, closing the round
+        phase: 'exhale',
         breaths: 1,
         cueId: 'samasthiti',
         cueOn: 'first',
@@ -137,58 +147,64 @@ export const poses: Pose[] = [
     category: 'sun_b',
     group: 'salutation',
     order: 20,
-    // 22 breaths per round — the FULL authentic Surya B vinyasa, fully modeled
-    // (both intermediate Down Dogs INCLUDED, exit counted), now ending with the
-    // Samasthiti return breath. Must equal sum(flow.breaths) below. See flow for
-    // the exact 22-breath structure.
-    breaths: 22,
+    // 13.5 breaths per round (half-breath movement model) — the FULL authentic
+    // Surya B vinyasa, fully modeled (both intermediate Down Dogs present as
+    // single exhale movements, only the FINAL Down Dog is HELD). Each vinyasa
+    // MOVEMENT is a single breath PHASE (one inhale OR one exhale, `breathSeconds
+    // / 2`), counting as HALF a breath. 17 movement phases (=8.5 breaths) + the
+    // 5-breath FINAL Down Dog hold = 13.5 whole-breath-equivalents. The flow's
+    // half-breaths (movements=1 each, hold=5*2) must equal breaths*2=27 (enforced
+    // by validate-poses.ts). See flow below.
+    breaths: 13.5,
     sides: 1,
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
     drishti: 'Nasagrai (tip of the nose) — varies through the flow',
     isBasic: true,
-    // Surya B vinyasa = 16 single movement breaths + the 5-breath FINAL Downward
-    // Dog hold + 1 Samasthiti return breath = 22 breaths. This is now the strict
-    // canonical B: BOTH intermediate Down Dogs are present (one after each Warrior
-    // A side), the two Warrior A steps are side-labelled (right / left), and the
-    // exit (jump forward / fold / chair) is counted as breaths, closing with the
-    // Samasthiti return. `last_breath` plays on the LAST (5th) breath of the final
-    // Down Dog hold; `step_jump_forward` plays on the FIRST breath of the
-    // jump-forward (Ardha Uttanasana) exit step; the `samasthiti` cue plays on the
-    // FIRST (only) breath of the closing Samasthiti step — all data-driven breath
-    // cues.
+    // Surya B vinyasa (half-breath movement model): 17 single-phase MOVEMENTS
+    // (alternating inhale/exhale) with the FINAL Down Dog as the 5-breath HOLD.
+    // This is the strict canonical B: BOTH intermediate Down Dogs are present as
+    // single EXHALE movements (one after each Warrior A side, NOT held), the two
+    // Warrior A steps are side-labelled (right / left), and the exit (jump forward
+    // / fold / chair) is counted as movements, closing with the Samasthiti return.
+    // `last_breath` plays on the LAST (5th) breath of the final Down Dog hold;
+    // `step_jump_forward` plays on the jump-forward inhale movement (step 15); the
+    // `samasthiti` cue plays on the closing Samasthiti exhale movement (step 18) —
+    // all data-driven.
     flow: [
-      { label: 'Utkatasana', breaths: 1 }, // 1  chair
-      { label: 'Uttanasana', breaths: 1 }, // 2  fold
-      { label: 'Ardha Uttanasana', breaths: 1 }, // 3  halfway lift
-      { label: 'Chaturanga Dandasana', breaths: 1 }, // 4  jump back
-      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 5  up dog
-      { label: 'Adho Mukha Svanasana', breaths: 1 }, // 6  down dog (single)
-      { label: 'Virabhadrasana A (right)', breaths: 1 }, // 7  warrior 1 right
-      { label: 'Chaturanga Dandasana', breaths: 1 }, // 8  jump back
-      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 9  up dog
-      { label: 'Adho Mukha Svanasana', breaths: 1 }, // 10 down dog (intermediate)
-      { label: 'Virabhadrasana A (left)', breaths: 1 }, // 11 warrior 1 left
-      { label: 'Chaturanga Dandasana', breaths: 1 }, // 12 jump back
-      { label: 'Urdhva Mukha Svanasana', breaths: 1 }, // 13 up dog
+      { label: 'Utkatasana', phase: 'inhale', breaths: 1 }, // 1  inhale — chair
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 2  exhale — fold
+      { label: 'Ardha Uttanasana', phase: 'inhale', breaths: 1 }, // 3  inhale — halfway lift
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 4  exhale — jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 5  inhale — up dog
+      { label: 'Adho Mukha Svanasana', phase: 'exhale', breaths: 1 }, // 6  exhale — down dog (single)
+      { label: 'Virabhadrasana A (right)', phase: 'inhale', breaths: 1 }, // 7  inhale — warrior 1 right
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 8  exhale — jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 9  inhale — up dog
+      { label: 'Adho Mukha Svanasana', phase: 'exhale', breaths: 1 }, // 10 exhale — down dog (intermediate)
+      { label: 'Virabhadrasana A (left)', phase: 'inhale', breaths: 1 }, // 11 inhale — warrior 1 left
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 12 exhale — jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 13 inhale — up dog
       {
-        label: 'Adho Mukha Svanasana', // 14 final downward dog — the 5-breath hold
+        label: 'Adho Mukha Svanasana', // 14 final downward dog — the 5-breath HOLD (entered on the exhale)
         breaths: 5,
         hold: true,
         cueId: 'last_breath',
         cueOn: 'last',
       },
       {
-        label: 'Ardha Uttanasana', // 15 jump forward, halfway lift
+        label: 'Ardha Uttanasana', // 15 inhale — jump forward, halfway lift
+        phase: 'inhale',
         breaths: 1,
         cueId: 'step_jump_forward',
         cueOn: 'first',
       },
-      { label: 'Uttanasana', breaths: 1 }, // 16 fold
-      { label: 'Utkatasana', breaths: 1 }, // 17 chair
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 16 exhale — fold
+      { label: 'Utkatasana', phase: 'inhale', breaths: 1 }, // 17 inhale — chair
       {
-        label: 'Samasthiti', // 18 exhale to standing stillness, closing the round
+        label: 'Samasthiti', // 18 exhale — return to standing stillness, closing the round
+        phase: 'exhale',
         breaths: 1,
         cueId: 'samasthiti',
         cueOn: 'first',

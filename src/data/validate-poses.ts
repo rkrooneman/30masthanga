@@ -66,9 +66,25 @@ for (const p of poses) {
   if (p.sides !== 1 && p.sides !== 2) {
     errors.push(`sides must be 1 or 2 on pose "${p.id}" (got ${p.sides})`);
   }
-  if (!Number.isInteger(p.breaths) || p.breaths <= 0) {
+  // `breaths` must be positive. Non-flow poses must be whole breaths; a
+  // salutation FLOW pose may be fractional (the half-breath movement model:
+  // movements count 0.5, holds count whole breaths — e.g. Surya A = 9.5). Flow
+  // poses are additionally required to be a whole number of HALF-breaths (breaths
+  // * 2 integer) so the flow can be built from whole half-breath units.
+  const hasFlow = Boolean(p.flow && p.flow.length > 0);
+  if (typeof p.breaths !== 'number' || p.breaths <= 0) {
     errors.push(
-      `breaths must be a positive integer on pose "${p.id}" (got ${p.breaths})`,
+      `breaths must be a positive number on pose "${p.id}" (got ${p.breaths})`,
+    );
+  } else if (!hasFlow && !Number.isInteger(p.breaths)) {
+    errors.push(
+      `breaths must be a positive integer on non-flow pose "${p.id}" ` +
+        `(got ${p.breaths})`,
+    );
+  } else if (hasFlow && !Number.isInteger(p.breaths * 2)) {
+    errors.push(
+      `breaths must be a whole number of half-breaths on flow pose "${p.id}" ` +
+        `(got ${p.breaths}, i.e. ${p.breaths * 2} half-breaths)`,
     );
   }
   if (!Number.isInteger(p.repeat) || p.repeat <= 0) {
@@ -78,27 +94,45 @@ for (const p of poses) {
   }
 }
 
-// --- flow: if a pose carries a vinyasa `flow`, its breaths must sum to the
-// card's `breaths` so the timing budget (poseHoldSeconds / sequenceDuration) is
-// unaffected by the flow expansion. Also sanity-check each flow step's fields. ---
+// --- flow: if a pose carries a vinyasa `flow`, its total HALF-breaths must
+// equal the card's `breaths * 2` (half-breath movement model), so the timing
+// budget (poseHoldSeconds / sequenceDuration) is unaffected by the flow
+// expansion. A single-phase MOVEMENT (`phase` set) contributes 1 half-breath; a
+// whole-breath HOLD (`phase` absent) contributes `breaths * 2` half-breaths.
+// Also sanity-check each flow step's fields. ---
 for (const p of poses) {
   if (!p.flow) continue;
   if (p.flow.length === 0) {
     errors.push(`Pose "${p.id}" has an empty flow array`);
     continue;
   }
-  let flowBreaths = 0;
+  let flowHalfBreaths = 0;
   for (const [i, step] of p.flow.entries()) {
     if (!step.label || step.label.trim() === '') {
       errors.push(`Pose "${p.id}" flow[${i}] has an empty label`);
+    }
+    if (
+      step.phase !== undefined &&
+      step.phase !== 'inhale' &&
+      step.phase !== 'exhale'
+    ) {
+      errors.push(
+        `Pose "${p.id}" flow[${i}] phase must be 'inhale' or 'exhale' ` +
+          `(got ${String(step.phase)})`,
+      );
     }
     if (!Number.isInteger(step.breaths) || step.breaths <= 0) {
       errors.push(
         `Pose "${p.id}" flow[${i}] breaths must be a positive integer ` +
           `(got ${step.breaths})`,
       );
+    } else if (step.phase !== undefined) {
+      // MOVEMENT: a single half-breath phase regardless of `breaths` (which is
+      // pinned to 1 for schema consistency but ignored for counting).
+      flowHalfBreaths += 1;
     } else {
-      flowBreaths += step.breaths;
+      // HOLD: whole breaths, each a full inhale+exhale = 2 half-breaths.
+      flowHalfBreaths += step.breaths * 2;
     }
     if (
       step.cueOn !== undefined &&
@@ -111,10 +145,13 @@ for (const p of poses) {
       );
     }
   }
-  if (flowBreaths !== p.breaths) {
+  // card.breaths is the whole-breath-equivalent, so breaths * 2 = total
+  // half-breaths.
+  const expectedHalfBreaths = p.breaths * 2;
+  if (flowHalfBreaths !== expectedHalfBreaths) {
     errors.push(
-      `Pose "${p.id}" flow breaths sum (${flowBreaths}) must equal ` +
-        `pose.breaths (${p.breaths})`,
+      `Pose "${p.id}" flow half-breaths (${flowHalfBreaths}) must equal ` +
+        `pose.breaths * 2 (${expectedHalfBreaths}) — half-breath movement model`,
     );
   }
 }

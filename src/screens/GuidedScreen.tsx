@@ -8,9 +8,16 @@
  * === timer lifecycle (the important part) ===
  * A single `useEffect` keyed on `[stepIndex, paused, complete]` owns the timers
  * for the CURRENT step. It reads the step and schedules it:
- *   - breath step: sets phase='inhale' immediately, schedules a timeout at
- *     `inhaleMs` to flip phase='exhale', and a timeout at `inhaleMs + exhaleMs`
- *     to advance to the next step.
+ *   - single-phase MOVEMENT breath step (`singlePhase` set — a vinyasa step):
+ *     sets phase to that single phase, plays the matching breath tone, and
+ *     schedules a timeout at half a breath (`breathSeconds / 2`) to advance. It
+ *     does NOT schedule the opposite phase — the NEXT movement's opposite phase
+ *     continues the breath rhythm (inhale expands, the following exhale
+ *     contracts), and `advance` leaves the phase in place so the circle flows
+ *     smoothly rather than resetting between movements.
+ *   - full breath step (a Down Dog HOLD breath or any non-flow breath): sets
+ *     phase='inhale' immediately, schedules a timeout at `inhaleMs` to flip
+ *     phase='exhale', and a timeout at `inhaleMs + exhaleMs` to advance.
  *   - transition step: shows a per-second countdown (a chain of 1s timeouts)
  *     and a timeout at `seconds * 1000` to advance.
  * All timeout ids are held in a ref array; the effect's cleanup clears every one
@@ -23,9 +30,10 @@
  * === pause / resume ===
  * `paused` short-circuits the effect (it schedules nothing) and cleanup halts
  * the live timers. Resuming re-runs the effect, which RESTARTS the current step
- * from its beginning (phase back to 'inhale', full inhale+exhale scheduled).
+ * from its beginning: a full breath resumes at its inhale (full inhale+exhale
+ * scheduled); a single-phase movement resumes at the start of that one phase.
  * This is the deliberate, simple, leak-free semantic: a paused breath resumes at
- * the start of that same breath rather than mid-breath.
+ * the start of that same breath/phase rather than mid-breath.
  *
  * === prev / next pose ===
  * Navigation jumps to the FIRST breath step of the previous/next POSE (not the
@@ -255,12 +263,35 @@ function GuidedScreen({
     const advance = () => {
       if (stepIndex + 1 >= stepCount) setComplete(true);
       else {
-        setPhase('inhale');
+        // Do NOT reset phase here: the NEXT step's effect run sets its own
+        // initial phase (a full breath restarts at 'inhale'; a single-phase
+        // movement sets its own phase). Leaving the current phase in place lets
+        // the BreathingCircle flow smoothly from one movement's phase into the
+        // next movement's opposite phase without a jarring mid-flow reset.
         setStepIndex((i) => i + 1);
       }
     };
 
-    if (step.kind === 'breath') {
+    if (step.kind === 'breath' && step.singlePhase !== undefined) {
+      // Single-phase MOVEMENT (a vinyasa step): play ONLY this phase for half a
+      // breath, then advance. The NEXT movement's opposite phase continues the
+      // rhythm — an inhale movement expands the circle, the following exhale
+      // movement contracts it — so we deliberately do NOT schedule the opposite
+      // phase here. The active half's ms is inhaleMs for an inhale movement and
+      // exhaleMs for an exhale movement (the other is 0).
+      const phaseForMovement = step.singlePhase;
+      setPhase(phaseForMovement);
+      // Play the matching breath tone at the START of this single phase. Guarded
+      // to breath steps only, never during starting/paused/complete (early
+      // returns above). Both self-guard on the sound + breath-cues toggles.
+      if (phaseForMovement === 'inhale') playInhale();
+      else playExhale();
+      const movementMs =
+        phaseForMovement === 'inhale' ? step.inhaleMs : step.exhaleMs;
+      schedule(advance, movementMs);
+    } else if (step.kind === 'breath') {
+      // Full breath (a Down Dog HOLD breath or any non-flow breath): inhale then
+      // exhale, exactly as before.
       // Start expanding immediately.
       setPhase('inhale');
       // Play the soft inhale tone at the START of the inhale. This is guarded to
@@ -425,10 +456,10 @@ function GuidedScreen({
 
   // --- prerecorded vinyasa voice cues ----------------------------------------
   // The salutation flow tags certain BREATH steps with a `voiceCueId`:
-  // `last_breath` on the Down Dog hold's 5th breath, and `step_jump_forward` on
-  // the jump-forward (Ardha Uttanasana) exit step's first breath. Fire that clip
-  // exactly once when its step becomes current. Only breath steps carry cues —
-  // transitions never do.
+  // `last_breath` on the Down Dog HOLD's 5th breath, `step_jump_forward` on the
+  // jump-forward (Ardha Uttanasana) inhale MOVEMENT, and `samasthiti` on the
+  // closing Samasthiti exhale MOVEMENT. Fire that clip exactly once when its step
+  // becomes current. Only breath steps carry cues — transitions never do.
   //
   // A ref of the last step index we cued guards against double-firing across
   // pause/resume (which re-runs effects but leaves `stepIndex` unchanged). This
@@ -646,6 +677,14 @@ function GuidedScreen({
 
   const isBreath = currentStep?.kind === 'breath';
   const isTransition = currentStep?.kind === 'transition';
+  // A single-phase MOVEMENT (a vinyasa step, `singlePhase` set) vs a full breath
+  // (a Down Dog HOLD breath or a non-flow breath). The on-screen "Breath N of M"
+  // counter is shown only for FULL breaths (holds / non-flow); during a movement
+  // we show just the phase word + sub-pose label, since a movement is a single
+  // half-breath with no meaningful "N of M".
+  const isMovement =
+    currentStep?.kind === 'breath' && currentStep.singlePhase !== undefined;
+  const isHoldOrFullBreath = isBreath && !isMovement;
 
   // The pose shown above the circle: for a breath it's the current pose; for a
   // transition it's the pose we're heading into.
@@ -737,7 +776,10 @@ function GuidedScreen({
 
         <div className="guided-player__meta">
           {starting && <p className="guided-player__cue">Get ready&hellip;</p>}
-          {!starting && isBreath && (
+          {/* Breath counter: only for full breaths (Down Dog hold / non-flow).
+              Hidden during single-phase movements — a movement is one
+              half-breath with no meaningful "N of M". */}
+          {!starting && isHoldOrFullBreath && (
             <p className="guided-player__breath-count">
               Breath {currentStep.breathNumber} of {currentStep.breathCount}
             </p>

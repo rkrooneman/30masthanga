@@ -147,7 +147,13 @@ export function transitionSecondsBetween(
  *
  * Counts BOTH sides: `breaths` is per-side, so a 5-breath / 2-side pose at
  * 5s/breath holds for 5 * 2 * 5 = 50s. For salutation cards `sides` is 1 and
- * `breaths` already carries the whole-flow count, so the math still holds.
+ * `breaths` is the whole-flow WHOLE-BREATH-EQUIVALENT (half-breath movement
+ * model): each single-phase movement counts as 0.5 and the Down Dog hold as its
+ * whole breaths, so `breaths` is fractional (Surya A = 9.5, Surya B = 13.5) and
+ * equals the flow's true duration in breaths. `breaths * breathSeconds`
+ * therefore gives the correct per-round flow time with no special-casing —
+ * exactly matching the sum the guided plan builds from half-breath movements +
+ * whole-breath hold breaths.
  *
  * Counts ALL repeats: a card performed `repeat` times holds for
  * breaths * sides * repeat * breathSeconds.

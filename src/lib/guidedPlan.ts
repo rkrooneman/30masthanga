@@ -11,8 +11,12 @@
  * === the practice model ===
  * Each pose is performed `sides` (1 or 2) times AND `repeat` (salutations = 3)
  * times back-to-back, so a pose is split into `sides * repeat` SEGMENTS. Each
- * segment is `breaths` breaths. Every breath is inhale-then-exhale on a 50/50
+ * segment is `breaths` breaths. A normal breath is inhale-then-exhale on a 50/50
  * split (at 5s/breath: 2.5s in, 2.5s out).
+ *
+ * Salutation flows are the exception: a vinyasa MOVEMENT is a single breath
+ * PHASE (one inhale OR one exhale, `breathSeconds / 2`) — see the salutation
+ * section below.
  *
  * A countdown is inserted BEFORE every segment except the very first segment of
  * the whole practice — that covers switching sides, moving to the next
@@ -47,31 +51,43 @@
  * The unit test asserts this exact delta from the catalog. Everything here is
  * PURE so it stays fully unit-testable.
  *
- * === salutation vinyasa flows (voice cues + sub-pose labels) ===
+ * === salutation vinyasa flows (half-breath movements + whole-breath holds) ===
  * A pose MAY carry an ordered `flow` (see FlowStep) — currently the two Sun
  * Salutations. When it does, each SEGMENT (round) is expanded by walking the
- * flow rather than emitting `pose.breaths` identical breaths:
- *   - each flow step contributes its own `breaths` BreathSteps, tagged with
- *     `subPoseLabel = flowStep.label` so the guided screen can show the current
- *     sub-pose ("Adho Mukha Svanasana") instead of just "Surya Namaskara A";
- *   - `breathNumber`/`breathCount` count WITHIN the flow step, so the Down Dog
- *     hold reads "Breath 1..5 of 5" (chosen for a meaningful on-screen counter
- *     during the hold — this is the ONLY behavioural change to those fields, and
- *     only for flow poses; non-flow poses keep whole-segment counts);
- *   - a flow step's `cueId` is placed on the FIRST or LAST breath of that step
- *     per `cueOn`, as `BreathStep.voiceCueId`, to fire a prerecorded clip at
- *     that exact breath (used for `last_breath` on the Down Dog's 5th breath).
+ * flow rather than emitting `pose.breaths` identical breaths. A flow step is
+ * EITHER a single half-breath MOVEMENT (`phase` set) or a whole-breath HOLD
+ * (`phase` absent):
+ *   - a MOVEMENT emits ONE BreathStep that plays only its `phase` for
+ *     `breathSeconds / 2` (a single inhale OR exhale). Its `singlePhase` field
+ *     carries the phase so the player schedules only that one phase (not
+ *     inhale+exhale) and advances after half a breath. `inhaleMs`/`exhaleMs` are
+ *     set so the ACTIVE half equals `breathSeconds / 2` and the other is 0. The
+ *     breath counter is HIDDEN for movements (breathNumber/breathCount are still
+ *     set to 1/1 for completeness, but the player suppresses the counter for
+ *     single-phase steps and shows only the phase word + sub-pose label);
+ *   - a HOLD emits `breaths` full inhale+exhale BreathSteps (no `singlePhase`),
+ *     with `breathNumber`/`breathCount` counting WITHIN the hold so the Down Dog
+ *     reads "Breath 1..5 of 5" — the ONLY place the counter shows during a flow;
+ *   - every emitted step is tagged with `subPoseLabel = flowStep.label` so the
+ *     guided screen shows the current sub-pose ("Adho Mukha Svanasana") instead
+ *     of just "Surya Namaskara A";
+ *   - a flow step's `cueId` becomes `BreathStep.voiceCueId`: for a HOLD it is
+ *     placed on the first/last breath per `cueOn` (e.g. `last_breath` on the
+ *     Down Dog's 5th); for a MOVEMENT it fires on the single phase.
  *
- * The `step_jump_forward` cue is a data-driven BREATH cue: the salutation flow
- * places it on the jump-forward (Ardha Uttanasana) exit step with
- * `cueOn: 'first'`, so `emitSegmentBreaths` tags it onto the FIRST breath of
- * that step (like any other flow-step cue). It therefore fires once per round,
- * on the jump-forward breath itself, rather than on a TransitionStep. No
- * transition carries a voice cue.
+ * The `step_jump_forward` cue is a data-driven MOVEMENT cue on the jump-forward
+ * (Ardha Uttanasana) inhale movement; the `samasthiti` cue is on the closing
+ * Samasthiti exhale movement. They fire once per round on those movements, never
+ * on a TransitionStep. No transition carries a voice cue.
  *
- * Because sum(flow.breaths) === pose.breaths (validated in validate-poses.ts),
- * the breath COUNT per segment is unchanged, so `totalMs` and the timing.ts
- * reconciliation identity are entirely unaffected by the flow expansion.
+ * === duration accounting ===
+ * Each MOVEMENT adds `breathSeconds / 2 * 1000` ms; each HOLD breath adds
+ * `breathSeconds * 1000` ms (inhale+exhale). Because a card's `breaths` is
+ * defined as the whole-breath-equivalent (movements count 0.5, holds count their
+ * whole breaths — validated in validate-poses.ts), the per-segment duration
+ * equals `pose.breaths * breathSeconds` exactly, so `totalMs` and the timing.ts
+ * `poseHoldSeconds` reconciliation identity stay in agreement with fractional
+ * `breaths` representing real time.
  */
 
 import type { Pose } from '../types/pose';
@@ -93,20 +109,39 @@ export interface BreathStep {
   /** Human label for the segment, e.g. "First side", "Round 2 of 3", or null. */
   segmentLabel: string | null;
   /**
-   * 1-based breath number. For a flow pose this counts WITHIN the current flow
-   * step (so the Down Dog hold reads 1..5); otherwise it counts within the
-   * whole segment.
+   * 1-based breath number. For a flow HOLD this counts WITHIN the hold (so the
+   * Down Dog reads 1..5); for a single-phase MOVEMENT it is 1; otherwise it
+   * counts within the whole segment. The player HIDES this counter for
+   * single-phase movements (`singlePhase` set) and shows it only for holds and
+   * non-flow breaths.
    */
   breathNumber: number;
   /**
-   * Total breaths for the counter. For a flow pose this is the current flow
-   * step's `breaths` (5 for the Down Dog hold); otherwise it is `pose.breaths`.
+   * Total breaths for the counter. For a flow HOLD this is the hold's `breaths`
+   * (5 for the Down Dog); for a single-phase MOVEMENT it is 1; otherwise it is
+   * `pose.breaths`.
    */
   breathCount: number;
-  /** Inhale duration in ms (breathSeconds / 2 * 1000). */
+  /**
+   * Inhale duration in ms. For a full breath (hold breath / non-flow) it is
+   * `breathSeconds / 2 * 1000`. For an EXHALE movement it is 0. For an INHALE
+   * movement it is `breathSeconds / 2 * 1000` (the whole movement).
+   */
   inhaleMs: number;
-  /** Exhale duration in ms (breathSeconds / 2 * 1000). */
+  /**
+   * Exhale duration in ms. For a full breath it is `breathSeconds / 2 * 1000`.
+   * For an INHALE movement it is 0. For an EXHALE movement it is
+   * `breathSeconds / 2 * 1000` (the whole movement).
+   */
   exhaleMs: number;
+  /**
+   * When set, this breath step is a single half-breath MOVEMENT (a vinyasa
+   * step): the player plays ONLY this phase for `breathSeconds / 2` and then
+   * advances, without scheduling the opposite phase. Undefined for a full breath
+   * (a Down Dog hold breath or any non-flow breath), which plays inhale then
+   * exhale as usual.
+   */
+  singlePhase?: GuidedPhase;
   /**
    * For a flow (salutation) pose: the current flow step's label, shown on
    * screen as the sub-pose name (e.g. "Adho Mukha Svanasana"). Undefined for
@@ -213,16 +248,22 @@ function cueFor(
 /**
  * Emit the BreathSteps for ONE segment (round) of a pose.
  *
- * - If the pose has a `flow`, walk it: each flow step contributes its own
- *   `breaths` BreathSteps, with `subPoseLabel` set to the step's label,
- *   per-flow-step `breathNumber`/`breathCount`, and the step's `cueId` placed on
- *   the first or last breath per `cueOn` (`voiceCueId`) — e.g. `last_breath` on
- *   the Down Dog hold's last breath and `step_jump_forward` on the jump-forward
- *   step's first breath.
- * - Otherwise, emit `pose.breaths` plain BreathSteps with whole-segment
+ * - If the pose has a `flow`, walk it (half-breath movement model):
+ *     - a MOVEMENT step (`phase` set) emits ONE single-phase BreathStep lasting
+ *       `halfMs` (breathSeconds / 2), with `singlePhase` = its phase, the ACTIVE
+ *       half's ms set to `halfMs` and the other to 0, `subPoseLabel` = its label,
+ *       and its `cueId` on that single phase (`voiceCueId`) — e.g.
+ *       `step_jump_forward` on the jump-forward inhale movement and `samasthiti`
+ *       on the closing Samasthiti exhale movement;
+ *     - a HOLD step (`phase` absent) emits `breaths` FULL inhale+exhale
+ *       BreathSteps with per-hold `breathNumber`/`breathCount` (so it reads
+ *       "N of 5") and its `cueId` on the first/last breath per `cueOn` — e.g.
+ *       `last_breath` on the Down Dog hold's last breath.
+ * - Otherwise, emit `pose.breaths` plain full BreathSteps with whole-segment
  *   `breathNumber`/`breathCount` (unchanged legacy behaviour).
  *
- * Returns the added milliseconds so the caller can keep `totalMs` exact.
+ * Returns the added milliseconds so the caller can keep `totalMs` exact: each
+ * movement adds `halfMs`, each full breath (hold / non-flow) adds `halfMs * 2`.
  */
 function emitSegmentBreaths(
   steps: GuidedStep[],
@@ -235,7 +276,8 @@ function emitSegmentBreaths(
 ): number {
   let addedMs = 0;
 
-  const pushBreath = (
+  /** Push a FULL breath (inhale + exhale), used by holds and non-flow poses. */
+  const pushFullBreath = (
     breathNumber: number,
     breathCount: number,
     extras: Pick<BreathStep, 'subPoseLabel' | 'voiceCueId'>,
@@ -256,9 +298,44 @@ function emitSegmentBreaths(
     addedMs += halfMs * 2;
   };
 
+  /** Push a single half-breath MOVEMENT playing only `phase` for `halfMs`. */
+  const pushMovement = (
+    phase: GuidedPhase,
+    extras: Pick<BreathStep, 'subPoseLabel' | 'voiceCueId'>,
+  ): void => {
+    steps.push({
+      kind: 'breath',
+      poseIndex,
+      pose,
+      segmentIndex,
+      segmentCount,
+      segmentLabel,
+      breathNumber: 1,
+      breathCount: 1,
+      // Only the active half has duration; the other is 0 so the player and the
+      // BreathingCircle bind the transition to the movement's own half.
+      inhaleMs: phase === 'inhale' ? halfMs : 0,
+      exhaleMs: phase === 'exhale' ? halfMs : 0,
+      singlePhase: phase,
+      ...extras,
+    });
+    addedMs += halfMs;
+  };
+
   if (pose.flow && pose.flow.length > 0) {
-    // Flow-driven expansion: per-flow-step counts so a hold reads "N of 5".
+    // Flow-driven expansion: movements are single half-breaths; only the Down
+    // Dog HOLD is whole breaths (counted "N of 5").
     for (const flowStep of pose.flow) {
+      if (flowStep.phase !== undefined) {
+        // MOVEMENT: a single half-breath phase. Its cue (if any) fires on this
+        // one phase — there is only one, so cueOn is irrelevant.
+        pushMovement(flowStep.phase, {
+          subPoseLabel: flowStep.label,
+          voiceCueId: flowStep.cueId,
+        });
+        continue;
+      }
+      // HOLD: whole breaths, each a full inhale+exhale.
       for (let b = 1; b <= flowStep.breaths; b++) {
         const isCueBreath =
           flowStep.cueId !== undefined &&
@@ -266,7 +343,7 @@ function emitSegmentBreaths(
             ? b === 1
             : // default / 'last' → last breath of the step
               b === flowStep.breaths);
-        pushBreath(b, flowStep.breaths, {
+        pushFullBreath(b, flowStep.breaths, {
           subPoseLabel: flowStep.label,
           voiceCueId: isCueBreath ? flowStep.cueId : undefined,
         });
@@ -277,7 +354,7 @@ function emitSegmentBreaths(
 
   // Legacy expansion: flat, whole-segment counts.
   for (let breath = 1; breath <= pose.breaths; breath++) {
-    pushBreath(breath, pose.breaths, {});
+    pushFullBreath(breath, pose.breaths, {});
   }
   return addedMs;
 }
@@ -290,9 +367,10 @@ function emitSegmentBreaths(
  * whole practice. `totalMs` is the exact sum of every step's duration.
  *
  * Salutation poses carry a `flow`; those segments are expanded via
- * `emitSegmentBreaths` (sub-pose labels + per-breath voice cues, including
- * `step_jump_forward` on the jump-forward exit breath). Transitions never carry
- * a voice cue.
+ * `emitSegmentBreaths` (single-phase movements + a whole-breath Down Dog hold,
+ * sub-pose labels + movement/hold voice cues, including `step_jump_forward` on
+ * the jump-forward inhale movement and `samasthiti` on the closing exhale
+ * movement). Transitions never carry a voice cue.
  */
 export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPlan {
   const halfMs = (breathSeconds / 2) * 1000;
