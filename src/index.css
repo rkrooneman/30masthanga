@@ -1187,6 +1187,49 @@ body {
   font-weight: 400;
   letter-spacing: 0.01em;
   color: var(--color-text);
+  /* Keep the pronunciation button on the same line as the Sanskrit name. */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* On-demand pronunciation button: a calm sage speaker beside the Sanskrit name.
+   Tapping it plays the pose's spoken name (voice.ts speakPoseName). */
+.pose-card__pronounce {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  color: var(--color-accent-text);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.pose-card__pronounce:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.pose-card__pronounce:active {
+  transform: translateY(1px);
+}
+
+.pose-card__pronounce:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.pose-card__pronounce-icon {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .pose-card__secondary-name {

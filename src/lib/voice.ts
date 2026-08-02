@@ -67,12 +67,17 @@ function narrationEnabled(): boolean {
 /**
  * Play one voice clip with ducking. Best-effort; silent on any failure.
  *
+ * The `gate` decides whether playback is allowed: automatic practice cues use
+ * `narrationEnabled` (sound AND voice guidance on); an explicit on-demand action
+ * like the pronunciation button passes its own gate (e.g. sound only). Defaults
+ * to `narrationEnabled`.
+ *
  * Ducking bookkeeping: requestDuck() is called before playback, and releaseDuck()
  * fires exactly once — guarded by `released` — on the first of `ended`, `error`,
  * a `.play()` rejection, or the safety timeout.
  */
-function playClip(src: string): void {
-  if (!narrationEnabled()) return;
+function playClip(src: string, gate: () => boolean = narrationEnabled): void {
+  if (!gate()) return;
 
   // Never let two voice clips overlap: hard-stop and un-duck any in-flight one
   // before starting this one.
@@ -132,9 +137,20 @@ function playClip(src: string): void {
 
 /**
  * Speak the name of a pose by its id. No-op unless both sound and voice are on.
+ * Used for the automatic pose announcement during guided practice.
  */
 export function speakPose(poseId: string): void {
   playClip(voiceSrc(poseId));
+}
+
+/**
+ * Speak a pose's name ON DEMAND (the pronunciation button on the detail card).
+ * Unlike speakPose, this is an explicit user action, so it plays regardless of
+ * the "Voice guidance" toggle. It still respects the master sound mute
+ * (loadSoundEnabled): if the user has silenced all sound, honor that.
+ */
+export function speakPoseName(poseId: string): void {
+  playClip(voiceSrc(poseId), loadSoundEnabled);
 }
 
 /**

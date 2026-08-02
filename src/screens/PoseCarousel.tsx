@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { TouchEvent } from 'react';
 import type { Pose } from '../types/pose';
 import PoseGraphic from '../components/PoseGraphic';
+import { speakPoseName } from '../lib/voice';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
 const UNVERIFIED = '__UNVERIFIED__';
@@ -200,7 +201,37 @@ function PoseCarousel({
         </div>
 
         <div className="pose-card__names">
-          <h2 className="pose-card__primary-name">{pose.sanskrit}</h2>
+          <h2 className="pose-card__primary-name">
+            {pose.sanskrit}
+            <button
+              type="button"
+              className="pose-card__pronounce"
+              onClick={() => speakPoseName(pose.id)}
+              aria-label={`Hear how to say ${pose.sanskrit}`}
+            >
+              <svg
+                className="pose-card__pronounce-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                {/* Speaker body */}
+                <path
+                  d="M4 9v6h4l5 4V5L8 9H4z"
+                  fill="currentColor"
+                  stroke="none"
+                />
+                {/* Sound waves */}
+                <path
+                  d="M16 8.5a4 4 0 0 1 0 7M18.5 6a7.5 7.5 0 0 1 0 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          </h2>
           <p className="pose-card__secondary-name">{pose.english}</p>
           <p className="pose-card__phonetic">{pose.phonetic}</p>
         </div>
