@@ -159,13 +159,19 @@ function App() {
   // stray call can never remove Savasana / Shoulderstand / the Salutations.
   const handleToggleSelected = (poseId: string) => {
     if (fixedFrameIds.has(poseId)) return;
-    setSelectedIds((prev) => {
-      const base = prev ?? new Set<string>();
-      const next = new Set(base);
-      if (next.has(poseId)) next.delete(poseId);
-      else next.add(poseId);
-      return next;
-    });
+    const base = selectedIds ?? new Set<string>();
+    const next = new Set(base);
+    if (next.has(poseId)) next.delete(poseId);
+    else next.add(poseId);
+    setSelectedIds(next);
+    // Keep the "Full series" toggle honest: it is on exactly when every catalog
+    // pose is selected. Unchecking any pose turns it off; checking the final
+    // remaining pose turns it on.
+    const allSelected = poses.every((p) => next.has(p.id));
+    if (allSelected !== fullSeries) {
+      setFullSeries(allSelected);
+      saveFullSeriesEnabled(allSelected);
+    }
   };
 
   // Toggle "Basics only" mode: remember the choice and re-seed the selection
