@@ -20,6 +20,7 @@ const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
 const BREATH_CUES_ENABLED_KEY = 'ashtanga30.breathCuesEnabled';
 const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
 const FULL_SERIES_KEY = 'ashtanga30.fullSeries';
+const VINYASAS_KEY = 'ashtanga30.vinyasas';
 
 /**
  * Load the saved breath pace, clamped to the valid slider range. Returns the
@@ -177,6 +178,29 @@ export function loadFullSeriesEnabled(): boolean {
 export function saveFullSeriesEnabled(enabled: boolean): void {
   try {
     window.localStorage.setItem(FULL_SERIES_KEY, enabled ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Whether "Vinyasas" mode is enabled — inserting a half-vinyasa between
+ * consecutive seated poses (and budgeting for it in generation). Like
+ * voice/sound this defaults to ON (true): only an explicit stored "0" disables
+ * it. Safe on storage failure (returns true).
+ */
+export function loadVinyasasEnabled(): boolean {
+  try {
+    return window.localStorage.getItem(VINYASAS_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+/** Persist the vinyasas-enabled preference. Silently no-ops on storage failure. */
+export function saveVinyasasEnabled(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(VINYASAS_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
   }

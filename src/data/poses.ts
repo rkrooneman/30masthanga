@@ -397,13 +397,22 @@ export const poses: Pose[] = [
     category: 'standing',
     group: 'balance',
     order: 140,
-    breaths: 5,
+    // Not a single hold: each side is a 4-stage sequence (16 breaths), run on
+    // the right leg then, after a "switch sides" transition, the left. The flow
+    // stages are all holds (whole breaths); sum(flow.breaths) === breaths (16).
+    breaths: 16,
     sides: 2,
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
     drishti: 'Padhayoragrai (toes)',
     isBasic: false,
+    flow: [
+      { label: 'Utthita Hasta Padangusthasana', breaths: 5, hold: true }, // toe hold, leg forward
+      { label: 'Parsva Hasta Padangusthasana', breaths: 5, hold: true }, // leg out to the side, gaze side
+      { label: 'Utthita Hasta Padangusthasana', breaths: 1, hold: true }, // back to front, head to knee, then upright
+      { label: 'Utthita Hasta Padangusthasana', breaths: 5, hold: true }, // hands on hips, leg lifted, balance
+    ],
   },
   {
     id: 'ardha_baddha_padmottanasana',

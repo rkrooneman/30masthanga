@@ -53,6 +53,22 @@ export const TRANSITION_SIMILAR_SECONDS = 3;
 export const TRANSITION_SECTION_CHANGE_SECONDS = 8;
 
 /**
+ * === half-vinyasa (the "Vinyasas" toggle) ===
+ *
+ * When the practitioner turns "Vinyasas" ON, a HALF-VINYASA is inserted BETWEEN
+ * two consecutive DISTINCT SEATED poses, REPLACING the plain between-seated-pose
+ * countdown transition (the vinyasa IS the transition there). It is a 4-movement
+ * single-breath-phase mini-flow — Chaturanga (exhale), Up Dog (inhale), Down Dog
+ * (exhale), jump through (inhale) — so each movement is one breath PHASE lasting
+ * `breathSeconds / 2`, exactly like a salutation movement. Four half-breaths =
+ * `4 * (breathSeconds / 2)` = `2 * breathSeconds`.
+ *
+ * `vinyasaSeconds` is the SINGLE source of truth for that cost, used by BOTH the
+ * guided plan (runtime) and the generator budget so the two can never disagree.
+ */
+export const HALF_VINYASA_MOVEMENTS = 4;
+
+/**
  * Backward-compatible alias for the "new pose, same section" gap (the medium
  * tier). Prefer `transitionSecondsBetween` / the named tier constants above at
  * new call sites; this remains so existing references keep the same meaning.
@@ -123,15 +139,43 @@ export function displaySection(pose: Pose): string {
  *
  * Note Sun A → Sun B are both section 'sun', so they get the 3s in-section gap.
  */
+/**
+ * The duration (in seconds) of ONE half-vinyasa at the given breath pace: four
+ * single breath-phase movements, each `breathSeconds / 2` — so
+ * `4 * (breathSeconds / 2)` = `2 * breathSeconds`. This is the cost a half-vinyasa
+ * adds when it is inserted between two consecutive seated poses (see
+ * `HALF_VINYASA_MOVEMENTS`).
+ */
+export function vinyasaSeconds(breathSeconds: number): number {
+  return HALF_VINYASA_MOVEMENTS * (breathSeconds / 2);
+}
+
+/**
+ * True when a half-vinyasa should be inserted BETWEEN `prevPose` and `nextPose`:
+ * both are DISTINCT SEATED poses (the caller only ever passes an adjacent pair of
+ * DIFFERENT poses, so "distinct" is about category, not identity). This is the
+ * single predicate both the guided plan and the generator budget consult, so the
+ * "only between consecutive seated poses" rule lives in one place.
+ */
+export function isSeatedToSeated(prevPose: Pose, nextPose: Pose): boolean {
+  return prevPose.category === 'seated' && nextPose.category === 'seated';
+}
+
 export function transitionSecondsBetween(
   prevPose: Pose,
   nextPose: Pose,
   samePose: boolean,
 ): number {
   if (samePose) {
-    // A salutation round repeat is just a short settling pause: the exit
-    // choreography is now a counted breath step at the end of the flow.
-    return prevPose.flow && prevPose.flow.length > 0
+    // The salutation ROUND repeat (Surya A/B, which repeat via `repeat > 1`) is a
+    // short settling pause, since the exit choreography is now a counted breath
+    // step at the end of the flow. This 3s rate applies ONLY to the salutations,
+    // identified by their sun_a / sun_b sections. Every other same-pose case is a
+    // plain side/round switch at 1s, including a flow pose that repeats by SIDES
+    // rather than rounds (e.g. Utthita Hasta Padangusthasana's leg switch).
+    const isSalutation =
+      prevPose.category === 'sun_a' || prevPose.category === 'sun_b';
+    return isSalutation
       ? TRANSITION_SALUTATION_ROUND_SECONDS
       : TRANSITION_SAME_POSE_SECONDS;
   }
@@ -192,19 +236,40 @@ export function poseHoldSeconds(pose: Pose, breathSeconds: number): number {
  *   plan, not here; the reconciliation identity in guidedPlan.ts accounts for
  *   the extra same-pose side/round gaps the plan inserts.
  *
+ * === vinyasas flag (the "Vinyasas" toggle) ===
+ * When `vinyasas` is true, a half-vinyasa REPLACES the plain between-pose gap
+ * for every adjacent pair of consecutive SEATED poses (both `category ===
+ * 'seated'`): instead of `transitionSecondsBetween(...)` (3s, same section) that
+ * pair costs `vinyasaSeconds(breathSeconds)` (= `2 * breathSeconds`). This is the
+ * SAME substitution the guided plan makes (the vinyasa IS the transition there),
+ * so this flagged duration stays the single source of truth for both the runtime
+ * plan total and the generator's 30-min budget. Non-seated pairs and same-pose
+ * side/round gaps are unchanged; when `vinyasas` is false the math is exactly as
+ * before.
+ *
  * An empty sequence is 0s; a single-pose sequence is just its hold time.
  */
 export function sequenceDurationSeconds(
   seq: Pose[],
   breathSeconds: number,
+  options?: { vinyasas?: boolean },
 ): number {
   if (seq.length === 0) return 0;
+  const vinyasas = options?.vinyasas ?? false;
   let total = 0;
   for (const pose of seq) {
     total += poseHoldSeconds(pose, breathSeconds);
   }
   for (let i = 1; i < seq.length; i++) {
-    total += transitionSecondsBetween(seq[i - 1], seq[i], false);
+    const prev = seq[i - 1];
+    const next = seq[i];
+    // Between two consecutive SEATED poses with vinyasas ON, the half-vinyasa
+    // REPLACES the plain between-pose transition (the vinyasa is the transition),
+    // matching the guided plan exactly.
+    total +=
+      vinyasas && isSeatedToSeated(prev, next)
+        ? vinyasaSeconds(breathSeconds)
+        : transitionSecondsBetween(prev, next, false);
   }
   return total;
 }

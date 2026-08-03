@@ -71,6 +71,17 @@ export interface OverviewScreenProps {
    * off); OFF regenerates a fresh <=30-min set. The shell persists the choice.
    */
   onToggleFullSeries: (next: boolean) => void;
+  /**
+   * Whether "Vinyasas" mode is active — a half-vinyasa is inserted between
+   * consecutive seated poses (and budgeted into generation). Orthogonal to
+   * Basics / Full series (it can combine with either). Drives the toggle.
+   */
+  vinyasas: boolean;
+  /**
+   * Toggle "Vinyasas" mode. The shell persists the choice and re-seeds a fresh
+   * generated set with the new flag so the pose count reflects the new budget.
+   */
+  onToggleVinyasas: (next: boolean) => void;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */
@@ -79,6 +90,12 @@ export interface GuidedScreenProps {
   practice: GeneratedPractice;
   /** The breath pace this practice was generated at. */
   breathSeconds: number;
+  /**
+   * Whether "Vinyasas" mode is active — build the guided plan with half-vinyasas
+   * inserted between consecutive seated poses. Default false in the player if
+   * the shell does not pass it (existing behaviour preserved).
+   */
+  vinyasas?: boolean;
   /**
    * Exit the guided run mid-practice — returns to the Overview so the
    * practitioner can review the sequence again (wired to the Exit control).

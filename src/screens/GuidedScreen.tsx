@@ -56,6 +56,7 @@ import { buildGuidedPlan } from '../lib/guidedPlan';
 import BreathingCircle from '../components/BreathingCircle';
 import NamasteMark from '../components/NamasteMark';
 import PoseGraphic from '../components/PoseGraphic';
+import FlowMark from '../components/FlowMark';
 import { unlockAudio, playCompletionBell } from '../lib/chime';
 import {
   speakPose,
@@ -91,15 +92,16 @@ const FIRST_POSE_ANNOUNCE_DELAY_MS = 1000;
 function GuidedScreen({
   practice,
   breathSeconds,
+  vinyasas = false,
   onExit,
   onComplete,
   startComplete = false,
 }: GuidedScreenProps) {
-  // The plan is pure and deterministic for a given practice + pace, so memoise
-  // it once. Rebuild only if the practice or pace identity changes.
+  // The plan is pure and deterministic for a given practice + pace + vinyasas
+  // flag, so memoise it once. Rebuild only if any of those identities change.
   const plan = useMemo(
-    () => buildGuidedPlan(practice.poses, breathSeconds),
-    [practice, breathSeconds],
+    () => buildGuidedPlan(practice.poses, breathSeconds, { vinyasas }),
+    [practice, breathSeconds, vinyasas],
   );
   const steps = plan.steps;
   const stepCount = steps.length;
@@ -156,10 +158,13 @@ function GuidedScreen({
   // index of the FIRST breath of each pose. Recomputed only when the plan
   // changes.
   const poseStarts = useMemo(() => {
-    const starts: number[] = []; // starts[k] = step index of first breath of pose k
+    const starts: number[] = []; // starts[k] = step index of first REAL breath of pose k
     const seen = new Set<number>();
     steps.forEach((step, i) => {
-      if (step.kind === 'breath' && !seen.has(step.poseIndex)) {
+      // A half-vinyasa's movement steps carry the NEXT pose's index but are NOT
+      // the pose itself, so they must not count as its start: prev/next-pose
+      // navigation should land on the pose's first real breath (past the vinyasa).
+      if (step.kind === 'breath' && !step.isVinyasa && !seen.has(step.poseIndex)) {
         seen.add(step.poseIndex);
         starts.push(i);
       }
@@ -426,6 +431,12 @@ function GuidedScreen({
     if (starting) return; // first pose is handled by the opening countdown
     const step = steps[stepIndex];
     if (!step) return;
+
+    // A half-vinyasa's movement steps are tagged with the NEXT pose's index, but
+    // they are the transition INTO it, not the pose itself. Do not announce the
+    // pose name during the vinyasa — wait for its first real breath, so the name
+    // lands just as the pose actually begins.
+    if (step.kind === 'breath' && step.isVinyasa) return;
 
     const enteredPoseIndex =
       step.kind === 'breath' ? step.poseIndex : step.toPoseIndex;
@@ -698,6 +709,13 @@ function GuidedScreen({
   const drishtiVerified =
     shownPose !== undefined && shownPose.drishti !== UNVERIFIED;
 
+  // A half-vinyasa movement step (between seated poses). It is tagged with the
+  // next pose, but we do not present it as that pose: show a flow glyph + the
+  // movement label, with a quiet "Vinyasa" subtitle, and NOT the next pose's
+  // name (that is announced/shown only once the pose actually begins).
+  const isVinyasaStep =
+    currentStep?.kind === 'breath' && currentStep.isVinyasa === true;
+
   // During a salutation breath the current flow step tags a `subPoseLabel`
   // (e.g. "Adho Mukha Svanasana"). When present, show the sub-pose large (as the
   // primary Sanskrit name) and the salutation name small underneath, so the
@@ -705,10 +723,13 @@ function GuidedScreen({
   const subPoseLabel =
     currentStep?.kind === 'breath' ? currentStep.subPoseLabel : undefined;
   const primaryName = subPoseLabel ?? shownPose?.sanskrit ?? '\u00a0';
-  // Secondary line: the salutation name while in a flow, else the English name.
-  const secondaryName = subPoseLabel
-    ? shownPose?.sanskrit
-    : shownPose?.english;
+  // Secondary line: "Vinyasa" during a between-poses vinyasa; the salutation
+  // name while in a salutation flow; else the pose's English name.
+  const secondaryName = isVinyasaStep
+    ? 'Vinyasa'
+    : subPoseLabel
+      ? shownPose?.sanskrit
+      : shownPose?.english;
 
   // Phase word over the circle (breath only).
   const phaseWord = phase === 'inhale' ? 'Inhale' : 'Exhale';
@@ -741,13 +762,17 @@ function GuidedScreen({
       {/* Middle: the focal stage. */}
       <div className="guided-player__stage">
         <div className="guided-player__pose">
-          {shownPose && (
-            <PoseGraphic
-              poseId={shownPose.id}
-              name={shownPose.english}
-              size={44}
-              className="guided-player__pose-icon"
-            />
+          {isVinyasaStep ? (
+            <FlowMark size={44} className="guided-player__pose-icon" />
+          ) : (
+            shownPose && (
+              <PoseGraphic
+                poseId={shownPose.id}
+                name={shownPose.english}
+                size={44}
+                className="guided-player__pose-icon"
+              />
+            )
           )}
           <h2 className="guided-player__primary-name">{primaryName}</h2>
           {secondaryName && (

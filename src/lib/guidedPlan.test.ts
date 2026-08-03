@@ -13,12 +13,13 @@
 
 import type { Pose } from '../types/pose';
 import { poses } from '../data/poses';
-import { buildGuidedPlan } from './guidedPlan';
+import { buildGuidedPlan, HALF_VINYASA_FLOW } from './guidedPlan';
 import type { BreathStep, TransitionStep } from './guidedPlan';
 import {
   DEFAULT_BREATH_SECONDS,
   TRANSITION_SAME_POSE_SECONDS,
   sequenceDurationSeconds,
+  vinyasaSeconds,
 } from './timing';
 
 // --- minimal assertion helper ---
@@ -736,6 +737,243 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
     b.filter((s) => s.poseIndex === 1).every((s) => s.voiceCueId === undefined),
     `flow: the following plain pose must not inherit any voice cue`,
   );
+}
+
+// ---------------------------------------------------------------------------
+// 9. Vinyasas toggle: a half-vinyasa is inserted BETWEEN two consecutive
+//    DISTINCT SEATED poses (replacing the plain transition) — and ONLY there.
+//    Verifies: correct 4 movement steps (labels + phases exhale/inhale/exhale/
+//    inhale, single-phase, silent); NONE with vinyasas OFF; none standing->
+//    seated, none seated->closing, none between the two SIDES of a seated pose;
+//    and the reconciliation identity holds for BOTH vinyasas on and off on a
+//    synthetic seated sequence.
+// ---------------------------------------------------------------------------
+{
+  const seatedA = makePose({
+    english: 'Seated A',
+    category: 'seated',
+    breaths: 5,
+  });
+  const seatedB = makePose({
+    english: 'Seated B',
+    category: 'seated',
+    breaths: 5,
+  });
+
+  const VINYASA_LABELS = HALF_VINYASA_FLOW.map((s) => s.label);
+  const VINYASA_PHASES = HALF_VINYASA_FLOW.map((s) => s.phase);
+
+  // Sanity: the shared definition is the confirmed 4-movement mini-flow.
+  check(
+    VINYASA_LABELS.join('|') ===
+      [
+        'Chaturanga Dandasana',
+        'Urdhva Mukha Svanasana',
+        'Adho Mukha Svanasana',
+        'Jump through',
+      ].join('|'),
+    `vinyasa: HALF_VINYASA_FLOW labels must be the confirmed choreography ` +
+      `(got ${VINYASA_LABELS.join('|')})`,
+  );
+  check(
+    VINYASA_PHASES.join(',') === 'exhale,inhale,exhale,inhale',
+    `vinyasa: HALF_VINYASA_FLOW phases must be exhale,inhale,exhale,inhale ` +
+      `(got ${VINYASA_PHASES.join(',')})`,
+  );
+
+  // --- 9a. vinyasas OFF: no vinyasa steps, a plain transition between them. ---
+  {
+    const plan = buildGuidedPlan([seatedA, seatedB], 5); // default: vinyasas off
+    const breaths = plan.steps.filter(isBreath);
+    const transitions = plan.steps.filter(isTransition);
+    check(
+      breaths.every((b) => b.subPoseLabel === undefined),
+      `vinyasa OFF: no breath step should carry a vinyasa subPoseLabel`,
+    );
+    check(
+      transitions.length === 1 && transitions[0].cue === 'Next: Seated B',
+      `vinyasa OFF: a single plain "Next:" transition sits between the poses`,
+    );
+    // 10 plain breaths, no movements.
+    check(
+      breaths.length === 10 && breaths.every((b) => b.singlePhase === undefined),
+      `vinyasa OFF: two 5-breath seated poses expand to 10 full breaths`,
+    );
+  }
+
+  // --- 9b. vinyasas ON: the 4 movement steps replace the transition. ---
+  {
+    const plan = buildGuidedPlan([seatedA, seatedB], 5, { vinyasas: true });
+    const breaths = plan.steps.filter(isBreath);
+    const transitions = plan.steps.filter(isTransition);
+
+    // The plain between-pose transition is REPLACED by the vinyasa, so there
+    // are NO transition steps at all in this two-seated-pose plan.
+    check(
+      transitions.length === 0,
+      `vinyasa ON: the seated->seated transition is replaced by the vinyasa ` +
+        `(expected 0 transitions, got ${transitions.length})`,
+    );
+
+    const vinyasaSteps = breaths.filter((b) =>
+      VINYASA_LABELS.includes(b.subPoseLabel ?? ''),
+    );
+    check(
+      vinyasaSteps.length === 4,
+      `vinyasa ON: exactly 4 half-vinyasa movement steps inserted (got ` +
+        `${vinyasaSteps.length})`,
+    );
+    check(
+      vinyasaSteps.map((b) => b.subPoseLabel).join('|') ===
+        VINYASA_LABELS.join('|'),
+      `vinyasa ON: the 4 steps carry the vinyasa labels in order`,
+    );
+    check(
+      vinyasaSteps.map((b) => b.singlePhase).join(',') ===
+        'exhale,inhale,exhale,inhale',
+      `vinyasa ON: the 4 steps are single-phase movements ` +
+        `exhale/inhale/exhale/inhale`,
+    );
+    check(
+      vinyasaSteps.every(
+        (b) =>
+          (b.singlePhase === 'inhale' &&
+            b.inhaleMs === 2500 &&
+            b.exhaleMs === 0) ||
+          (b.singlePhase === 'exhale' &&
+            b.exhaleMs === 2500 &&
+            b.inhaleMs === 0),
+      ),
+      `vinyasa ON: each movement is a single half-breath (2500ms) on its phase`,
+    );
+    check(
+      vinyasaSteps.every((b) => b.voiceCueId === undefined),
+      `vinyasa ON: half-vinyasa movements are silent (no voice cue)`,
+    );
+    // The vinyasa sits BETWEEN the two poses: after Seated A's 5 breaths, before
+    // Seated B's 5 breaths. It is tagged to the ENTERED pose (Seated B / index 1).
+    check(
+      vinyasaSteps.every((b) => b.poseIndex === 1),
+      `vinyasa ON: the vinyasa movements are tagged to the entered pose (index 1)`,
+    );
+    const firstVinyasaIdx = plan.steps.findIndex(
+      (s) => s.kind === 'breath' && (s as BreathStep).subPoseLabel === 'Chaturanga Dandasana',
+    );
+    check(
+      firstVinyasaIdx === 5,
+      `vinyasa ON: the vinyasa begins right after Seated A's 5 breaths (index 5)`,
+    );
+  }
+
+  // --- 9c. NO vinyasa on non-seated boundaries. ---
+  {
+    const standing = makePose({
+      english: 'Standing',
+      category: 'standing',
+      breaths: 5,
+    });
+    const seated = makePose({
+      english: 'Seated',
+      category: 'seated',
+      breaths: 5,
+    });
+    const closing = makePose({
+      english: 'Closing',
+      category: 'closing',
+      breaths: 5,
+    });
+    // standing -> seated -> closing, vinyasas ON.
+    const plan = buildGuidedPlan([standing, seated, closing], 5, {
+      vinyasas: true,
+    });
+    const breaths = plan.steps.filter(isBreath);
+    const vinyasaSteps = breaths.filter((b) =>
+      HALF_VINYASA_FLOW.map((s) => s.label).includes(b.subPoseLabel ?? ''),
+    );
+    check(
+      vinyasaSteps.length === 0,
+      `vinyasa boundaries: NO vinyasa on standing->seated or seated->closing ` +
+        `(got ${vinyasaSteps.length})`,
+    );
+    // Both boundaries keep normal transitions (standing->seated and seated->
+    // closing are both section changes → 2 transitions).
+    check(
+      plan.steps.filter(isTransition).length === 2,
+      `vinyasa boundaries: both non-seated boundaries keep a plain transition`,
+    );
+  }
+
+  // --- 9d. NO vinyasa between the two SIDES of a single 2-sided seated pose. ---
+  {
+    const twoSidedSeated = makePose({
+      english: 'Two-sided Seated',
+      category: 'seated',
+      breaths: 5,
+      sides: 2,
+    });
+    const plan = buildGuidedPlan([twoSidedSeated], 5, { vinyasas: true });
+    const breaths = plan.steps.filter(isBreath);
+    const transitions = plan.steps.filter(isTransition);
+    const vinyasaSteps = breaths.filter((b) =>
+      HALF_VINYASA_FLOW.map((s) => s.label).includes(b.subPoseLabel ?? ''),
+    );
+    check(
+      vinyasaSteps.length === 0,
+      `vinyasa sides: NO vinyasa between the two sides of one seated pose`,
+    );
+    check(
+      transitions.length === 1 && transitions[0].cue === 'Switch sides',
+      `vinyasa sides: the side switch stays a plain "Switch sides" transition`,
+    );
+  }
+
+  // --- 9e. reconciliation identity holds for BOTH vinyasas on and off. ---
+  //     guidedTotalSeconds
+  //       === sequenceDurationSeconds(seq, bs, {vinyasas}) + sideDelta
+  //     where sideDelta = Σ repeat*(sides-1) * TRANSITION_SAME_POSE_SECONDS.
+  {
+    const bs = DEFAULT_BREATH_SECONDS;
+    // A 4-pose seated run (3 seated->seated adjacencies) plus a 2-sided seated
+    // pose to exercise the side-delta, and a standing lead-in + closing tail so
+    // the seated block has non-seated neighbours.
+    const seq = [
+      makePose({ english: 'Lead Standing', category: 'standing', breaths: 5 }),
+      makePose({ english: 'S1', category: 'seated', breaths: 5 }),
+      makePose({ english: 'S2', category: 'seated', breaths: 5, sides: 2 }),
+      makePose({ english: 'S3', category: 'seated', breaths: 5 }),
+      makePose({ english: 'Tail Closing', category: 'closing', breaths: 5 }),
+    ];
+    for (const vinyasas of [false, true]) {
+      const plan = buildGuidedPlan(seq, bs, { vinyasas });
+      const guidedSeconds = plan.totalMs / 1000;
+      const base = sequenceDurationSeconds(seq, bs, { vinyasas });
+      let sideDelta = 0;
+      for (const p of seq) sideDelta += p.repeat * (p.sides - 1);
+      const expected = base + sideDelta * TRANSITION_SAME_POSE_SECONDS;
+      check(
+        guidedSeconds === expected,
+        `vinyasa reconciliation (vinyasas=${vinyasas}): guided=${guidedSeconds}s ` +
+          `must equal base=${base}s + sideDelta=${sideDelta}*` +
+          `${TRANSITION_SAME_POSE_SECONDS}s (=${expected})`,
+      );
+    }
+
+    // Sanity: turning vinyasas ON must ADD time — exactly 3 seated->seated
+    // adjacencies (S1->S2, S2->S3; note S2 is one pose with two sides, and the
+    // S1->S2 / S2->S3 pairs are the two distinct-seated adjacencies) each
+    // swapping a 3s in-section gap for a vinyasa (2*bs seconds).
+    const off = buildGuidedPlan(seq, bs, { vinyasas: false }).totalMs / 1000;
+    const on = buildGuidedPlan(seq, bs, { vinyasas: true }).totalMs / 1000;
+    const seatedAdjacencies = 2; // S1->S2 and S2->S3
+    const expectedDelta =
+      seatedAdjacencies * (vinyasaSeconds(bs) - 3); // 3s = TRANSITION_SIMILAR
+    check(
+      on - off === expectedDelta,
+      `vinyasa delta: turning vinyasas on must add ` +
+        `${expectedDelta}s (2 seated adjacencies * (vinyasa - 3s)); got ` +
+        `${on - off}s`,
+    );
+  }
 }
 
 // --- report ---

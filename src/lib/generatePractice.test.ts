@@ -215,6 +215,84 @@ for (const breathSeconds of BREATHS) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Vinyasas mode.
+//   (i)   all standard invariants still hold, and the hard 30-min ceiling is
+//         respected using the VINYASA-FLAGGED duration.
+//   (ii)  IN AGGREGATE across the whole seed/pace matrix, vinyasas-on selects
+//         FEWER seated poses than vinyasas-off — the budget accounts for the
+//         seated->seated half-vinyasas, so on average it fits fewer seated
+//         poses. (Per-seed it is not strictly monotonic: the greedy variety
+//         shuffle + cross-section ceiling rebalancing can occasionally pick one
+//         more or fewer at a given seed; the aggregate captures the real intent.)
+//   (iii) determinism holds with the flag on.
+// ---------------------------------------------------------------------------
+const countSeated = (seq: Pose[]): number =>
+  seq.filter((p) => p.category === 'seated').length;
+
+let totalSeatedVin = 0;
+let totalSeatedNoVin = 0;
+for (const breathSeconds of BREATHS) {
+  for (const seed of SEEDS) {
+    const ctx = `vinyasas seed=${seed} breathSeconds=${breathSeconds}`;
+    const withVin = generatePractice(poses, {
+      breathSeconds,
+      vinyasas: true,
+      rng: mulberry32(seed),
+    });
+    const withoutVin = generatePractice(poses, {
+      breathSeconds,
+      vinyasas: false,
+      rng: mulberry32(seed),
+    });
+
+    // (i) all standard invariants hold with vinyasas on.
+    runInvariants(withVin.poses, withVin.totalSeconds, ctx);
+
+    // The reported total is internally consistent with the VINYASA-FLAGGED
+    // duration (the single source of truth the generator budgets against).
+    const recomputed = sequenceDurationSeconds(withVin.poses, breathSeconds, {
+      vinyasas: true,
+    });
+    check(
+      recomputed === withVin.totalSeconds,
+      `${ctx}: reported totalSeconds (${withVin.totalSeconds}) must equal the ` +
+        `vinyasa-flagged sequenceDurationSeconds (${recomputed})`,
+    );
+
+    // The ceiling holds under the flagged duration (the hard 30-min ceiling).
+    check(
+      withVin.totalSeconds <= TARGET_SECONDS,
+      `${ctx}: vinyasa-flagged total (${withVin.totalSeconds}) must be <= ` +
+        `target (${TARGET_SECONDS})`,
+    );
+
+    totalSeatedVin += countSeated(withVin.poses);
+    totalSeatedNoVin += countSeated(withoutVin.poses);
+
+    // (iii) determinism with the flag on.
+    const again = generatePractice(poses, {
+      breathSeconds,
+      vinyasas: true,
+      rng: mulberry32(seed),
+    });
+    check(
+      again.poses.map((p) => p.id).join(',') ===
+        withVin.poses.map((p) => p.id).join(','),
+      `${ctx}: vinyasa generation must be deterministic for a fixed seed`,
+    );
+  }
+}
+
+// (ii) Aggregate: vinyasas ON selects FEWER seated poses overall than OFF,
+// proving the budget genuinely trims seated poses to make room for the vinyasas.
+check(
+  totalSeatedVin < totalSeatedNoVin,
+  `vinyasas: aggregate seated-pose count with vinyasas on ` +
+    `(${totalSeatedVin}) must be fewer than off (${totalSeatedNoVin}) across ` +
+    `the whole seed/pace matrix`,
+);
+
 // --- report ---
 if (failures.length > 0) {
   console.error(`\n=== GENERATOR TESTS FAILED (${failures.length}) ===`);

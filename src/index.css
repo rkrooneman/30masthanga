@@ -826,6 +826,13 @@ body {
   margin-top: 0.25rem;
 }
 
+/* The "Vinyasas" switch sits below the "Full series" toggle, reusing the same
+   switch styling and spacing. Unlike Basics/Full series it is ORTHOGONAL (it can
+   combine with either), but it reads as part of the same settings group. */
+.pose-map__vinyasas-toggle {
+  margin-top: 0.25rem;
+}
+
 /* A calm hairline dividing the settings toggles from the pose sections. Sits in
    the .overview flex column, which supplies the gap on either side. */
 .overview__divider {

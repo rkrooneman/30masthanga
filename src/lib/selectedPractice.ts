@@ -17,6 +17,11 @@
  * exceed the target freely (the total is shown honestly). The fixed frame is not
  * special-cased here — callers seed/keep the `alwaysInclude` ids in the set; this
  * helper simply materialises whatever is selected, in order.
+ *
+ * When `vinyasas` is true the total ACCOUNTS for the half-vinyasa inserted
+ * between every pair of consecutive seated poses (via the vinyasa-flagged
+ * `sequenceDurationSeconds`), so the Overview total the practitioner sees matches
+ * what the guided run will actually play.
  */
 
 import type { Pose } from '../types/pose';
@@ -26,19 +31,23 @@ import { sequenceDurationSeconds } from './timing';
 /**
  * Build the derived practice from a selected-id set. `selectedIds` may be a Set
  * or any iterable-membership container; ids not present in `catalog` are simply
- * ignored. The result is always in canonical order.
+ * ignored. The result is always in canonical order. `vinyasas` (default false)
+ * makes the total include the seated→seated half-vinyasas.
  */
 export function buildSelectedPractice(
   catalog: Pose[],
   selectedIds: ReadonlySet<string>,
   breathSeconds: number,
+  options?: { vinyasas?: boolean },
 ): GeneratedPractice {
   const poses = catalog
     .filter((p) => selectedIds.has(p.id))
     .sort((a, b) => a.order - b.order);
   return {
     poses,
-    totalSeconds: sequenceDurationSeconds(poses, breathSeconds),
+    totalSeconds: sequenceDurationSeconds(poses, breathSeconds, {
+      vinyasas: options?.vinyasas ?? false,
+    }),
     breathSeconds,
   };
 }

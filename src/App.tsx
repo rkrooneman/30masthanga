@@ -22,6 +22,8 @@ import {
   saveBasicsOnly,
   loadFullSeriesEnabled,
   saveFullSeriesEnabled,
+  loadVinyasasEnabled,
+  saveVinyasasEnabled,
 } from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
 import OverviewScreen from './screens/OverviewScreen';
@@ -58,6 +60,10 @@ function App() {
   // "Full series" mode (every catalog pose selected), remembered across visits.
   // Mutually exclusive with "Basics only" (enforced by the toggle handlers).
   const [fullSeries, setFullSeries] = useState<boolean>(loadFullSeriesEnabled);
+  // "Vinyasas" mode (a half-vinyasa between consecutive seated poses), remembered
+  // across visits, DEFAULT ON. Orthogonal to Basics/Full series — it can combine
+  // with either. Threads into both generation (budget) and the guided plan.
+  const [vinyasas, setVinyasas] = useState<boolean>(loadVinyasasEnabled);
 
   // The fixed frame — poses that must always be included and are NOT toggleable
   // (Sun Salutations A/B, Shoulderstand, Savasana). Derived once from the
@@ -74,9 +80,9 @@ function App() {
   const practice = useMemo(
     () =>
       selectedIds
-        ? buildSelectedPractice(poses, selectedIds, breathSeconds)
+        ? buildSelectedPractice(poses, selectedIds, breathSeconds, { vinyasas })
         : null,
-    [selectedIds, breathSeconds],
+    [selectedIds, breathSeconds, vinyasas],
   );
 
   // DEV-ONLY pilot escape hatch: visiting `/?pilot` renders the pose-icon
@@ -112,7 +118,7 @@ function App() {
   // Generate the throwaway practice for the `?complete` hatch once (only when the
   // hatch is active). Not stateful — this render path never re-renders normally.
   const devPractice = devComplete
-    ? generatePractice(poses, { breathSeconds, basicsOnly })
+    ? generatePractice(poses, { breathSeconds, basicsOnly, vinyasas })
     : null;
 
   // Persist the breath pace whenever it changes (from the Home slider).
@@ -125,10 +131,11 @@ function App() {
   // generator's chosen poses become the initially-checked set (the fixed frame
   // is included among them). Also clears "Full series" (persisted): a generated
   // set is capped at 30 min, so Full series can no longer be on.
-  const seedFromGenerated = (pace: number, basics: boolean) => {
+  const seedFromGenerated = (pace: number, basics: boolean, vin: boolean) => {
     const generated = generatePractice(poses, {
       breathSeconds: pace,
       basicsOnly: basics,
+      vinyasas: vin,
     });
     setSelectedIds(new Set(generated.poses.map((p) => p.id)));
     setFullSeries(false);
@@ -141,7 +148,7 @@ function App() {
     // preference is enabled, since the initial autoplay on load was blocked and
     // this may be the user's first interaction. No-op when ambient is disabled.
     requestAmbientPlay();
-    seedFromGenerated(pace, basicsOnly);
+    seedFromGenerated(pace, basicsOnly, vinyasas);
     setBreathSeconds(pace);
     saveBreathSeconds(pace);
     setScreen('overview');
@@ -151,7 +158,7 @@ function App() {
   // at the same breath pace (re-seeding the selected set), turning Full series
   // off. Manual customisation is discarded — this is a clean regenerate.
   const handleRegenerate = () => {
-    seedFromGenerated(breathSeconds, basicsOnly);
+    seedFromGenerated(breathSeconds, basicsOnly, vinyasas);
   };
 
   // Toggle a single pose in/out of the selection. Fixed-frame poses are never
@@ -181,7 +188,7 @@ function App() {
   const handleToggleBasics = (next: boolean) => {
     setBasicsOnly(next);
     saveBasicsOnly(next);
-    seedFromGenerated(breathSeconds, next);
+    seedFromGenerated(breathSeconds, next, vinyasas);
   };
 
   // Toggle "Full series" mode.
@@ -199,8 +206,21 @@ function App() {
     } else {
       // Regenerate a fresh <=30-min set. seedFromGenerated also clears Full
       // series (already false here) — harmless and keeps the invariant.
-      seedFromGenerated(breathSeconds, basicsOnly);
+      seedFromGenerated(breathSeconds, basicsOnly, vinyasas);
     }
+  };
+
+  // Toggle "Vinyasas" mode: remember the choice and re-seed the selection from a
+  // fresh generated set with the new flag, so the pose count reflects the new
+  // budget immediately (a vinyasa practice budgets in the seated→seated
+  // half-vinyasas, so it selects fewer seated poses). Orthogonal to Basics /
+  // Full series — it does not touch either. Uses `next` (not the async state).
+  // If Full series is currently on, seedFromGenerated turns it off (a generated
+  // set is capped at 30 min), consistent with the Basics toggle.
+  const handleToggleVinyasas = (next: boolean) => {
+    setVinyasas(next);
+    saveVinyasasEnabled(next);
+    seedFromGenerated(breathSeconds, basicsOnly, next);
   };
 
   const handleBackHome = () => setScreen('home');
@@ -238,6 +258,7 @@ function App() {
             <GuidedScreen
               practice={devPractice}
               breathSeconds={breathSeconds}
+              vinyasas={vinyasas}
               onExit={handleBackHome}
               onComplete={handleBackHome}
               startComplete
@@ -280,6 +301,8 @@ function App() {
             onToggleBasics={handleToggleBasics}
             fullSeries={fullSeries}
             onToggleFullSeries={handleToggleFullSeries}
+            vinyasas={vinyasas}
+            onToggleVinyasas={handleToggleVinyasas}
           />
         )}
 
@@ -299,6 +322,7 @@ function App() {
             <GuidedScreen
               practice={practice}
               breathSeconds={breathSeconds}
+              vinyasas={vinyasas}
               onExit={handleBackOverview}
               onComplete={handleBackHome}
             />

@@ -90,11 +90,51 @@
  * `breaths` representing real time.
  */
 
-import type { Pose } from '../types/pose';
-import { transitionSecondsBetween } from './timing';
+import type { FlowStep, Pose } from '../types/pose';
+import { isSeatedToSeated, transitionSecondsBetween } from './timing';
 
 /** Which half of a single breath a `BreathStep` phase refers to. */
 export type GuidedPhase = 'inhale' | 'exhale';
+
+/**
+ * === the half-vinyasa (the "Vinyasas" toggle) ===
+ *
+ * The canonical half-vinyasa inserted BETWEEN two consecutive DISTINCT SEATED
+ * poses when the "Vinyasas" toggle is ON. It REPLACES the plain
+ * between-seated-pose countdown transition (the vinyasa IS the transition
+ * there). It is a 4-movement single-breath-phase mini-flow modelled exactly like
+ * the salutation MOVEMENT steps: each entry is one breath PHASE lasting
+ * `breathSeconds / 2`, so the whole vinyasa is 4 half-breaths = `2 *
+ * breathSeconds` — reconciled with `vinyasaSeconds` in timing.ts.
+ *
+ * Steps (breath-paced, silent — no voice cues):
+ *   1. exhale — Chaturanga Dandasana
+ *   2. inhale — Urdhva Mukha Svanasana (Up Dog)
+ *   3. exhale — Adho Mukha Svanasana (Down Dog)
+ *   4. inhale — Jump through (return to seated)
+ *
+ * `breaths: 1` is pinned for schema consistency with `FlowStep` (a MOVEMENT's
+ * `breaths` is ignored for counting — a movement is always a single half-breath).
+ * These are NOT stored on any catalog pose; they are emitted by the guided plan
+ * in place of the seated→seated transition, so `validate-poses.ts` is unaffected.
+ */
+export const HALF_VINYASA_FLOW: readonly FlowStep[] = [
+  { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 },
+  { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 },
+  { label: 'Adho Mukha Svanasana', phase: 'exhale', breaths: 1 },
+  { label: 'Jump through', phase: 'inhale', breaths: 1 },
+];
+
+/** Options for {@link buildGuidedPlan}. */
+export interface BuildGuidedPlanOptions {
+  /**
+   * When true, insert a half-vinyasa (see {@link HALF_VINYASA_FLOW}) between two
+   * consecutive DISTINCT seated poses, in place of the plain between-seated-pose
+   * transition. Default false — existing callers/tests are unaffected unless
+   * they opt in.
+   */
+  vinyasas?: boolean;
+}
 
 /** One breath (inhale + exhale) within a segment of a pose. */
 export interface BreathStep {
@@ -148,6 +188,15 @@ export interface BreathStep {
    * non-flow poses.
    */
   subPoseLabel?: string;
+  /**
+   * True for the movement steps of a half-vinyasa inserted BETWEEN two seated
+   * poses (the "Vinyasas" toggle). These steps are tagged with the NEXT pose's
+   * `poseIndex` (so the timeline stays ordered), but they are not that pose yet:
+   * the player shows a flow glyph + the movement label instead of the pose, and
+   * does NOT announce the pose name until the first real (non-vinyasa) breath of
+   * the pose begins.
+   */
+  isVinyasa?: boolean;
   /**
    * A prerecorded voice cue id to play WHEN this breath begins (maps to
    * `/audio/voice/<id>.mp3`). Set on the flow step's cue breath (per `cueOn`) —
@@ -360,6 +409,49 @@ function emitSegmentBreaths(
 }
 
 /**
+ * Emit the {@link HALF_VINYASA_FLOW} MOVEMENT breath-steps in place of a plain
+ * transition, when a half-vinyasa is inserted between two consecutive seated
+ * poses (the "Vinyasas" toggle). Each step is a single half-breath MOVEMENT
+ * (`singlePhase` set, `subPoseLabel` = the vinyasa label, `halfMs` on its active
+ * phase, silent), tagged to the ENTERED `pose`'s segment 0 so it reads as that
+ * pose's entry — the same modelling salutation movements use.
+ *
+ * Returns the milliseconds added (`HALF_VINYASA_FLOW.length * halfMs`), so the
+ * caller keeps `totalMs` exact and reconciled with `vinyasaSeconds` in timing.ts.
+ */
+function emitVinyasaMovements(
+  steps: GuidedStep[],
+  pose: Pose,
+  poseIndex: number,
+  segmentCount: number,
+  segmentLabel: string | null,
+  halfMs: number,
+): number {
+  let addedMs = 0;
+  for (const flowStep of HALF_VINYASA_FLOW) {
+    // HALF_VINYASA_FLOW entries are all MOVEMENTs (`phase` always set).
+    const phase = flowStep.phase as GuidedPhase;
+    steps.push({
+      kind: 'breath',
+      poseIndex,
+      pose,
+      segmentIndex: 0,
+      segmentCount,
+      segmentLabel,
+      breathNumber: 1,
+      breathCount: 1,
+      inhaleMs: phase === 'inhale' ? halfMs : 0,
+      exhaleMs: phase === 'exhale' ? halfMs : 0,
+      singlePhase: phase,
+      subPoseLabel: flowStep.label,
+      isVinyasa: true,
+    });
+    addedMs += halfMs;
+  }
+  return addedMs;
+}
+
+/**
  * Build the flat guided timeline for a sequence at a given breath pace.
  *
  * Emits, per pose, `sides * repeat` segments of `breaths` breaths, with a
@@ -371,8 +463,26 @@ function emitSegmentBreaths(
  * sub-pose labels + movement/hold voice cues, including `step_jump_forward` on
  * the jump-forward inhale movement and `samasthiti` on the closing exhale
  * movement). Transitions never carry a voice cue.
+ *
+ * === vinyasas (the "Vinyasas" toggle) ===
+ * When `options.vinyasas` is true, entering a NEW pose where BOTH the pose being
+ * left and the pose being entered are `category === 'seated'` REPLACES the plain
+ * between-pose countdown transition with the four {@link HALF_VINYASA_FLOW}
+ * MOVEMENT breath-steps (Chaturanga → Up Dog → Down Dog → jump through). Each is
+ * a single half-breath movement with a `subPoseLabel`, so the player shows the
+ * sub-pose and the breathing circle paces each phase (identical modelling to a
+ * salutation movement). The vinyasa is tagged with the ENTERED pose's index /
+ * segment 0, so it reads as that pose's entry (matching how salutation flows
+ * belong to their pose). Same-pose side/round switches, standing→seated,
+ * seated→closing, and every other boundary are UNCHANGED — a half-vinyasa is
+ * emitted ONLY between two consecutive distinct seated poses. When `vinyasas` is
+ * false, behaviour is exactly as before.
  */
-export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPlan {
+export function buildGuidedPlan(
+  poses: Pose[],
+  breathSeconds: number,
+  { vinyasas = false }: BuildGuidedPlanOptions = {},
+): GuidedPlan {
   const halfMs = (breathSeconds / 2) * 1000;
 
   const steps: GuidedStep[] = [];
@@ -396,24 +506,49 @@ export function buildGuidedPlan(poses: Pose[], breathSeconds: number): GuidedPla
         // change (3s / 8s) via the centralized model. `prevPose` is guaranteed
         // non-null here (sawFirstSegment is true).
         const samePose = !enteringNewPose;
-        const seconds = transitionSecondsBetween(
-          prevPose as Pose,
-          pose,
-          samePose,
-        );
-        // Transitions carry no voice cue: the `step_jump_forward` cue is now a
-        // data-driven breath cue on the salutation's jump-forward flow step (see
-        // emitSegmentBreaths), not a transition cue.
-        const transition: TransitionStep = {
-          kind: 'transition',
-          seconds,
-          fromPoseIndex: enteringNewPose ? poseIndex - 1 : poseIndex,
-          toPoseIndex: poseIndex,
-          toPose: pose,
-          cue: cueFor(pose, segmentIndex, enteringNewPose && poseIndex > 0),
-        };
-        steps.push(transition);
-        totalMs += seconds * 1000;
+        // Vinyasas ON + entering a NEW pose where BOTH the pose being left and
+        // the pose being entered are seated → the half-vinyasa REPLACES the
+        // plain between-pose countdown transition (the vinyasa IS the
+        // transition). Same-pose side/round switches and every non-seated
+        // boundary keep the normal transition.
+        const insertVinyasa =
+          vinyasas &&
+          enteringNewPose &&
+          isSeatedToSeated(prevPose as Pose, pose);
+
+        if (insertVinyasa) {
+          // Emit the four half-vinyasa MOVEMENT breath-steps in place of the
+          // transition, tagged to the ENTERED pose's segment 0 (so it reads as
+          // this pose's entry, exactly like a salutation flow belongs to its
+          // pose). Silent (no voice cues), each a single half-breath movement.
+          totalMs += emitVinyasaMovements(
+            steps,
+            pose,
+            poseIndex,
+            segmentCount,
+            segmentLabelFor(pose, segmentIndex),
+            halfMs,
+          );
+        } else {
+          const seconds = transitionSecondsBetween(
+            prevPose as Pose,
+            pose,
+            samePose,
+          );
+          // Transitions carry no voice cue: the `step_jump_forward` cue is now a
+          // data-driven breath cue on the salutation's jump-forward flow step
+          // (see emitSegmentBreaths), not a transition cue.
+          const transition: TransitionStep = {
+            kind: 'transition',
+            seconds,
+            fromPoseIndex: enteringNewPose ? poseIndex - 1 : poseIndex,
+            toPoseIndex: poseIndex,
+            toPose: pose,
+            cue: cueFor(pose, segmentIndex, enteringNewPose && poseIndex > 0),
+          };
+          steps.push(transition);
+          totalMs += seconds * 1000;
+        }
       }
       sawFirstSegment = true;
       prevPose = pose;

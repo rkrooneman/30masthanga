@@ -95,6 +95,10 @@ interface PoseMapProps {
   fullSeries: boolean;
   /** Toggle "Full series" mode (parent persists + selects all / regenerates). */
   onToggleFullSeries: (next: boolean) => void;
+  /** Whether "Vinyasas" mode is active (drives the switch). */
+  vinyasas: boolean;
+  /** Toggle "Vinyasas" mode (parent persists + regenerates for the new budget). */
+  onToggleVinyasas: (next: boolean) => void;
 }
 
 /** A pose paired with its absolute index in the full catalog. */
@@ -145,6 +149,8 @@ function PoseMap({
   onToggleBasics,
   fullSeries,
   onToggleFullSeries,
+  vinyasas,
+  onToggleVinyasas,
 }: PoseMapProps) {
   // The grand total comes from the DERIVED practice (selected poses only), so it
   // is honest even past 30:00 — no cap, no warning.
@@ -209,6 +215,31 @@ function PoseMap({
         </label>
         <p className="basics-toggle__hint">
           Select every pose. Uncheck any you want to skip.
+        </p>
+      </div>
+
+      {/*
+        Vinyasas is ORTHOGONAL to Basics / Full series (it can combine with
+        either): it inserts a half-vinyasa between consecutive seated poses and
+        is budgeted into the 30-minute generation, so turning it on selects
+        slightly fewer seated poses. Reuses the shared `.basics-toggle*` styling.
+      */}
+      <div className="basics-toggle pose-map__vinyasas-toggle">
+        <label className="basics-toggle__label" htmlFor="vinyasas-switch">
+          <span className="basics-toggle__text">Vinyasas</span>
+          <input
+            type="checkbox"
+            id="vinyasas-switch"
+            className="basics-toggle__input"
+            checked={vinyasas}
+            onChange={(e) => onToggleVinyasas(e.target.checked)}
+          />
+          <span className="basics-toggle__track" aria-hidden="true">
+            <span className="basics-toggle__thumb" />
+          </span>
+        </label>
+        <p className="basics-toggle__hint">
+          Adds a half-vinyasa between seated poses.
         </p>
       </div>
 
