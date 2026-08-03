@@ -1,18 +1,11 @@
 /**
- * ParivrttaTrikonasana — Revolved Triangle, original stick-figure pose icon.
+ * ParivrttaTrikonasana — Revolved Triangle Pose (Parivrtta Trikonasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: the twisted triangle. Both legs stay straight and wide on the
- * floor. The torso hinges forward over the front (right) leg and revolves, so the
- * OPPOSITE (left) hand crosses the body and reaches down to the front foot while
- * the other (right) arm points straight up. The crossed bottom arm marks the
- * revolve apart from Extended Triangle.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -28,33 +21,11 @@ function ParivrttaTrikonasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Revolved Triangle pose"
+      aria-label="Revolved Triangle Pose pose"
     >
-      {/* Faint floor line under both wide feet. */}
-      <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Legs: straight and wide, from the hip apex out to both feet. */}
-      <line x1="50" y1="54" x2="20" y2="92" />
-      <line x1="50" y1="54" x2="80" y2="92" />
-
-      {/* Torso: hinges forward over the front (right) leg from the hips. */}
-      <line x1="50" y1="54" x2="66" y2="40" />
-
-      {/* Bottom arm: the OPPOSITE hand crosses the body down to the front foot —
-          the revolve. */}
-      <line x1="66" y1="40" x2="78" y2="86" />
-      {/* Top arm: the other arm points straight up, twisted open. */}
-      <line x1="66" y1="40" x2="58" y2="14" />
-
-      {/* Head: turned up under the raised arm, beyond the shoulder. */}
-      <circle cx="70" cy="33" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 194.227 76.258 C 192.707 77.876, 191.908 80.437, 191.412 85.286 C 190.769 91.556, 190.594 91.942, 189.030 90.527 C 186.199 87.965, 185.776 88.747, 186.478 95.250 C 186.965 99.763, 188.034 102.890, 190.326 106.500 C 193.955 112.217, 193.789 108.721, 192.794 158.500 L 192.254 185.500 188.953 193.500 C 186.126 200.352, 185.641 202.745, 185.576 210.177 C 185.491 219.893, 183.483 224.236, 178.816 224.801 C 174.796 225.286, 173.509 222.824, 175 217.500 C 176.509 212.112, 176.021 211.322, 169.095 207.928 C 165.997 206.410, 164.020 204.750, 163.820 203.500 C 163.580 202, 162.874 201.587, 161 201.846 C 156.847 202.421, 150.766 202.284, 145.869 201.504 C 126.378 198.401, 114.218 228.349, 130.141 240.241 C 137.621 245.827, 144.385 246.745, 154.946 243.609 C 161.245 241.738, 165.660 243.159, 169.384 248.254 C 171.613 251.304, 170.973 258.967, 167.483 271 C 165.823 276.727, 166.110 285.529, 168.131 290.843 C 170.022 295.817, 169.227 319.536, 166.921 326.908 C 165.698 330.819, 164.485 338.650, 163.938 346.161 C 163.431 353.125, 162.572 361.900, 162.028 365.661 C 161.485 369.423, 161.031 373.061, 161.020 373.747 C 161.009 374.433, 159.460 376.699, 157.577 378.783 C 155.695 380.866, 153.278 384.805, 152.205 387.535 C 151.133 390.266, 149.900 393.354, 149.464 394.398 C 148.778 396.044, 149.029 396.228, 151.356 395.783 C 153.890 395.298, 154.008 395.444, 153.464 398.385 C 153.148 400.098, 152.575 403.722, 152.191 406.439 C 151.525 411.149, 151.194 411.578, 145.065 415.684 C 137.370 420.839, 126.173 426.456, 120.072 428.220 C 115.020 429.680, 114.159 431.017, 116.661 433.518 C 118.215 435.072, 119.537 435.175, 128.456 434.439 C 133.980 433.983, 144.522 433.585, 151.881 433.555 C 167.108 433.492, 166.547 433.807, 167.519 424.789 C 168.243 418.064, 170.514 415.660, 190.620 400.323 C 205.280 389.141, 210.145 383.935, 216.352 372.783 C 221.696 363.184, 223.476 361.390, 243.073 345.858 C 250.458 340.005, 263.145 328.417, 271.267 320.108 C 279.388 311.799, 286.457 305, 286.974 305 C 287.491 305, 289.171 306.647, 290.707 308.660 C 292.243 310.672, 296.669 315.960, 300.542 320.410 C 304.415 324.859, 310.893 333, 314.938 338.500 C 318.982 344, 325.938 352.325, 330.396 357 C 335.838 362.708, 339.949 368.216, 342.913 373.768 C 345.424 378.474, 352.198 387.954, 358.634 395.768 C 366.479 405.296, 370.571 411.184, 371.996 415 C 373.127 418.025, 374.554 421.491, 375.169 422.702 C 375.851 424.045, 376.038 427.023, 375.648 430.334 C 374.785 437.683, 375.757 438.387, 385.951 437.797 C 397.726 437.115, 399.471 434.711, 393.837 426.934 C 392.097 424.532, 390.094 420.639, 389.385 418.283 C 388.676 415.927, 386.790 412.087, 385.194 409.749 C 383.598 407.412, 381.492 403.025, 380.513 400 C 372.686 375.811, 366.237 362.998, 354.978 349.265 C 345.463 337.660, 344.524 335.906, 335.024 312 C 330.543 300.725, 325.296 288.359, 323.362 284.520 C 312.622 263.193, 298.496 251.264, 276.500 244.944 C 264.051 241.367, 262.929 240.860, 250.500 233.204 C 245.550 230.155, 235.650 224.870, 228.500 221.461 C 221.350 218.051, 214.417 214.087, 213.094 212.651 L 210.689 210.040 210.374 176.578 C 210.140 151.630, 209.641 140.494, 208.413 132.808 C 207.507 127.139, 206.807 119.125, 206.856 115 C 207.234 83.569, 207.251 83.897, 205.068 81.573 C 203.931 80.362, 203 78.889, 203 78.301 C 203 77.186, 198.710 74, 197.209 74 C 196.736 74, 195.394 75.016, 194.227 76.258 M 195.500 279.209 C 189.587 281.282, 189.277 282.040, 188.712 295.799 C 187.669 321.207, 183.237 345.463, 176.124 364.690 C 172.639 374.111, 170.615 389.678, 173.223 387 C 180.039 380.002, 195.901 359.525, 199.929 352.526 C 202.671 347.760, 206.290 342.294, 207.972 340.380 C 209.653 338.465, 213.887 332.534, 217.381 327.199 C 220.875 321.865, 228.069 312.451, 233.367 306.279 C 243.638 294.315, 244.080 293.325, 241.043 289.060 C 237.268 283.759, 227.927 280.520, 216 280.376 C 210.225 280.307, 203.928 279.744, 202.007 279.125 C 200.085 278.506, 198.510 278.036, 198.507 278.079 C 198.503 278.122, 197.150 278.631, 195.500 279.209" />
     </svg>
   );
 }

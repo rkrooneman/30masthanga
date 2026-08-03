@@ -1,18 +1,11 @@
 /**
- * SalambaSarvangasana — Supported Shoulderstand, original stick-figure pose icon.
+ * SalambaSarvangasana — Supported Shoulderstand (Salamba Sarvangasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a vertical inversion balanced on the shoulders. The head and
- * shoulders rest on the floor at the baseline; from the shoulders the torso and
- * straight legs rise straight up the centre to the lifted feet near the top. Two
- * supporting arms angle up from the elbows on the floor to brace the low back —
- * the "salamba" (supported) detail.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -28,32 +21,11 @@ function SalambaSarvangasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 1264 843"
       role="img"
       aria-label="Supported Shoulderstand pose"
     >
-      {/* Faint floor line the head, shoulders and elbows rest on. */}
-      <line x1="30" y1="90" x2="70" y2="90" strokeWidth={2} opacity={0.35} />
-
-      {/* Torso + legs: rise straight up the centre from the shoulders on the floor
-          to the lifted feet near the top. */}
-      <line x1="50" y1="86" x2="50" y2="12" />
-
-      {/* Small foot flick at the top. */}
-      <path d="M50 12 L57 11" />
-
-      {/* Supporting arms: from the elbows on the floor angling up to brace the low
-          back on either side of the torso. */}
-      <path d="M38 88 L48 56" />
-      <path d="M62 88 L52 56" />
-
-      {/* Head: rests on the floor just below the shoulders at the base. */}
-      <circle cx="50" cy="87" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 603 44 C 600.492 46.508, 600.498 48.835, 603.034 57 C 606.435 67.952, 607.802 75.962, 608.495 89 C 608.860 95.875, 610.461 109.825, 612.053 120 C 613.644 130.175, 615.405 142.550, 615.965 147.500 C 617.253 158.881, 617.293 211.937, 616.025 226.500 C 615.498 232.550, 614.613 249.200, 614.059 263.500 C 612.947 292.149, 612.279 296.061, 604.920 317 C 601.339 327.188, 600.712 330.383, 599.420 345 C 598.617 354.075, 596.631 369.150, 595.005 378.500 C 589.201 411.879, 588.585 419.047, 588.603 453 C 588.621 486.498, 588.612 486.409, 594.828 516 C 596.063 521.878, 597.072 531.791, 597.476 542 C 598.149 559.011, 599.984 577.705, 602.541 593.600 C 603.395 598.905, 604.176 612.459, 604.415 626.100 C 604.640 638.970, 605.128 652.875, 605.498 657 C 606.119 663.902, 605.966 664.859, 603.582 669 C 591.978 689.159, 591.182 695.419, 596.181 727.246 C 597.684 736.817, 595.989 740.274, 589.527 740.818 L 585.753 741.135 586.611 735.318 C 588.675 721.330, 586.933 716, 580.297 716 C 578.932 716, 576.671 715.100, 575.273 714 C 573.874 712.900, 571.693 712, 570.424 712 C 569.156 712, 567.840 711.550, 567.500 711 C 567.160 710.450, 565.382 710, 563.549 710 C 560.749 710, 560.107 709.561, 559.528 707.256 C 557.936 700.911, 556.129 700.694, 545.972 705.633 C 538.663 709.187, 538.228 709.268, 526 709.383 C 511.337 709.520, 505.652 711.504, 497.164 719.443 C 477.882 737.480, 478.313 774.059, 497.994 789.875 C 512.855 801.818, 531.798 802.726, 553.978 792.559 C 575.059 782.896, 583.892 783.509, 612 796.590 C 627.947 804.011, 633.170 804.882, 666 805.590 C 728.052 806.929, 761.020 806.648, 767.232 804.727 C 775.445 802.187, 781 796.726, 781 791.192 C 781 778.904, 763.255 746.307, 735.168 707 C 719.110 684.528, 716.326 678.139, 713.437 657.129 C 712.218 648.269, 711.171 644.309, 709.040 640.500 C 707.502 637.750, 704.996 631.695, 703.471 627.044 C 700.380 617.615, 695.036 605.554, 692.596 602.500 C 691.009 600.512, 690.986 600.515, 688.999 602.861 C 686.408 605.921, 686.376 613.345, 688.902 625.500 C 692.519 642.906, 692.680 655, 689.296 655 C 688.481 655, 685.111 652.553, 681.806 649.562 C 674.270 642.743, 670.631 641.261, 668.587 644.179 C 666.611 647.001, 667.855 649.895, 674.020 656.812 C 676.876 660.016, 680.903 666.356, 683.444 671.649 C 687.094 679.252, 689.281 682.274, 695.778 688.695 C 708.215 700.985, 718.170 722.869, 724.951 752.820 C 726.734 760.696, 728.016 767.317, 727.800 767.533 C 727.584 767.749, 722.028 766.178, 715.454 764.042 C 700.175 759.077, 691.732 757.403, 675 756.019 C 664.563 755.157, 660.309 754.360, 656.250 752.507 C 649.937 749.626, 649.325 748.479, 655.250 750.635 C 660.315 752.478, 691.634 754.766, 693.007 753.393 C 694.833 751.567, 696.893 734.024, 697.549 714.703 L 698.222 694.906 691.459 688.703 C 685.821 683.532, 683.994 680.995, 680.475 673.454 C 678.001 668.151, 674.135 661.985, 671.133 658.555 C 657.522 643.001, 667.225 632.027, 682.301 645.924 C 684.734 648.166, 687.011 650, 687.362 650 C 689.046 650, 687.936 637.605, 684.510 618.168 C 683.027 609.752, 683.014 608.329, 684.377 603.668 C 685.209 600.826, 686.092 593.967, 686.340 588.427 C 686.717 580.016, 687.326 577.045, 690.027 570.427 C 696.349 554.935, 697.203 552.416, 698.594 545.162 C 702.840 523.004, 698.695 504.778, 684.004 481.006 C 675.068 466.548, 674.132 463.107, 671.490 435 C 669.843 417.484, 666.352 393.679, 663.130 378 C 657.875 352.423, 657.794 333.670, 662.839 310.473 C 669.302 280.759, 669.505 260.821, 663.670 228.846 C 658.017 197.872, 655.848 181.624, 655.275 165.963 C 654.671 149.492, 655.198 147.591, 662.751 139 C 674.238 125.933, 672.872 118.951, 655.554 102.215 C 645.645 92.638, 643.259 89.157, 637.477 75.837 C 632.916 65.330, 627.243 56.816, 618.760 47.750 C 613.867 42.521, 613.001 42, 609.190 42 C 606.333 42, 604.364 42.636, 603 44" />
     </svg>
   );
 }

@@ -1,20 +1,11 @@
 /**
- * Purvottanasana — Upward Plank Pose, original stick-figure pose icon.
+ * Purvottanasana — Upward Plank / Intense East Stretch (Purvottanasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a reverse plank traced from the reference photo — the front of the
- * body faces up. The straight arms press vertically down to the hands planted on
- * the floor behind the shoulders (left), and the soles press flat on the floor
- * ahead (right); between them the body lifts clear of the floor into one long,
- * nearly level line from feet through the raised hips to the shoulders, tilting up
- * only slightly toward the shoulder. The head drops back off the top of the line.
- * The signature: a high, upward-facing lifted plank (opposite of a forward fold).
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -30,29 +21,11 @@ function Purvottanasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Upward Plank Pose"
+      aria-label="Upward Plank / Intense East Stretch pose"
     >
-      {/* Faint floor line under the planted hands and the pressing feet. */}
-      <line x1="16" y1="92" x2="90" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Body: one long, nearly level lifted line — shoulders (left) to feet
-          (right), the raised hips only a touch higher than the ends. */}
-      <line x1="30" y1="52" x2="86" y2="60" />
-      {/* Soles pressing flat on the floor at the far end. */}
-      <line x1="86" y1="60" x2="88" y2="88" />
-
-      {/* Supporting arm: straight and vertical from the shoulder to the hand. */}
-      <line x1="30" y1="52" x2="26" y2="88" />
-
-      {/* Head: dropped back off the shoulder end of the line. */}
-      <circle cx="22" cy="57" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 401.095 157.026 C 398.103 158.900, 397.169 159.028, 393.402 158.080 C 387.008 156.470, 386 156.663, 386 159.500 C 386 160.875, 385.478 162, 384.841 162 C 384.203 162, 381.274 163.818, 378.332 166.039 C 372.451 170.480, 372.191 171.974, 376.165 178.500 C 378.659 182.594, 378.490 184.023, 374.931 188.937 C 371.324 193.915, 364.815 197.217, 359.843 196.590 C 358.004 196.358, 350.801 195.847, 343.835 195.454 C 328.751 194.602, 324.520 195.964, 319.192 203.383 C 316.837 206.662, 314.626 208.322, 310.280 210.077 C 299.027 214.621, 272.926 228.103, 265.209 233.357 C 260.906 236.287, 252.911 240.874, 247.443 243.550 C 234.957 249.659, 220.428 259.345, 207.440 270.219 C 201.907 274.851, 194.932 280.272, 191.940 282.266 C 188.948 284.260, 184.187 288.503, 181.360 291.696 C 178.109 295.367, 173.148 299.320, 167.860 302.451 C 163.262 305.175, 154.550 310.555, 148.500 314.407 C 142.450 318.259, 129.850 324.894, 120.500 329.151 C 111.150 333.407, 100.125 338.703, 96 340.918 C 91.875 343.133, 86.375 345.239, 83.778 345.598 C 78.048 346.389, 76.560 349.008, 79.929 352.368 C 81.928 354.361, 83.127 354.506, 98.284 354.585 C 107.203 354.632, 117.462 355.023, 121.082 355.456 C 127.488 356.221, 127.723 356.168, 129.832 353.486 C 131.025 351.970, 132 349.861, 132 348.799 C 132 343.621, 134.642 342.339, 160.500 334.970 C 175.071 330.817, 181.787 327.387, 192 318.882 C 203.467 309.333, 206.778 307.542, 222.228 302.532 C 229.528 300.165, 239.775 296.290, 245 293.920 C 254.375 289.668, 254.652 289.610, 266 289.535 C 283.204 289.422, 290.574 285.282, 298.993 271 C 305.955 259.189, 311.095 256.110, 328 253.624 C 333.775 252.775, 341.792 251.387, 345.815 250.540 C 349.839 249.693, 353.776 249, 354.565 249 C 355.774 249, 356 253.006, 356 274.420 C 356 294.823, 356.405 302.610, 358.051 313.875 C 359.179 321.595, 359.967 330.518, 359.801 333.705 L 359.500 339.500 353 340.716 C 337.673 343.582, 330.501 345.641, 330.188 347.265 C 329.804 349.257, 335.368 350.529, 340.366 349.591 C 345.751 348.581, 348.258 350.107, 343.435 351.460 C 338.967 352.714, 338.242 355.060, 342 356.105 C 349.435 358.173, 379.643 356.536, 381.004 353.992 C 384.065 348.272, 385.107 320.311, 382.983 300.876 C 381.622 288.420, 383.018 273.902, 388.021 248.500 C 389.491 241.034, 389.941 235.016, 389.797 224.754 C 389.531 205.791, 389.846 205.364, 403.763 205.848 C 415.396 206.252, 420.840 204.493, 427.231 198.266 C 437.794 187.975, 435.405 168.359, 422.451 159.022 C 416.142 154.474, 406.594 153.582, 401.095 157.026 M 370.195 342.500 C 370.215 344.150, 370.439 344.704, 370.693 343.731 C 370.947 342.758, 370.930 341.408, 370.656 340.731 C 370.382 340.054, 370.175 340.850, 370.195 342.500" />
     </svg>
   );
 }

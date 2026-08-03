@@ -1,19 +1,11 @@
 /**
- * Bhujapidasana — Shoulder-Pressing Pose, original stick-figure pose icon.
+ * Bhujapidasana — Shoulder-Pressing Pose (Bhujapidasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: an arm balance, traced from the reference photo (frame A, the
- * clearest signature). The two arms drop as supports to the hands planted on the
- * floor, the rounded back lifting up-and-back behind them. The legs drape forward
- * OVER the upper arms and the feet cross at the ankles out in FRONT of the hands,
- * hovering just off the floor. The head tips forward and down over the crossed
- * feet. A low, compact, forward-leaning balance off the ground.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -29,33 +21,11 @@ function Bhujapidasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
       aria-label="Shoulder-Pressing Pose pose"
     >
-      {/* Faint floor line the hands press into. */}
-      <line x1="30" y1="92" x2="66" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Two arms: bent supports from the lifted shoulders down to the hands
-          planted close together on the floor. */}
-      <line x1="34" y1="52" x2="44" y2="88" />
-      <line x1="54" y1="50" x2="48" y2="88" />
-
-      {/* Rounded back: lifts up-and-back behind the arms, over toward the head. */}
-      <path d="M34 52 C26 60 30 44 44 40" />
-
-      {/* Legs drape OVER the upper arms and cross at the ankles out in front,
-          hovering just off the floor. */}
-      <path d="M38 58 C30 70 40 78 56 74" />
-      <path d="M52 56 C64 66 58 78 42 74" />
-
-      {/* Head: tips forward and down over the crossed feet. */}
-      <circle cx="48" cy="38" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 291.500 131.689 C 281.460 132.992, 270.033 135.647, 259.911 139.030 C 223.088 151.338, 204.490 166.619, 182.359 202.752 C 181.181 204.674, 179.606 206.635, 178.859 207.108 C 176.782 208.424, 172.379 208.162, 171.123 206.648 C 170.506 205.905, 166.739 203.776, 162.751 201.916 C 138.326 190.529, 114.511 204.796, 114.657 230.728 C 114.724 242.584, 118.677 250.542, 127.251 256.084 C 133.716 260.262, 138.533 261.985, 143.772 261.994 C 146.196 261.999, 148.171 263.038, 151.384 266 C 156.313 270.543, 156.638 270.638, 159.234 268.288 C 160.386 267.246, 163.158 266.465, 166.313 266.292 C 179.459 265.574, 180.205 265.440, 181.598 263.534 C 182.459 262.358, 183.006 259.084, 183.015 255.059 C 183.033 246.723, 183.962 245.153, 192.500 239.007 L 199.500 233.968 201.427 236.734 C 206.329 243.769, 213.873 249.834, 223.332 254.344 C 233.168 259.033, 233.834 259.585, 260.422 285.081 C 262.746 287.309, 263.695 289.587, 265.054 296.192 C 265.993 300.761, 267.720 308.679, 268.891 313.786 C 270.063 318.893, 271.307 328.404, 271.658 334.922 C 272.403 348.781, 272.505 348.634, 261.061 350.131 C 247.443 351.912, 231.055 355.611, 229.386 357.281 C 229.097 357.569, 229.455 358.795, 230.181 360.004 C 231.442 362.107, 231.927 362.174, 241.296 361.552 C 246.683 361.195, 251.751 360.649, 252.557 360.340 C 253.565 359.953, 253.840 360.252, 253.439 361.298 C 252.585 363.525, 256.050 364.268, 261.220 362.966 C 263.643 362.356, 267.397 362.038, 269.563 362.260 C 273.364 362.650, 273.334 362.670, 268.700 362.832 C 266.061 362.924, 262.686 363.615, 261.200 364.366 C 259.715 365.118, 256.700 366.049, 254.500 366.437 C 242.806 368.495, 231.871 373.365, 233.398 375.836 C 234.588 377.760, 242.035 379.183, 247.201 378.472 C 251.310 377.907, 252.351 378.097, 253.462 379.617 C 254.734 381.357, 255.104 381.364, 261.647 379.778 C 265.416 378.864, 272.955 377.873, 278.400 377.575 C 290.509 376.913, 292.424 375.857, 294.416 368.744 C 297.079 359.233, 299.350 331.726, 298.606 318 C 296.557 280.175, 297.130 282.340, 285.544 268.683 C 279.237 261.249, 279.424 260.937, 288.082 264.455 C 291.405 265.805, 302.083 269.190, 311.812 271.976 C 333.344 278.142, 338.489 280.575, 352.673 291.297 C 358.759 295.897, 366.162 301.029, 369.125 302.701 C 375.220 306.141, 383.369 314.062, 385.092 318.221 C 385.842 320.032, 386.984 320.998, 388.371 320.995 C 391.018 320.990, 396.939 315.578, 397.175 312.949 C 397.772 306.301, 397.651 304.286, 396.550 302.500 C 395.871 301.400, 395.035 299.375, 394.692 298 C 394.348 296.625, 391.135 292.177, 387.551 288.115 C 381.964 281.782, 380.654 279.533, 378.356 272.318 C 376.397 266.169, 374.917 263.313, 372.855 261.703 C 371.303 260.491, 368.717 258.488, 367.108 257.250 C 363.696 254.625, 360.345 254.411, 355.346 256.500 C 347.836 259.638, 343.330 257.639, 324 242.599 C 320.425 239.817, 314.817 236.102, 311.538 234.343 C 305.623 231.169, 305.599 231.139, 308.538 230.486 C 339.146 223.677, 363.363 207.679, 372.230 188.410 C 379.966 171.599, 369.395 148.467, 349.698 139.107 C 336.092 132.642, 309.893 129.302, 291.500 131.689 M 288.111 184.517 C 273.030 193.132, 265.231 198.793, 255.105 208.474 C 242.646 220.385, 239.658 228.243, 243.973 237.750 C 246.279 242.831, 247.520 243.488, 245.449 238.532 C 242.947 232.543, 243.562 226.004, 247.135 220.609 C 253.044 211.689, 274.045 194.841, 298.616 179.309 C 299.652 178.654, 300.275 178.094, 300 178.064 C 299.725 178.035, 294.375 180.939, 288.111 184.517" />
     </svg>
   );
 }

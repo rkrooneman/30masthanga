@@ -1,20 +1,11 @@
 /**
- * Dandasana — Staff Pose, original stick-figure pose icon.
+ * Dandasana — Staff Pose (Dandasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: seated side profile facing right — the crisp upright "L" traced
- * from the reference photo. The legs lie flat along the floor extended forward
- * (to the right) from the sitting bones out to the feet, which flex up at the far
- * end. The torso rises nearly vertical from the hips to the shoulders with only a
- * whisper of forward lean, and the near arm drops straight down at the side, the
- * hand resting on the floor by the hip. Tall and square — the reference posture
- * for all seated poses.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -30,31 +21,11 @@ function Dandasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Staff Pose"
+      aria-label="Staff Pose pose"
     >
-      {/* Faint floor line the legs and seat rest along. */}
-      <line x1="20" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Legs: flat along the floor from the sitting bones out to the feet. */}
-      <line x1="28" y1="88" x2="84" y2="88" />
-      {/* Flexed feet at the far end. */}
-      <line x1="84" y1="88" x2="84" y2="77" />
-
-      {/* Torso: nearly vertical from the hips up to the shoulders, a hair forward. */}
-      <line x1="28" y1="88" x2="31" y2="43" />
-
-      {/* Arm: drops straight down at the side, hand on the floor by the hip. */}
-      <line x1="33" y1="47" x2="34" y2="86" />
-
-      {/* Head: above the shoulders at the top of the upright torso. */}
-      <circle cx="31.5" cy="36" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 351 121.543 C 337.658 125.266, 330 135.202, 330 148.788 C 330 153.309, 329.414 155.238, 326.806 159.302 L 323.612 164.279 326.451 166.542 C 328.257 167.982, 329.070 169.375, 328.688 170.371 C 328.358 171.232, 328.498 172.190, 329 172.500 C 329.502 172.810, 329.677 173.679, 329.388 174.431 C 329.100 175.183, 329.344 176.095, 329.932 176.458 C 330.519 176.821, 331 178.634, 331 180.488 C 331 185.629, 333.202 187.153, 340.385 186.985 C 343.748 186.907, 346.985 186.878, 347.578 186.921 C 348.754 187.007, 351 195.509, 351 199.871 C 351 201.651, 348.524 206.028, 343.831 212.545 C 323.350 240.988, 323.216 241.424, 324.960 274.141 C 325.615 286.438, 326.402 304.190, 326.708 313.590 L 327.264 330.680 309.882 331.348 C 300.322 331.715, 285.525 332.916, 277 334.016 C 268.475 335.116, 255.875 336.500, 249 337.093 C 239.902 337.876, 233.427 339.113, 225.209 341.638 C 216.343 344.361, 209.901 345.521, 195.209 347.039 C 184.919 348.103, 173.125 349.415, 169 349.955 C 158.981 351.268, 142.425 351.246, 137.623 349.912 C 135.491 349.320, 132.008 347.185, 129.884 345.168 C 125.212 340.732, 116.229 325.963, 115.566 321.628 C 115.303 319.907, 114.816 316.363, 114.483 313.750 C 113.962 309.660, 113.563 309, 111.613 309 C 108.688 309, 104.999 312.942, 105.003 316.064 C 105.004 317.404, 104.271 321.526, 103.373 325.225 C 101.806 331.685, 101.826 332.304, 103.871 340.909 C 105.312 346.975, 106 353.135, 106 359.984 C 106 377.039, 108.606 379.188, 124.688 375.392 C 133.332 373.352, 149.461 373.947, 170.500 377.082 C 193.235 380.470, 205.115 380.133, 222.164 375.618 C 238.720 371.234, 239.837 371.216, 258.594 375.034 C 275.870 378.550, 309.238 383.002, 318.280 382.997 C 321.871 382.995, 328.304 381.928, 333.500 380.473 C 338.450 379.086, 345.650 377.473, 349.500 376.888 C 362.252 374.950, 361 376.018, 361 367.075 C 361 362.737, 360.094 350.708, 358.986 340.344 C 357.748 328.765, 357.074 316.488, 357.236 308.500 C 357.381 301.350, 356.961 289.875, 356.302 283 C 355.643 276.125, 354.890 264.650, 354.628 257.500 C 353.909 237.920, 355.671 247.196, 356.935 269.649 C 357.528 280.181, 358.459 291.149, 359.004 294.022 C 359.552 296.910, 359.716 304.220, 359.371 310.373 C 358.952 317.850, 359.302 327.076, 360.439 338.500 C 361.370 347.850, 361.989 360.225, 361.815 366 L 361.500 376.500 354 377.552 C 342.225 379.203, 318.880 385.859, 318.252 387.745 C 317.265 390.706, 322.473 391.462, 344 391.481 C 367.768 391.502, 370.973 390.887, 373.604 385.798 C 377.016 379.201, 380.445 339.670, 379.485 318.007 C 378.889 304.559, 379.148 299.645, 381.438 281 C 382.890 269.175, 384.486 255.225, 384.984 250 C 385.872 240.691, 385.881 240.759, 385.422 253.396 C 385.164 260.489, 384.016 273.314, 382.871 281.896 C 381.188 294.515, 380.815 302.283, 380.921 322.500 C 381.021 341.541, 380.591 351.433, 379.118 364 C 378.055 373.075, 377.337 380.657, 377.524 380.848 C 378.182 381.524, 382.776 377.472, 384.716 374.505 C 390.309 365.952, 391.466 353.215, 388.400 333.976 C 385.691 316.980, 386.124 297.544, 389.831 269.683 C 394.824 232.160, 394.007 221.395, 384.771 203.004 C 379.880 193.265, 379.474 191.908, 379.144 184.166 C 378.805 176.243, 378.937 175.615, 381.760 171.662 C 392.589 156.498, 392.992 140.456, 382.821 129.422 C 375.642 121.634, 362.412 118.358, 351 121.543" />
     </svg>
   );
 }

@@ -1,18 +1,11 @@
 /**
- * Navasana — Boat Pose, original stick-figure pose icon.
+ * Navasana — Boat Pose (Navasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: balancing on the sitting bones (a single low point on the floor),
- * the body opens into a wide "V", figure facing right. The torso rises up-and-back
- * (up-left) to the head; the straight legs lift up-and-forward (up-right) so the
- * toes reach roughly head height. The arms extend forward level with the floor,
- * running past the knees toward the shins — the signature Boat line.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -28,28 +21,11 @@ function Navasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Boat Pose"
+      aria-label="Boat Pose pose"
     >
-      {/* Faint floor line under the single balance point (the sitting bones). */}
-      <line x1="30" y1="92" x2="58" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Torso: from the sitting bones up-and-back to the shoulders. */}
-      <line x1="40" y1="84" x2="25" y2="44" />
-      {/* Legs: from the sitting bones lifted up-and-forward; toes near head height. */}
-      <line x1="40" y1="84" x2="86" y2="31" />
-
-      {/* Arms: extend forward level with the floor, past the knees to the shins. */}
-      <line x1="27" y1="47" x2="65" y2="45" />
-
-      {/* Head: above the shoulders at the top of the torso. */}
-      <circle cx="21.5" cy="34" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 404.483 133.765 C 403.924 134.169, 402.903 136.750, 402.215 139.500 C 401.526 142.250, 399.460 147.425, 397.624 151 C 395.787 154.575, 391.319 163.272, 387.694 170.327 C 376.915 191.307, 369.831 201.062, 356.324 213.526 C 349.821 219.527, 338.599 230.146, 331.386 237.123 C 319.298 248.817, 317.460 250.197, 307.886 254.773 C 300.958 258.085, 296.168 261.129, 293.500 263.917 C 291.300 266.215, 285.450 271.099, 280.500 274.770 C 266.767 284.954, 252.680 296.337, 240.219 307.317 L 228.939 317.258 222.219 310.948 C 217.135 306.174, 214.145 302.160, 209.931 294.456 C 206.868 288.857, 203.412 283.068, 202.251 281.592 C 200.674 279.587, 200.281 278.044, 200.696 275.487 C 201.020 273.491, 200.550 269.921, 199.569 266.922 C 198.644 264.094, 198.025 261.645, 198.194 261.480 C 198.953 260.738, 221.872 257, 225.664 257 C 233.006 257, 249.998 253.197, 268.566 247.398 C 285.032 242.255, 287.019 241.849, 292.836 242.435 C 302.267 243.385, 322.755 239.578, 325.538 236.358 C 326.658 235.061, 328.458 233.986, 329.538 233.969 C 330.617 233.951, 332.334 232.792, 333.354 231.393 C 335.179 228.887, 335.172 228.812, 332.868 226.360 C 330.669 224.019, 330.008 223.889, 321.818 224.185 C 313.746 224.477, 313.122 224.360, 313.304 222.591 C 313.691 218.822, 299.173 220.604, 292.860 225.099 C 289.164 227.732, 274.485 229.614, 251.495 230.403 C 241.145 230.758, 232.339 231.581, 228.995 232.506 C 209.093 238.009, 190.771 238.645, 171.597 234.500 C 165.237 233.125, 158.746 232, 157.172 232 C 152.390 232, 148.947 226.657, 148.772 218.962 C 148.634 212.898, 148.687 212.843, 155.553 211.912 C 163.653 210.812, 163.966 210.347, 163.634 199.889 C 163.428 193.406, 163.714 190.652, 164.675 189.855 C 166.690 188.182, 166.361 187.449, 161.598 182.984 C 158.588 180.163, 156.980 177.709, 156.515 175.226 C 154.083 162.267, 143.572 154, 129.527 154 C 111.932 154, 99.020 165.852, 99.020 182 C 99.020 191.347, 101.941 197.019, 110.820 204.910 C 119.901 212.980, 120.576 214.878, 120.103 231 C 119.284 258.939, 119.356 259.379, 127.555 276.500 C 130.385 282.409, 134.066 287.981, 138.273 292.723 C 141.797 296.696, 149.246 306.146, 154.827 313.723 C 160.408 321.300, 168.117 331.775, 171.958 337 C 175.800 342.225, 180.868 350.024, 183.221 354.331 C 190.471 367.600, 193.258 371.292, 198.418 374.471 L 203.335 377.500 224.179 377.806 L 245.023 378.112 250.050 375.376 C 256.208 372.025, 260.427 367.519, 269.805 354.283 C 273.786 348.664, 280.670 339.678, 285.102 334.315 C 292.676 325.151, 297.035 318.949, 308.457 301.086 C 315.223 290.504, 322.255 283.517, 331.836 277.858 C 351.142 266.455, 357.529 259.860, 373.045 235.303 C 392.817 204.011, 393.694 203.021, 403 201.502 C 413.255 199.829, 414.419 196.440, 411.152 177.774 C 410.658 174.953, 410.748 170.519, 411.376 166.774 C 412.757 158.540, 412.582 143.292, 411.053 138.659 C 409.629 134.346, 406.700 132.164, 404.483 133.765" />
     </svg>
   );
 }

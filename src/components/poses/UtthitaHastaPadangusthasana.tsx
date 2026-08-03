@@ -1,20 +1,11 @@
 /**
- * UtthitaHastaPadangusthasana — Extended Hand-to-Big-Toe, original stick-figure
- * pose icon.
+ * UtthitaHastaPadangusthasana — Extended Hand-to-Big-Toe Pose (Utthita Hasta Padangusthasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a tall one-legged balance, figure facing right. The standing
- * (left) leg is straight and vertical to the floor and the torso rises upright
- * above it. The other (right) leg extends straight out to the front, lifted to
- * about hip height, and the same-side hand reaches forward along it to hook the
- * big toe of the lifted foot. The free (left) arm bends with the hand planted on
- * the hip, steadying the balance.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -30,35 +21,11 @@ function UtthitaHastaPadangusthasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Extended Hand-to-Big-Toe pose"
+      aria-label="Extended Hand-to-Big-Toe Pose pose"
     >
-      {/* Faint floor line under the single standing foot. */}
-      <line x1="24" y1="92" x2="52" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Standing (left) leg: straight and vertical from the hips to the floor. */}
-      <line x1="38" y1="52" x2="38" y2="92" />
-      {/* Lifted (right) leg: straight out to the front, level at about hip
-          height, to the raised foot. */}
-      <line x1="38" y1="52" x2="84" y2="50" />
-
-      {/* Torso: upright from the hips to the shoulders. */}
-      <line x1="38" y1="52" x2="40" y2="28" />
-
-      {/* Reaching (right) arm: from the shoulder forward along the lifted leg to
-          hook the big toe of the raised foot. */}
-      <line x1="40" y1="31" x2="82" y2="49" />
-      {/* Free (left) arm: bends with the hand planted on the hip. */}
-      <path d="M40 31 L31 42 L37 51" />
-
-      {/* Head: above the shoulders at the top of the upright torso. */}
-      <circle cx="40.5" cy="21.5" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 302.184 77.032 C 292.530 79.015, 286 86.994, 286 96.809 C 286 100.785, 285.448 102.503, 283.379 104.961 C 280.837 107.982, 280.813 108.136, 282.568 110.075 C 283.562 111.174, 284.489 112.844, 284.626 113.787 C 286.333 125.531, 287.269 126.637, 294.581 125.540 C 299.549 124.795, 300.431 126.147, 299.820 133.572 C 299.397 138.702, 296.781 139.966, 286.552 139.985 C 280.918 139.996, 276.168 140.743, 270.241 142.551 C 260.972 145.378, 261.192 145.376, 211 143.174 C 186.953 142.119, 184.290 141.796, 176.435 138.981 C 171.782 137.314, 170.811 137.284, 164.479 138.611 C 160.689 139.406, 157.048 139.849, 156.388 139.595 C 154.960 139.047, 152.004 142.061, 151.990 144.079 C 151.985 144.860, 150.447 147.429, 148.572 149.788 C 146.495 152.400, 144.909 155.721, 144.512 158.288 C 143.470 165.023, 141.921 169.193, 138.718 173.880 C 136.990 176.408, 135.521 180.070, 135.242 182.542 C 134.696 187.386, 136.157 188.648, 145 190.974 C 151.746 192.748, 158.968 197.144, 174.487 208.922 C 190.010 220.703, 195.806 223.573, 211.889 227.442 C 223.195 230.161, 227.666 232.511, 240.662 242.562 C 244.973 245.897, 251.425 250.350, 255 252.458 C 258.575 254.567, 266.048 259.207, 271.608 262.769 L 281.715 269.246 282.308 283.373 C 282.730 293.435, 283.778 301.648, 285.950 311.914 C 287.628 319.841, 289 327.373, 289 328.652 C 289 329.930, 290.417 335.369, 292.149 340.738 C 295.484 351.077, 296.209 357.637, 297.590 390 C 298.338 407.499, 297.475 412.728, 293.182 416.709 C 289.775 419.868, 273.686 427.667, 268.750 428.551 C 264.439 429.323, 263.589 432.175, 267.110 434.059 C 269.840 435.520, 283.033 435.735, 299.908 434.592 C 315.876 433.511, 317.671 432.546, 316.579 425.634 C 314.334 411.435, 314.447 409.499, 319.175 381.057 C 321.589 366.534, 321.359 361.448, 317.507 344.181 L 314.760 331.862 316.427 320.274 C 317.343 313.901, 318.519 302.726, 319.040 295.443 C 320.112 280.446, 320.157 280.269, 324.673 273.652 C 330.987 264.398, 332.333 255.054, 329.124 242.750 L 327.364 236 330.554 236 C 337.963 236, 377 201.870, 377 195.393 C 377 190.467, 368.180 175.314, 360.381 166.844 C 358.024 164.282, 354.424 159.557, 352.381 156.344 C 345.934 146.200, 342.107 142.196, 336.150 139.358 C 322.412 132.816, 317.913 125.087, 322.752 116.339 C 330.365 102.574, 330.224 102.979, 329.828 95.969 C 329.034 81.919, 317.353 73.916, 302.184 77.032 M 157.975 149.565 C 156.761 152.759, 156.755 160.529, 157.962 168.873 C 159.489 179.441, 163.571 182.422, 194.886 195.838 C 211.376 202.903, 217.328 205.006, 220.886 205.026 C 223.424 205.040, 228.650 206.197, 232.500 207.596 C 236.350 208.996, 244.917 211.846, 251.537 213.931 C 258.158 216.015, 267.487 219.291, 272.269 221.211 C 277.052 223.131, 281.197 224.469, 281.482 224.185 C 283.537 222.130, 280.482 189.265, 277.634 182.782 C 275.597 178.148, 275.550 173.013, 277.500 168.346 C 278.325 166.371, 279 164.586, 279 164.378 C 279 164.170, 274.163 163.991, 268.250 163.980 C 262.337 163.969, 254.575 163.503, 251 162.946 C 247.425 162.388, 237.975 161.538, 230 161.057 C 219.732 160.438, 211.560 159.258, 202 157.012 C 192.016 154.668, 187.198 153.993, 183.500 154.422 C 166.738 156.365, 164.238 156.325, 163.533 154.104 C 163.166 152.947, 162.446 152, 161.933 152 C 161.420 152, 161 150.875, 161 149.500 C 161 146.250, 159.221 146.288, 157.975 149.565 M 336.173 173.750 C 330.798 184.236, 324.056 206.476, 324.017 213.846 C 323.995 218.115, 327.401 223, 330.399 223 C 334.710 223, 356 197.531, 356 192.374 C 356 191.847, 353.954 189.410, 351.453 186.958 C 348.953 184.506, 345.020 180.137, 342.714 177.250 C 338.117 171.493, 337.499 171.163, 336.173 173.750" />
     </svg>
   );
 }

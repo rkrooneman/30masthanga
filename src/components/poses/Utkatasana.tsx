@@ -1,20 +1,11 @@
 /**
- * Utkatasana — Fierce Pose / Chair Pose, original stick-figure pose icon.
+ * Utkatasana — Fierce Pose / Chair Pose (Utkatasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: standing with the feet together on the floor and the knees bent
- * as if sitting back into a chair, figure facing right. The shins stay near
- * vertical while the hips drop back and down and the thighs angle down-and-back.
- * The torso leans slightly forward from the hips and both arms reach up overhead
- * in one long line, angled a touch forward past vertical. Distinct from the
- * Warriors (which have a wide split stance): here the feet are together and the
- * silhouette is a compact "seated-in-the-air" shape.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -30,34 +21,11 @@ function Utkatasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Fierce Pose / Chair Pose"
+      aria-label="Fierce Pose / Chair Pose pose"
     >
-      {/* Faint floor line under the feet. */}
-      <line x1="36" y1="92" x2="60" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Legs: feet together on the floor, near-vertical shins up to the bent
-          knees, then thighs angling back to the hips dropped down-and-back (the
-          "sitting into a chair" shape). Drawn as two nearly-overlapping legs. */}
-      <path d="M46 92 L47 66 L58 58" />
-      <path d="M52 92 L53 66 L58 58" />
-
-      {/* Torso: from the hips leaning slightly forward and up to the shoulders. */}
-      <line x1="58" y1="58" x2="52" y2="32" />
-
-      {/* Arms: both reaching up overhead, angled a touch forward past vertical,
-          continuing the torso line. */}
-      <path d="M52 32 L47 12" />
-      <path d="M52 32 L53 12" />
-
-      {/* Head: at the top of the torso, in front of the raised arms. */}
-      <circle cx="55.5" cy="28" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 313.206 74.048 C 310.971 74.945, 310.345 76.098, 306.453 86.500 C 305.105 90.104, 304.471 90.942, 304.184 89.500 C 303.739 87.272, 302.144 85, 301.024 85 C 300.622 85, 299.768 88.178, 299.127 92.061 C 298.067 98.477, 298.146 99.541, 299.980 103.689 C 301.091 106.200, 302 109.074, 302 110.075 C 302 113.293, 297.015 127.802, 292.415 137.974 C 289.958 143.408, 287.159 150.924, 286.197 154.677 C 284.082 162.924, 273.580 180.558, 268.455 184.467 C 263.618 188.156, 264.034 185.427, 269 180.887 C 273.869 176.437, 273.920 175.492, 269.593 169.826 C 267.720 167.372, 266.032 164.270, 265.843 162.932 C 265.551 160.858, 264.835 160.426, 260.991 160 C 258.223 159.693, 255.126 158.460, 252.971 156.807 C 243.645 149.653, 231.604 152.155, 222.813 163.074 C 212.619 175.735, 222.636 196, 239.089 196 C 246.638 196, 248.145 199.621, 243.931 207.632 C 242.287 210.756, 239.846 217.211, 238.506 221.977 C 232.434 243.573, 225.404 260.990, 220.317 267.035 C 218.879 268.744, 213.284 273.720, 207.886 278.092 C 202.487 282.464, 196.943 287.519, 195.565 289.326 C 186.216 301.583, 186.570 317.503, 196.411 327.344 C 204.517 335.451, 236.208 348.446, 253 350.550 C 258.508 351.240, 271 354.691, 271 355.523 C 271 355.766, 268.944 358.110, 266.431 360.732 C 260.584 366.833, 256.623 373.798, 253.079 384.207 C 249.140 395.776, 242.602 411.189, 238.054 419.631 C 233.210 428.621, 232.335 432.336, 234.341 435.398 C 235.823 437.660, 236.363 437.731, 257.282 438.435 C 281.819 439.261, 287 438.572, 287 434.481 C 287 432.623, 286.341 431.899, 284.250 431.459 C 276.082 429.738, 261.568 422.908, 259.699 419.905 C 257.646 416.608, 261.247 410.005, 273.007 395.500 C 280.102 386.749, 286.816 377.222, 294.464 365.053 C 304.780 348.637, 303.494 342.582, 286.950 329.698 C 275.620 320.875, 261.448 311.651, 252 306.951 C 247.325 304.626, 243.324 302.571, 243.108 302.386 C 242.196 301.603, 253.944 285.877, 260.952 278.500 C 265.133 274.099, 269.593 268.251, 270.865 265.500 C 272.137 262.750, 275.137 258.475, 277.532 256 C 285.223 248.051, 285.706 243.391, 280.435 227.946 C 275.710 214.102, 275.536 209.424, 279.561 204.355 C 285.294 197.135, 288.815 191.412, 296.990 176.020 C 305.734 159.554, 306.894 156.006, 311.535 131.500 C 313.281 122.279, 315.333 114.940, 317.548 110 C 322.122 99.798, 325.014 84.215, 322.655 82.489 C 321.745 81.824, 321 80.317, 321 79.140 C 321 77.066, 317.770 72.935, 316.250 73.063 C 315.837 73.098, 314.468 73.541, 313.206 74.048" />
     </svg>
   );
 }

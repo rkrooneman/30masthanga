@@ -1,21 +1,11 @@
 /**
- * UtthitaParsvakonasana — Extended Side Angle, original stick-figure pose icon.
+ * UtthitaParsvakonasana — Extended Side Angle Pose (Utthita Parsvakonasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a wide split stance, figure facing right. The front (right) knee
- * bends deeply to roughly a right angle over a vertical shin; the back (left) leg
- * rakes out long and straight to the floor. The torso lays down along the front
- * thigh and the bottom (right) hand drops to the floor beside the front foot,
- * while the top (left) arm sweeps up and over the ear — so the back foot, the
- * straight back leg, the torso and the top arm all fall on ONE long unbroken
- * diagonal from the bottom-left heel up to the top-right reaching hand, the
- * signature Extended Side Angle line.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -31,37 +21,11 @@ function UtthitaParsvakonasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Extended Side Angle pose"
+      aria-label="Extended Side Angle Pose pose"
     >
-      {/* Faint floor line under both feet and the bottom hand. */}
-      <line x1="8" y1="92" x2="82" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Front (right) leg: deep bent knee at a right angle — thigh out to the
-          right from the hips, vertical shin down to the planted front foot. */}
-      <path d="M56 62 L74 74 L74 92" />
-      {/* Back (left) leg: long and straight, raked out low to the back foot — the
-          start of the one long diagonal. */}
-      <line x1="56" y1="62" x2="14" y2="90" />
-
-      {/* Torso: lays down along the front thigh, out toward the front foot, so the
-          shoulders reach past the bent knee. */}
-      <line x1="56" y1="62" x2="70" y2="70" />
-
-      {/* Bottom (right) arm: drops to the floor beside the front foot. */}
-      <line x1="70" y1="70" x2="72" y2="90" />
-      {/* Top (left) arm: sweeps up and over the ear, continuing the back-leg
-          diagonal all the way to the top-right reaching hand. */}
-      <line x1="70" y1="70" x2="90" y2="40" />
-
-      {/* Head: alongside the reaching top arm, just past the shoulders. */}
-      <circle cx="64.5" cy="61" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 90.427 75.118 C 89.031 77.377, 91.485 82.081, 96.660 87.064 C 99.721 90.013, 101.725 92.592, 101.113 92.796 C 97.116 94.128, 109.770 107.434, 116.196 108.657 C 123.869 110.117, 125.586 111.836, 138.508 131 C 142.773 137.325, 148.846 145.434, 152.003 149.021 C 155.161 152.608, 159.424 158.908, 161.477 163.021 C 163.531 167.134, 167.899 174.225, 171.185 178.778 C 176.129 185.629, 177.575 188.609, 179.567 196.054 C 180.892 201.002, 182.656 206.367, 183.488 207.976 C 186.271 213.359, 184.527 216, 178.188 216 C 173.515 216, 172.612 214.047, 174.439 207.893 C 175.298 205.002, 176 202.301, 176 201.889 C 176 200.868, 167.200 195, 165.669 195 C 164.992 195, 163.915 193.612, 163.274 191.915 C 162.272 189.260, 161.789 188.946, 159.805 189.660 C 157.032 190.657, 150.861 190.603, 145.805 189.536 C 132.087 186.641, 119.624 198.088, 119.539 213.660 C 119.493 222.036, 122.304 227.157, 129.862 232.472 C 134.555 235.773, 142.035 236.428, 153.719 234.562 C 159.890 233.577, 163.153 235.157, 165.617 240.324 C 167.055 243.338, 166.953 244.529, 164.078 258.447 C 160.459 275.963, 160.434 276.672, 163.016 288.902 C 164.107 294.073, 165 300.232, 165 302.588 C 165 306.733, 164.829 306.965, 159.750 309.687 C 151.232 314.251, 150.736 315.933, 151.408 338 C 151.718 348.175, 152.645 361.225, 153.468 367 C 155.612 382.053, 155.474 384.183, 152 389.661 C 150.350 392.263, 149 395.443, 149 396.728 C 149 398.013, 148.325 400.680, 147.500 402.654 C 145.515 407.406, 145.607 408.336, 148 407.710 C 150.216 407.131, 150.655 408.908, 149.040 411.925 C 147.543 414.722, 137.117 420.466, 129.139 422.889 C 121.622 425.172, 119.835 426.891, 122.119 429.643 C 123.285 431.048, 124.912 431.156, 134.481 430.463 C 140.541 430.023, 151.125 429.592, 158 429.505 C 177.908 429.253, 178.250 428.966, 175.991 414.441 C 174.474 404.688, 175.264 385.027, 177.576 375 C 178.400 371.425, 179.467 362.425, 179.947 355 C 181.082 337.444, 181.614 335.135, 184.700 334.360 C 186.045 334.023, 192.625 334.480, 199.323 335.376 C 214.813 337.448, 217.609 337.417, 234 334.980 C 249.302 332.706, 256.319 330.886, 263.174 327.412 C 270.153 323.875, 271.850 324.247, 282.725 331.692 C 288.101 335.373, 295.732 340.544, 299.681 343.183 C 303.631 345.823, 311.906 352.046, 318.071 357.013 C 324.235 361.980, 332.923 367.940, 337.376 370.257 C 343.262 373.319, 347.663 376.659, 353.487 382.485 C 358.644 387.643, 366.766 394.019, 376.277 400.374 C 384.404 405.805, 392.054 411.559, 393.277 413.161 C 394.500 414.763, 396.800 417.650, 398.388 419.576 C 401.074 422.833, 401.233 423.497, 400.655 429.027 C 399.808 437.127, 401.718 438.524, 412.232 437.496 C 425.559 436.194, 426.033 432.318, 414.790 416.600 C 413.255 414.455, 412 412.099, 412 411.364 C 412 410.629, 410.192 408.832, 407.982 407.370 C 405.478 405.712, 399.962 399.267, 393.338 390.257 C 379.567 371.525, 373.711 365.305, 362.058 357.033 C 346.845 346.233, 341.752 340.596, 321.721 312.389 C 316.706 305.327, 310.009 297.407, 305.656 293.389 C 301.550 289.600, 296.157 283.733, 293.672 280.352 C 290.415 275.919, 285.428 271.419, 275.798 264.223 C 265.315 256.389, 260.801 252.225, 254.814 244.871 C 250.619 239.717, 239.019 227.858, 229.037 218.519 C 210.929 201.576, 206.995 196.820, 200.520 184.041 C 196.993 177.080, 191.854 170.143, 180.489 157 C 175.495 151.225, 168.555 142.733, 165.067 138.129 C 153.349 122.661, 126.623 97.080, 112 87.337 C 108.975 85.321, 104.025 81.794, 101 79.499 C 95.250 75.136, 91.401 73.541, 90.427 75.118 M 186.154 279.750 C 184.235 281.374, 184.129 282.226, 184.680 291.597 L 185.274 301.695 191.387 300.395 C 194.749 299.681, 203.125 298.591, 210 297.973 C 225.983 296.538, 225.432 296.737, 223.539 293.076 C 220.864 287.902, 211.475 282, 205.920 282 C 203.305 282, 199.066 281.100, 196.500 280 C 190.773 277.545, 188.815 277.498, 186.154 279.750" />
     </svg>
   );
 }

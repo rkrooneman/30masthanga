@@ -1,20 +1,11 @@
 /**
- * SetuBandhasana — Bridge Pose, original stick-figure pose icon.
+ * SetuBandhasana — Bridge Pose (Primary Series variant) (Setu Bandhasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: the primary-series bridge, traced from the reference photo — a
- * backbend arching onto the CROWN of the head. The head presses into the floor at
- * the left and the neck arches; from there the chest and hips lift high off the
- * ground into a smooth arch that runs down the near-straight legs to the feet
- * planted on the floor at the right. The arm crosses over the lifted chest (hands
- * to the shoulders, not on the floor). The signature: crown-down neck arch with a
- * high open chest anchored between head and feet.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -30,32 +21,11 @@ function SetuBandhasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 1024 1024"
       role="img"
-      aria-label="Bridge Pose"
+      aria-label="Bridge Pose (Primary Series variant) pose"
     >
-      {/* Faint floor line the crown of the head and the feet press into. */}
-      <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Neck/torso: from the crown on the floor the neck arches up and the chest
-          and hips lift high into a smooth arch. */}
-      <path d="M28 84 C34 54 52 52 66 58" />
-
-      {/* Legs: near-straight from the lifted hips down to the feet planted on the
-          floor at the right, with a small flexed foot. */}
-      <path d="M66 58 L84 84" />
-      <line x1="84" y1="84" x2="78" y2="80" />
-
-      {/* Arm: crosses over the lifted chest, hand up toward the shoulder. */}
-      <path d="M40 66 C48 66 52 62 52 56" />
-
-      {/* Head: pressing into the floor on its crown at the left end. */}
-      <circle cx="24.5" cy="84" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 542 378.999 C 537.325 379.440, 528.763 379.846, 522.974 379.901 C 501.992 380.099, 484.455 383.596, 452.831 393.890 C 442.749 397.172, 425.500 402.095, 414.500 404.830 C 377.458 414.040, 372.307 416.746, 349.555 438.947 C 334.090 454.036, 331.858 455.639, 319.500 460.531 C 302.079 467.426, 291.719 477.768, 285.695 494.272 C 281.924 504.601, 281.072 521.671, 283.026 547.688 C 284.687 569.785, 283.742 574.528, 275.241 586.765 C 272.084 591.310, 266.528 599.786, 262.896 605.599 C 253.635 620.421, 254.052 620.216, 234.787 619.395 L 219.075 618.725 215.537 622.263 C 212.252 625.548, 212 626.240, 212 631.967 C 212 637.048, 211.548 638.726, 209.430 641.502 C 207.264 644.343, 207.042 645.210, 208.016 647.030 C 208.984 648.839, 208.813 649.570, 206.959 651.543 C 205.355 653.251, 204.919 654.599, 205.374 656.449 C 205.718 657.852, 206.276 660.117, 206.613 661.482 C 207.121 663.539, 206.677 664.266, 204.015 665.732 C 193.926 671.287, 193.823 672.949, 202.730 686.364 L 209.460 696.500 209.512 710.500 C 209.571 726.381, 210.952 731.490, 218.130 742.364 C 220.258 745.589, 222 748.645, 222 749.154 C 222 754.485, 230.498 762.962, 241.299 768.404 C 265.613 780.656, 298.901 779.599, 318.046 765.967 L 320.964 763.889 324.137 767.504 C 329.468 773.575, 334.206 775.476, 344 775.474 C 351.395 775.472, 353.204 775.103, 357.917 772.634 C 375.127 763.620, 384.574 743.398, 379.522 726.386 C 375.784 713.800, 366.284 706.172, 355.712 707.268 L 350.500 707.809 350.830 700.389 C 351.492 685.483, 345.753 671.655, 333.392 658.370 C 325.338 649.714, 324.313 647.268, 326.043 640.834 C 327.789 634.338, 332.890 630.068, 343.029 626.615 C 373.918 616.097, 393.198 598.820, 411.092 565.626 C 417.984 552.841, 418.286 552.408, 434.892 531.505 C 458.862 501.333, 469.358 493.112, 485.074 492.202 C 494.800 491.639, 498.330 493.164, 511 503.405 C 529.586 518.426, 543.896 523.483, 567.500 523.373 C 583.726 523.296, 591.433 521.445, 610.500 513.045 C 628.960 504.913, 630.630 504.728, 652.286 508.429 C 687.364 514.424, 702.372 515.020, 742 511.993 C 761.013 510.540, 771.246 511.564, 775.585 515.351 L 778.047 517.500 771.923 528 C 764.363 540.964, 757.066 556.827, 753.604 567.829 C 749.194 581.840, 747.987 590.604, 744.515 633.776 C 742.784 655.305, 737.930 689.776, 734.345 706 C 731.956 716.811, 730.424 721.671, 721.580 746.500 C 716.506 760.745, 716.967 769.149, 723.121 774.611 C 727.487 778.487, 731.791 779.178, 757 780.050 C 770.475 780.516, 787.350 781.567, 794.500 782.387 C 811.884 784.378, 834.510 784.522, 852 782.753 C 869.149 781.018, 876.679 766.583, 861.408 764.716 C 850.752 763.413, 803.423 741.921, 790.648 732.584 C 781.473 725.878, 780.015 711.136, 786.240 688 C 791.237 669.429, 794.473 660.563, 807.228 630.500 C 821.243 597.466, 824.381 589.096, 832.373 563.423 C 835.956 551.916, 840.260 539.478, 841.938 535.784 C 848.560 521.206, 853.670 496.197, 852.784 482.693 C 852.156 473.111, 848.711 466.494, 839.609 457.387 C 830.774 448.547, 821.558 443.873, 781.500 427.917 C 721.212 403.902, 688.462 395.113, 636 388.866 C 619.005 386.843, 605.664 384.645, 596 382.277 C 580.166 378.397, 560.816 377.223, 542 378.999 M 753.467 521.052 C 737.134 546.532, 731.250 565.410, 729.016 599.500 C 724.863 662.865, 721.194 685.319, 710.098 715.253 C 702.759 735.050, 703.205 744.874, 711.680 750.111 C 716.008 752.786, 715.906 752.909, 720.998 739 C 732.678 707.099, 738.639 674.221, 742.490 620.455 C 745.572 577.417, 750.629 558.862, 767.008 530.486 C 770.304 524.777, 773 519.442, 773 518.630 C 773 517.038, 769.014 515.535, 762.251 514.578 L 758.002 513.977 753.467 521.052 M 785.691 715.642 C 784.584 716.749, 787.982 725.371, 790.604 728.109 C 794.722 732.407, 826.305 749.146, 832.393 750.257 C 842.445 752.091, 850 748.955, 850 742.948 C 850 739.338, 847.761 737.683, 842.452 737.370 C 833.953 736.870, 818.184 731.047, 797.866 720.907 C 791.468 717.714, 785.989 715.344, 785.691 715.642" />
     </svg>
   );
 }

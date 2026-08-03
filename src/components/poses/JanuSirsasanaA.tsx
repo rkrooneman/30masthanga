@@ -1,21 +1,11 @@
 /**
- * JanuSirsasanaA — Head-to-Knee Pose A, original stick-figure pose icon.
+ * JanuSirsasanaA — Head-to-Knee Pose A (Janu Sirsasana A).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: seated side profile facing right, traced from the reference photo —
- * a deep forward fold over ONE extended leg. The extended leg lies flat forward
- * (to the right) to the flexed foot. The bent leg opens out with the knee lifted
- * into a low peak near the hip and the foot drawn in to the inner thigh (the small
- * raised triangle back-left). The torso folds all the way down flat over the
- * extended leg so the head drops to the shin and the hands clasp past the flexed
- * foot. Variant A is the OPEN bent-knee position — sole flat against the inner
- * thigh, heel down. (Distinguishes from B: foot under, and C: foot up on toes.)
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -31,34 +21,11 @@ function JanuSirsasanaA({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Head-to-Knee A pose"
+      aria-label="Head-to-Knee Pose A pose"
     >
-      {/* Faint floor line the legs and seat rest along. */}
-      <line x1="10" y1="92" x2="84" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Extended leg: flat along the floor to the flexed foot. */}
-      <line x1="38" y1="88" x2="80" y2="88" />
-      <line x1="80" y1="88" x2="80" y2="78" />
-
-      {/* Bent leg: knee lifted into a low peak near the hip, the foot drawn back
-          in to the inner thigh (sole flat, heel down). */}
-      <path d="M38 88 L26 78 L20 88" />
-
-      {/* Torso: folds all the way down flat over the extended leg. */}
-      <path d="M38 88 C40 74 52 73 60 76" />
-
-      {/* Arm: reaches the length of the leg and clasps the flexed foot. */}
-      <path d="M54 75 C64 75 74 80 80 84" />
-
-      {/* Head: dropped low to the shin at the end of the fold. */}
-      <circle cx="64.5" cy="78" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 320.326 176.997 C 313.970 178.326, 310.136 180.690, 302.691 187.873 L 295.883 194.441 289.012 194.829 C 283.509 195.140, 279.947 194.593, 271.121 192.079 C 233.496 181.362, 199.016 187.551, 163 211.484 C 146.050 222.747, 132.617 235.849, 115.256 258.048 C 93.350 286.058, 93.264 316.486, 115.061 327.531 C 125.040 332.588, 152.964 335.232, 173.710 333.084 C 184.322 331.985, 185.900 332.034, 189.500 333.574 C 197.569 337.025, 220.690 334.205, 228.207 328.852 C 237.069 322.542, 237.643 308.145, 229.396 299.017 C 224.411 293.499, 219.403 291.453, 204 288.640 C 192.314 286.505, 185.819 285.698, 163.500 283.607 C 161.300 283.401, 164.900 283.391, 171.500 283.585 C 183.754 283.945, 208.697 287.138, 215 289.154 C 229.560 293.810, 238.249 304.649, 236.697 316.220 L 236.161 320.220 243.830 319.360 C 259.201 317.637, 263.604 318.218, 279 324.005 C 289.945 328.119, 300.710 329.398, 317.923 328.630 C 355.642 326.948, 373.604 326.759, 380.500 327.974 C 384.350 328.652, 390.522 329.435, 394.216 329.714 C 400.663 330.201, 401.054 330.100, 403.966 327.188 C 407.578 323.576, 407.802 320.535, 405.364 308.250 L 403.726 300 400.113 299.832 C 397.658 299.718, 398.391 299.477, 402.398 299.082 C 406.191 298.708, 408.559 297.965, 409.032 297 C 411.498 291.974, 412.131 290.173, 411.872 288.914 C 411.711 288.136, 412.093 286.576, 412.720 285.446 C 413.438 284.153, 413.521 282.856, 412.946 281.946 C 412.442 281.151, 412.024 279.318, 412.015 277.872 C 411.996 274.553, 410.627 273.447, 405 272.207 C 401.886 271.520, 401.309 271.181, 403.128 271.107 C 405.925 270.993, 408.546 268.692, 407.608 267.174 C 407.297 266.672, 405.738 265.720, 404.144 265.059 C 401.703 264.049, 401.165 263.157, 400.745 259.430 C 400.470 256.994, 399.685 254.326, 399 253.501 C 397.737 251.978, 392.060 251.375, 391.928 252.750 C 391.063 261.709, 391.310 265.004, 392.850 265.063 C 394.098 265.111, 393.999 265.330, 392.445 265.959 C 391.314 266.417, 387.907 269.060, 384.873 271.833 C 376.524 279.463, 365.637 282.050, 338 282.968 C 326.725 283.342, 316.748 283.281, 315.829 282.832 C 314.910 282.382, 312.039 278.524, 309.449 274.257 C 306.859 269.991, 302.089 263.073, 298.849 258.885 C 294.117 252.767, 292.274 249.238, 289.479 240.939 C 287.566 235.257, 284.421 227.884, 282.490 224.554 C 279.001 218.538, 278.998 218.522, 281.990 221.962 C 283.645 223.866, 285 225.743, 285 226.133 C 285 226.522, 286.319 227.131, 287.931 227.485 C 291.888 228.354, 292.637 229.538, 293.442 236.198 C 294.391 244.049, 296.877 247.042, 302.326 246.895 C 304.622 246.833, 308.075 246.992, 310 247.249 C 311.925 247.506, 314.076 247.264, 314.779 246.712 C 315.689 245.997, 316.719 246.326, 318.344 247.853 C 321.453 250.774, 321.738 250.684, 326.940 245.135 C 330.464 241.375, 332.409 240.132, 335.500 239.662 C 341.561 238.742, 350.015 233.213, 353.638 227.799 C 359.978 218.325, 360.020 204.517, 353.746 192.699 C 347.435 180.810, 333.471 174.250, 320.326 176.997 M 254.997 248.750 C 254.987 250.836, 240.519 265.055, 236.355 267.070 C 230.780 269.769, 222.326 269.999, 216.602 267.607 C 211.396 265.432, 208.772 265.580, 203.217 268.363 C 200.623 269.663, 196.700 271.293, 194.500 271.984 C 187.795 274.092, 188.419 274.777, 197.648 275.435 C 209.377 276.272, 228.686 278.695, 238 280.499 C 242.125 281.297, 250.163 282.412, 255.863 282.976 C 273.108 284.682, 281.982 288.838, 294.555 301.097 C 300.085 306.489, 305.905 311.394, 307.489 311.996 C 312.311 313.829, 335.889 310.648, 348.861 306.414 C 353.777 304.809, 358.570 304, 363.160 304 C 371.072 304, 376.543 302.128, 379.631 298.364 C 381.631 295.925, 381.987 295.840, 385.448 296.983 C 387.475 297.652, 389.342 297.992, 389.596 297.738 C 389.850 297.484, 388.069 296.719, 385.638 296.039 C 381.410 294.855, 380.482 295.042, 364.077 300.389 C 338.221 308.815, 312.841 313.074, 306.903 309.983 C 297.221 304.943, 273.374 277.222, 261.108 256.750 C 256.162 248.494, 255.005 246.980, 254.997 248.750 M 395.750 264.662 C 396.438 264.940, 397.563 264.940, 398.250 264.662 C 398.938 264.385, 398.375 264.158, 397 264.158 C 395.625 264.158, 395.063 264.385, 395.750 264.662 M 391.750 298.662 C 392.438 298.940, 393.563 298.940, 394.250 298.662 C 394.938 298.385, 394.375 298.158, 393 298.158 C 391.625 298.158, 391.063 298.385, 391.750 298.662" />
     </svg>
   );
 }

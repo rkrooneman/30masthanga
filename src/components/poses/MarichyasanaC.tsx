@@ -1,21 +1,11 @@
 /**
- * MarichyasanaC — Marichi's Pose C, original stick-figure pose icon.
+ * MarichyasanaC — Pose Dedicated to Marichi C (Marichyasana C).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: seated side profile facing right, traced from the reference photo —
- * a TWIST with a bind (not a forward fold). One leg extends flat forward (to the
- * right) to the flexed foot. The other knee is bent up TALL, foot flat on the
- * floor near the sitting bone (a near-vertical shin). The torso stays UPRIGHT and
- * rotates toward the bent knee, the head turning back over the shoulder (to the
- * left): the opposite arm hooks ACROSS the outside of the raised knee while the
- * other arm sweeps behind the back to bind. The distinguishing feature: the
- * upright twisting torso with the arm hooked across the knee (versus A's fold).
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -31,36 +21,11 @@ function MarichyasanaC({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Marichi's Pose C"
+      aria-label="Pose Dedicated to Marichi C pose"
     >
-      {/* Faint floor line the extended leg and planted foot rest along. */}
-      <line x1="16" y1="92" x2="84" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Extended leg: flat along the floor to the flexed foot. */}
-      <line x1="42" y1="88" x2="82" y2="88" />
-      <line x1="82" y1="88" x2="82" y2="78" />
-
-      {/* Bent leg: knee up tall, near-vertical shin from a flat foot near the hip. */}
-      <path d="M42 88 L34 88 L37 52" />
-
-      {/* Torso: stays UPRIGHT, rotating toward the bent knee. */}
-      <line x1="42" y1="88" x2="45" y2="46" />
-
-      {/* Head: turned back over the shoulder at the top of the twisting torso. */}
-      <circle cx="41.5" cy="39.5" r="6.5" />
-
-      {/* Twisting arm: hooks ACROSS the outside of the raised knee. */}
-      <path d="M45 54 C34 52 28 58 32 64" />
-
-      {/* Binding arm: sweeps behind the back to meet the other hand. */}
-      <path d="M45 58 C57 62 55 80 40 80" />
+      <path fill="currentColor" fillRule="evenodd" d="M 199.703 132.442 C 188.389 136.478, 182.500 145.056, 182.500 157.500 C 182.500 163.297, 182.041 165.274, 179.829 169 L 177.157 173.500 179.301 175.801 C 180.515 177.104, 181.545 179.666, 181.676 181.704 C 181.802 183.685, 182.377 185.777, 182.953 186.353 C 183.529 186.929, 184 188.875, 184 190.677 C 184 195.550, 187.308 197.398, 193.891 196.202 C 199.509 195.181, 200 195.368, 200 198.532 C 200 204.248, 189.198 210.535, 176.675 212.107 C 167.658 213.239, 166.216 213.695, 162.241 216.674 C 155.638 221.621, 151 236.121, 151 251.820 C 151 269.118, 148.215 290.618, 144.953 298.500 C 140.873 308.358, 139.302 315.403, 137.528 331.789 C 135.553 350.043, 131.612 368.832, 129.268 371.177 C 128.292 372.153, 124.345 373.577, 120.497 374.342 C 116.649 375.107, 108.325 377.199, 102 378.992 C 95.675 380.785, 89.487 382.473, 88.250 382.743 C 85.389 383.366, 85.257 386.790, 88.054 387.824 C 89.184 388.242, 93.543 388.256, 97.740 387.855 C 104.175 387.241, 105.557 387.380, 106.554 388.742 C 107.787 390.429, 107.117 390.462, 131.893 387.487 C 136.498 386.934, 139.399 383.931, 142.377 376.636 C 143.754 373.261, 147.851 363.379, 151.481 354.676 C 159.912 334.462, 167.539 311.294, 168.498 302.983 C 168.909 299.417, 170.227 291.325, 171.425 285 L 173.605 273.500 176.394 284.500 C 180.617 301.156, 180.777 307.775, 177.396 326.041 C 171.034 360.413, 175.279 379.625, 190.819 386.795 C 201.758 391.842, 220.851 390.848, 231 384.704 C 242.690 377.627, 258.094 357.817, 269.119 335.682 C 273.040 327.809, 278.740 321.926, 292.500 311.548 C 308.129 299.761, 321 284.908, 321 278.660 C 321 273.397, 306.621 255.853, 293.351 244.924 C 289.418 241.685, 284.096 236.086, 281.523 232.480 C 273.095 220.670, 264.213 215.010, 249.444 212.039 C 233.735 208.879, 229.813 205.385, 229.169 193.977 C 228.781 187.111, 228.837 186.926, 233.332 180.259 C 246.319 160.996, 241.422 140.172, 222.212 132.980 C 216.004 130.655, 205.421 130.403, 199.703 132.442 M 256.455 252.455 C 254.254 254.655, 254 255.744, 254 262.987 C 254 272.327, 252.454 276.883, 247.546 282 C 245.057 284.595, 243.875 287.046, 242.976 291.477 C 241.833 297.112, 241.129 298.143, 230.671 309.477 C 213.353 328.248, 213.154 328.860, 229.989 311.577 C 249.198 291.857, 266.918 275.593, 272.040 272.979 C 279.018 269.420, 289.321 270.994, 292.017 276.031 C 292.608 277.137, 292.760 278.595, 292.354 279.271 C 291.883 280.056, 292.232 280.001, 293.320 279.117 C 295.561 277.299, 294.854 276.485, 283.500 267.813 C 278.550 264.032, 271.683 258.478, 268.239 255.469 C 261.183 249.306, 259.925 248.984, 256.455 252.455 M 290.702 281.750 C 285.670 290.829, 282.909 296.292, 283.752 295.500 C 285.158 294.180, 292.337 281, 291.651 281 C 291.358 281, 290.931 281.337, 290.702 281.750 M 280.872 298.750 C 279.629 300.336, 279.664 300.371, 281.250 299.128 C 282.916 297.821, 283.445 297, 282.622 297 C 282.415 297, 281.627 297.788, 280.872 298.750 M 277.405 303.250 L 275.500 305.500 277.750 303.595 C 279.864 301.805, 280.455 301, 279.655 301 C 279.465 301, 278.453 302.012, 277.405 303.250 M 304.414 303.095 C 303.371 304.248, 297.676 308.765, 291.759 313.134 C 285.841 317.502, 281.010 321.622, 281.022 322.288 C 281.067 324.771, 285.193 332.513, 290.534 340.136 C 293.565 344.461, 295.789 348, 295.476 348 C 295.162 348, 289.640 347.095, 283.203 345.990 C 276.766 344.884, 270.311 343.780, 268.858 343.536 C 266.460 343.134, 265.780 343.844, 261.497 351.214 C 254.375 363.471, 247.704 372.159, 239.713 379.581 L 232.500 386.281 258.500 385.671 C 273.246 385.324, 288.828 384.406, 294.500 383.549 C 308.635 381.414, 315.109 381.630, 325.500 384.582 C 338.804 388.361, 351.173 388.712, 375.446 385.997 C 398.174 383.455, 406.951 383.668, 418.138 387.036 C 424.836 389.052, 426.165 389.174, 428.927 388.030 C 433.488 386.141, 434.288 383.803, 434.400 372.036 C 434.492 362.345, 434.767 360.910, 437.833 354.143 L 441.167 346.785 439.400 337.643 C 436.592 323.114, 432.340 320.902, 430.070 332.790 C 428.529 340.860, 426.019 344.974, 417.193 353.891 C 408.601 362.573, 405.567 363.511, 388.702 362.701 C 381.991 362.379, 372.675 361.402, 368 360.530 C 363.325 359.659, 353.283 358.278, 345.685 357.462 C 335.800 356.400, 330.537 355.341, 327.185 353.739 C 322.524 351.512, 322.483 351.449, 319.288 341.500 C 317.522 336, 314.206 324.637, 311.920 316.250 C 309.634 307.863, 307.437 301, 307.037 301 C 306.637 301, 305.457 301.943, 304.414 303.095" />
     </svg>
   );
 }

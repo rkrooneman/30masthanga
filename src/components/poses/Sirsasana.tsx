@@ -1,18 +1,11 @@
 /**
- * Sirsasana — Headstand, original stick-figure pose icon.
+ * Sirsasana — Headstand (Sirsasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a fully vertical inversion (Sirsasana A). The crown of the head
- * rests on the floor and the forearms brace it from either side (a low tripod base
- * at the baseline); from there the torso and straight legs rise straight up the
- * centre all the way to the feet near the top. The balance point is the head and
- * forearms on the floor at the bottom.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -28,31 +21,11 @@ function Sirsasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 1264 843"
       role="img"
       aria-label="Headstand pose"
     >
-      {/* Faint floor line the crown and forearms press into. */}
-      <line x1="30" y1="90" x2="70" y2="90" strokeWidth={2} opacity={0.35} />
-
-      {/* Forearms: brace the head, angling in from the floor to the crown. */}
-      <line x1="36" y1="88" x2="50" y2="80" />
-      <line x1="64" y1="88" x2="50" y2="80" />
-
-      {/* Torso + legs: rise straight up the centre from the crown to the lifted
-          feet near the top. */}
-      <line x1="50" y1="80" x2="50" y2="13" />
-
-      {/* Small foot flick at the top. */}
-      <path d="M50 13 L57 12" />
-
-      {/* Head: crown resting on the floor at the base of the vertical body. */}
-      <circle cx="50" cy="84.5" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 591.161 29.691 C 587.244 31.621, 587.268 32.610, 591.495 43.500 C 596.057 55.250, 596.941 58.838, 598.115 70.383 C 598.737 76.497, 600.528 88.025, 602.096 96 C 610.356 138.032, 611.293 153.721, 608.595 204.833 C 605.244 268.308, 605.736 263.909, 600.117 280.641 C 594.876 296.247, 593.533 302.358, 592.456 315.500 C 592.095 319.900, 590.964 328, 589.942 333.500 C 581.718 377.754, 579.374 424.374, 583.883 454 C 586.481 471.074, 586.531 469.144, 582.513 507.477 C 581.131 520.664, 580 534.626, 580 538.503 C 580 549.198, 578.267 561.039, 574.452 576.409 C 570.330 593.016, 570.240 596.937, 573.517 616.908 C 575.431 628.568, 576.001 635.513, 575.894 645.873 C 575.748 660.037, 576.619 665.366, 580.248 672.494 C 584.639 681.120, 592.783 691.948, 602.175 701.646 C 607.579 707.226, 612 712.086, 612 712.445 C 612 713.675, 609.172 718.499, 603.508 726.930 C 584.675 754.964, 567.400 809.505, 573.370 822.084 C 576.132 827.905, 576.624 828.002, 603.742 828.065 C 626.831 828.118, 630.186 827.885, 653.500 824.604 C 679.427 820.956, 704.484 818.747, 709.248 819.689 C 713.145 820.460, 716.762 817.784, 717.558 813.542 C 717.955 811.424, 718.932 809.839, 720.061 809.481 C 725.248 807.834, 728.361 800.359, 725.806 795.684 C 725.150 794.483, 724.734 792.260, 724.882 790.745 C 725.264 786.838, 723.182 781.168, 720.920 779.957 C 719.803 779.359, 719 777.871, 719 776.399 C 719 768.955, 714.389 768.143, 706.789 774.250 C 703.880 776.587, 698.895 780.440, 695.712 782.811 C 692.529 785.182, 688.561 789.007, 686.894 791.311 C 685.228 793.615, 682.736 796.095, 681.356 796.822 C 677.714 798.741, 660.860 800.284, 651 799.601 C 643.271 799.066, 616.846 795.963, 616.251 795.521 C 616.114 795.419, 618.465 790.621, 621.475 784.858 C 624.484 779.094, 628.101 771.314, 629.511 767.568 C 633.488 757.001, 634.732 755.029, 642.485 747 C 651.021 738.161, 656.786 729.583, 660.075 720.830 C 661.434 717.212, 662.602 715.253, 662.801 716.258 C 663.854 721.567, 655.942 736.410, 646.378 747.070 C 636.666 757.894, 636.371 758.357, 630.930 771.269 L 626.346 782.146 628.673 786.743 C 629.953 789.271, 631 791.949, 631 792.694 C 631 795.174, 636.347 796.152, 653 796.719 C 675.516 797.485, 678.736 796.738, 685.602 789.150 C 690.479 783.761, 708.145 770.240, 712.359 768.671 C 713.897 768.098, 714.100 767.347, 713.533 764.322 C 711.071 751.201, 702.856 740.783, 690.500 735.112 C 686.650 733.346, 682.825 731.559, 682 731.143 C 675.950 728.088, 673.509 709.009, 677.760 698 C 683.429 683.318, 684.374 670.708, 681.096 653.500 C 680.048 648, 678.691 639.051, 678.080 633.614 C 676.689 621.220, 673.371 606.706, 666.477 582.858 C 655.687 545.531, 656.309 537.454, 672.014 511 C 680.007 497.536, 682.395 489.062, 682.441 474 C 682.487 458.730, 681.309 454.326, 672.514 436.891 C 663.635 419.290, 663.082 416.902, 660.039 383 C 658.856 369.825, 656.492 352.788, 653.933 339 C 648.872 311.735, 648.856 300.731, 653.839 275.500 C 660.783 240.344, 660.760 239.698, 650.605 183 C 649.276 175.575, 647.383 162.385, 646.400 153.689 C 644.243 134.610, 644.895 129.827, 650.833 121.128 C 661.751 105.132, 661.145 101.958, 644.175 86.261 C 633.236 76.142, 628.952 70.443, 626.424 62.649 C 624.247 55.937, 621.893 52.134, 615.280 44.648 C 612.293 41.267, 609.445 37.487, 608.950 36.250 C 608.455 35.013, 607.476 33.992, 606.775 33.982 C 606.074 33.972, 603.520 32.622, 601.100 30.982 C 596.018 27.539, 595.631 27.488, 591.161 29.691" />
     </svg>
   );
 }

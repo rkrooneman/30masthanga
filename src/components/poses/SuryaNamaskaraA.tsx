@@ -1,17 +1,11 @@
 /**
- * SuryaNamaskaraA — Sun Salutation A, original stick-figure pose icon.
+ * SuryaNamaskaraA — Sun Salutation A (Surya Namaskara A).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: the emblematic upward-salute of the flow (Urdhva Hastasana /
- * upward-hands mountain). A tall standing figure — both feet together on the
- * floor, legs straight and vertical, an upright torso — with both arms raised
- * straight overhead, palms toward each other, reaching to the sky.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -27,31 +21,11 @@ function SuryaNamaskaraA({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
       aria-label="Sun Salutation A pose"
     >
-      {/* Faint floor line under the feet. */}
-      <line x1="30" y1="92" x2="70" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Legs: straight and vertical, feet together, from hips to the floor. */}
-      <line x1="46" y1="56" x2="44" y2="92" />
-      <line x1="54" y1="56" x2="56" y2="92" />
-
-      {/* Torso: upright from the hips to the shoulders. */}
-      <line x1="50" y1="56" x2="50" y2="30" />
-
-      {/* Arms: raised straight overhead, nearly parallel, palms toward each other. */}
-      <line x1="50" y1="30" x2="43" y2="8" />
-      <line x1="50" y1="30" x2="57" y2="8" />
-
-      {/* Head: between the raised arms at the top of the torso. */}
-      <circle cx="50" cy="23.5" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 258.250 53.408 C 256.433 55.325, 256 56.931, 256 61.752 C 256 67.649, 255.968 67.717, 253.389 67.224 C 251.108 66.787, 250.862 66.989, 251.442 68.817 C 251.807 69.969, 252.469 73.207, 252.913 76.013 C 253.501 79.735, 254.590 82.014, 256.938 84.436 C 259.663 87.248, 260.279 88.811, 260.956 94.628 C 261.567 99.884, 261.641 131.409, 261.072 144.111 C 260.963 146.551, 256.091 145.245, 252.719 141.873 C 247.252 136.406, 238.908 135.638, 231.452 139.914 C 214.057 149.892, 217.422 172.671, 236.860 176.524 C 244.620 178.062, 245.781 180.407, 244.053 191.051 C 242.627 199.828, 243.286 204.159, 250.094 230.771 C 255.759 252.918, 255.415 256.228, 245.912 271.042 C 236.896 285.097, 235.801 292.675, 240.934 305.493 L 243.867 312.819 244.108 339.160 C 244.341 364.688, 244.266 365.845, 241.674 376.678 C 238.341 390.608, 238.313 397.247, 241.497 417.566 C 244.217 434.920, 244.515 441.012, 243.026 448.866 C 241.971 454.428, 242.847 458.343, 245.363 459.309 C 246.197 459.629, 255.794 460.169, 266.689 460.510 C 288.490 461.191, 291.238 460.685, 291.801 455.889 C 292.078 453.524, 291.611 453.190, 285.801 451.603 C 282.335 450.656, 275.900 447.996, 271.500 445.691 C 263.722 441.616, 263.448 441.347, 261.622 436 C 259.891 430.931, 259.837 429.443, 260.932 417 C 261.585 409.575, 262.569 397.987, 263.117 391.248 C 263.907 381.544, 264.719 377.531, 267.022 371.947 C 268.620 368.071, 270.207 363.234, 270.546 361.199 C 270.886 359.165, 272.467 353.450, 274.059 348.500 C 279.679 331.025, 281.085 323.286, 281.961 305 C 282.500 293.746, 283.375 285.735, 284.410 282.556 C 285.296 279.837, 286.481 272.187, 287.043 265.556 C 287.605 258.925, 288.763 249.124, 289.618 243.776 C 290.472 238.428, 290.864 232.659, 290.490 230.957 C 290.117 229.254, 290.369 225.051, 291.052 221.617 C 292.995 211.841, 292.008 209.033, 283.391 199.819 C 279.274 195.417, 274.745 190.060, 273.326 187.916 L 270.746 184.017 273.303 173.759 C 276.768 159.862, 280.297 132.886, 279.483 126.520 C 278.428 118.270, 274.996 98.612, 274.329 97 C 273.988 96.175, 273.612 89.650, 273.494 82.500 C 273.243 67.227, 271.679 58.990, 268.891 58.261 C 267.851 57.989, 267 56.945, 267 55.940 C 267 54.129, 263.504 50.984, 261.527 51.017 C 260.962 51.027, 259.488 52.103, 258.250 53.408" />
     </svg>
   );
 }

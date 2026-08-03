@@ -1,19 +1,11 @@
 /**
- * VirabhadrasanaA — Warrior I, original stick-figure pose icon.
+ * VirabhadrasanaA — Warrior I (Virabhadrasana A).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a wide standing lunge, figure facing right, hips squared over the
- * front leg. The front (right) leg bends at the knee to roughly a right angle
- * over a vertical shin; the back (left) leg stays long and straight, raked back
- * to the floor. The torso rises upright from the hips and BOTH arms sweep
- * straight up overhead, reaching high and nearly parallel — the raised arms
- * distinguishing Warrior I from Warrior II's horizontal reach.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -29,33 +21,11 @@ function VirabhadrasanaA({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
       aria-label="Warrior I pose"
     >
-      {/* Faint floor line under both feet. */}
-      <line x1="12" y1="92" x2="88" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Front (right) leg: bent knee at a right angle — thigh down-right from the
-          hips, vertical shin to the planted front foot. */}
-      <path d="M50 56 L74 74 L74 92" />
-      {/* Back (left) leg: long and straight, raked back to the back foot. */}
-      <line x1="50" y1="56" x2="14" y2="92" />
-
-      {/* Torso: upright from the hips to the shoulders. */}
-      <line x1="50" y1="56" x2="50" y2="32" />
-
-      {/* Arms: both sweep straight up overhead, nearly parallel, reaching high. */}
-      <line x1="50" y1="32" x2="46" y2="9" />
-      <line x1="50" y1="32" x2="54" y2="9" />
-
-      {/* Head: between the raised arms at the top of the torso. */}
-      <circle cx="50" cy="25.5" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 242 75.259 C 242 75.952, 241.056 77.108, 239.902 77.829 C 237.949 79.049, 237.853 79.693, 238.515 87.166 L 239.225 95.194 236.705 93.543 C 235.018 92.437, 233.967 92.244, 233.526 92.959 C 232.314 94.918, 237.053 105.422, 240.988 109.500 C 245.637 114.318, 246.787 119.300, 247.568 138 C 247.855 144.875, 248.542 153.085, 249.095 156.245 L 250.099 161.991 244.647 167.314 C 239.107 172.723, 237.017 177.163, 237.006 183.554 C 236.997 188.392, 241.729 196.792, 246.089 199.677 C 249.861 202.173, 249.919 202.306, 249.241 206.860 C 248.047 214.887, 249.745 231.186, 252.433 237.500 C 255.549 244.818, 261.953 268.083, 262.605 274.453 C 263.521 283.391, 261.159 290.148, 255.747 294.068 C 253.521 295.681, 251.156 297, 250.491 297 C 248.426 297, 240.013 305.054, 238.042 308.918 C 237.011 310.939, 235.845 314.372, 235.452 316.547 C 234.396 322.382, 233.720 323.286, 225.249 330.179 C 220.987 333.647, 214.016 339.730, 209.758 343.696 C 200.130 352.662, 195.359 355.492, 186.478 357.503 C 174.697 360.171, 164.703 363.896, 160.261 367.275 C 157.930 369.049, 151.327 374.225, 145.588 378.777 C 133.753 388.166, 128.392 391.397, 119.668 394.400 C 110.613 397.517, 109.713 399.666, 113.252 409.726 C 114.756 414.002, 116.399 420.491, 116.904 424.148 C 118.041 432.399, 119.296 434.808, 123.330 436.491 C 127.262 438.131, 139.458 437.358, 141.113 435.364 C 142.441 433.764, 140.680 431, 138.332 431 C 137.549 431, 135.855 429.946, 134.568 428.659 C 132.261 426.352, 132.245 426.198, 133.523 418.216 C 135.038 408.760, 136.553 406.306, 143.979 401.290 C 152.010 395.865, 190.486 380.176, 200.296 378.325 C 217.036 375.168, 253.102 357.015, 267.925 344.285 C 271.331 341.361, 271.383 341.352, 276.925 342.656 C 295 346.911, 305.057 348.085, 321.738 347.885 C 341.366 347.650, 343.471 348.051, 342.559 351.848 C 340.465 360.571, 340.800 373.540, 343.375 383.376 C 347.908 400.700, 349.058 418.197, 346.438 430 C 346.116 431.452, 346.503 433.338, 347.361 434.500 C 348.733 436.357, 350.111 436.513, 366.669 436.679 C 376.476 436.778, 387.601 436.923, 391.392 437.002 C 402.162 437.226, 404.907 432.049, 394.735 430.696 C 389.276 429.970, 372.497 421.379, 369.438 417.744 C 366.134 413.817, 365.617 409.708, 366.401 393.587 C 369.180 336.381, 369.080 333.361, 364.256 328.754 C 359.007 323.740, 329.598 312.714, 312.976 309.527 C 300.071 307.053, 299.881 307.001, 300.448 306.084 C 301.595 304.229, 305.246 276.761, 306.042 264 C 306.505 256.575, 307.173 249.339, 307.526 247.919 C 309.107 241.570, 306.467 237.129, 293.902 225 L 281.989 213.500 281.994 206.250 C 282 198.837, 283.818 195, 287.326 195 C 289.111 195, 293 190.756, 293 188.808 C 293 187.948, 292.325 186.685, 291.500 186 C 290.675 185.315, 290 183.965, 290 183 C 290 182.035, 289.344 180.701, 288.542 180.035 C 287.603 179.256, 287.283 177.834, 287.643 176.037 C 288.170 173.399, 287.937 173.184, 283.345 172.083 C 279.661 171.199, 278.080 170.204, 276.791 167.959 C 275.857 166.331, 274.003 164.503, 272.672 163.896 C 270.701 162.999, 270.136 161.811, 269.630 157.512 C 269.289 154.608, 266.513 143.517, 263.461 132.866 C 258.604 115.917, 257.990 112.795, 258.542 107.851 C 258.956 104.142, 258.591 99.335, 257.478 93.851 C 255.556 84.385, 254.551 82, 252.484 82 C 251.689 82, 250.758 80.885, 250.416 79.522 C 249.558 76.103, 242 72.276, 242 75.259" />
     </svg>
   );
 }

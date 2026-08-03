@@ -1,19 +1,11 @@
 /**
- * Padangusthasana — Big Toe Pose, original stick-figure pose icon.
+ * Padangusthasana — Big Toe Pose (Padangusthasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a deep standing forward fold seen from the side, feet together.
- * The legs are straight and vertical from the high folded hips down to the feet.
- * The torso folds completely flat against the legs so the head drops all the way
- * down to the ankles, tucked in at the shins. Both arms hang straight down and
- * the hands hook around the big toes at the very base of the feet — the fingers
- * curling over the toes in the toe-grip that names the pose.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -29,33 +21,11 @@ function Padangusthasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Big Toe Pose"
+      aria-label="Big Toe Pose pose"
     >
-      {/* Faint floor line under the feet. */}
-      <line x1="38" y1="92" x2="62" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Legs: straight and vertical from the high folded hips down to the feet. */}
-      <line x1="47" y1="30" x2="46" y2="90" />
-      <line x1="53" y1="30" x2="54" y2="90" />
-
-      {/* Torso: folds flat against the legs from the high hips, the spine dropping
-          straight down the front of the shins to the head at the ankles. */}
-      <path d="M50 30 C51 52 50 68 47 80" />
-
-      {/* Arms: hang straight down and the hands hook around the big toes at the
-          base of the feet — the fingers curling over the toes. */}
-      <path d="M42 60 L44 86 L49 88" />
-      <path d="M45 61 L52 86 L47 88" />
-
-      {/* Head: dropped all the way down to the ankles at the end of the fold. */}
-      <circle cx="44.5" cy="82" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 286.500 82.969 C 262.516 86.696, 228.245 111.095, 211.309 136.500 C 193.764 162.819, 186.654 180.489, 182.043 209.233 C 179.685 223.932, 179.531 232.460, 181.433 243 C 182.455 248.664, 182.543 252.459, 181.792 258.502 C 181.024 264.684, 181.144 268.891, 182.320 277.002 C 184.473 291.854, 183.638 301.516, 179.874 305.280 C 174.250 310.903, 174.036 323.324, 179.451 329.760 C 180.719 331.267, 182.498 335.425, 183.405 339 C 185.544 347.433, 190.199 357.198, 197.930 369.469 C 210.465 389.367, 212.481 394.261, 212.246 404.238 C 212.052 412.470, 212.200 413.165, 214.802 416.238 C 216.321 418.032, 218.757 421.119, 220.216 423.097 C 222.764 426.553, 223.193 426.727, 231.184 427.558 C 246.423 429.142, 296.670 427.979, 303.603 425.881 C 309.022 424.241, 310.289 417.969, 307.520 406.500 C 304.562 394.250, 306.256 372.165, 312.428 342.494 C 318.173 314.877, 318.006 305.118, 311.296 276.138 C 308.012 261.952, 308.555 256.601, 315.905 230.717 C 320.679 213.903, 322.819 203.771, 326.514 180.500 C 327.387 175, 329.631 164.133, 331.499 156.351 C 337.909 129.656, 338.168 121.472, 333.033 107.798 C 326.745 91.050, 305.939 79.949, 286.500 82.969 M 266.628 162.678 C 266.319 164.230, 265.570 168.425, 264.964 172 C 264.357 175.575, 262.327 182.100, 260.452 186.500 C 257.150 194.249, 257.049 194.877, 257.234 206.500 C 257.532 225.204, 254.052 232.366, 238.441 245.178 C 229.928 252.165, 229.233 253.755, 231.196 261.749 L 232.609 267.500 242.333 267.500 C 252.883 267.500, 253.955 268.023, 253.985 273.179 C 253.993 274.652, 254.652 276.509, 255.449 277.307 C 256.247 278.104, 257.209 281.096, 257.588 283.956 C 258.147 288.168, 258.726 289.326, 260.639 290.053 C 263.680 291.209, 263.653 293.780, 260.540 299.768 C 258.444 303.798, 258.099 305.760, 258.212 313 C 258.513 332.308, 244.531 346, 224.513 346 L 217.204 346 219.133 353.750 C 224.180 374.024, 226.174 379.079, 231.049 383.954 C 237.534 390.439, 238.949 392.919, 240.562 400.626 C 241.338 404.337, 242.418 407.818, 242.960 408.360 C 244.595 409.995, 268.231 397.882, 271.279 393.847 C 277.238 385.960, 279.088 369.190, 277.055 341.500 C 276.408 332.700, 275.260 315.600, 274.504 303.500 C 273.298 284.233, 272.733 280.134, 269.953 270.500 C 266.831 259.684, 266.768 259.048, 266.211 232.500 C 265.457 196.588, 265.674 179.240, 267.004 169.136 C 268.058 161.130, 267.804 156.777, 266.628 162.678 M 229 409.500 C 229 411.130, 229.560 412, 230.607 412 C 231.662 412, 232.005 411.456, 231.607 410.418 C 231.273 409.548, 231 408.423, 231 407.918 C 231 407.413, 230.550 407, 230 407 C 229.450 407, 229 408.125, 229 409.500" />
     </svg>
   );
 }

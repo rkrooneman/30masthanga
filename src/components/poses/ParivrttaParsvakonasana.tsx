@@ -1,18 +1,11 @@
 /**
- * ParivrttaParsvakonasana — Revolved Side Angle, original stick-figure pose icon.
+ * ParivrttaParsvakonasana — Revolved Side Angle Pose (Parivrtta Parsvakonasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: the twisted side-angle lunge. The front (right) knee is bent to a
- * vertical shin, the back leg long and straight. The torso revolves across the
- * front thigh so the OPPOSITE (left) arm crosses over the leg with the bottom
- * hand to the floor outside the front foot, while the top (right) arm extends up
- * and over the head. The crossing arm shows the revolve.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -28,35 +21,11 @@ function ParivrttaParsvakonasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
-      aria-label="Revolved Side Angle pose"
+      aria-label="Revolved Side Angle Pose pose"
     >
-      {/* Faint floor line under both feet and the bottom hand. */}
-      <line x1="10" y1="92" x2="90" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Front (right) leg: deep bent knee — thigh out to the right, vertical
-          shin down to the front foot. */}
-      <path d="M50 58 L70 74 L70 92" />
-      {/* Back (left) leg: long and straight from the hips down to the back foot. */}
-      <line x1="50" y1="58" x2="16" y2="92" />
-
-      {/* Torso: revolves forward across the front thigh from the hips. */}
-      <line x1="50" y1="58" x2="66" y2="64" />
-
-      {/* Bottom arm: the OPPOSITE arm crosses over the front thigh, hand to the
-          floor outside the front foot — the revolve. */}
-      <line x1="66" y1="64" x2="76" y2="90" />
-      {/* Top arm: extends up and over the head above the twist. */}
-      <line x1="66" y1="64" x2="50" y2="40" />
-
-      {/* Head: turned up toward the top arm, above the shoulder. */}
-      <circle cx="60" cy="53" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 97.043 75.974 C 95.031 77.217, 97.436 83.066, 101.606 87.072 C 103.568 88.957, 106.019 91.672, 107.051 93.105 L 108.929 95.709 106.582 95.260 C 102.627 94.504, 102.266 97.107, 105.933 99.947 C 107.745 101.351, 111.229 104.188, 113.675 106.250 C 117.025 109.075, 119.015 110, 121.745 110 C 126.528 110, 131.672 115.318, 142.840 131.813 C 147.426 138.585, 154.255 147.547, 158.016 151.729 C 162.034 156.196, 165.552 161.225, 166.543 163.917 C 167.471 166.438, 170.679 173.143, 173.671 178.818 C 177.490 186.063, 179.269 190.680, 179.644 194.318 C 179.938 197.168, 181.305 203.002, 182.682 207.283 C 185.017 214.539, 185.078 215.231, 183.593 217.498 C 181.115 221.280, 178.345 222.385, 174.909 220.962 C 171.540 219.567, 171.447 218.978, 173.600 212.660 C 175.521 207.022, 174.999 205.244, 171.013 203.855 C 169.356 203.277, 168 202.434, 168 201.982 C 168 201.529, 166.650 200.862, 165 200.500 C 163.137 200.091, 161.994 199.208, 161.985 198.171 C 161.949 194.248, 160.616 193.765, 154.630 195.505 C 149.338 197.044, 148.671 197.040, 144.497 195.446 C 129.507 189.721, 112.441 205.608, 114.294 223.563 C 115.288 233.191, 121.891 241.369, 131.061 244.331 C 137.975 246.564, 141.206 246.415, 149.500 243.483 C 158.423 240.329, 159.206 240.364, 163.465 244.104 C 167.589 247.725, 167.619 248.032, 165.350 263.809 C 163.335 277.812, 164.092 283.151, 169.882 295.794 C 172.074 300.583, 174.542 308.100, 175.366 312.500 C 176.190 316.900, 178.019 324.488, 179.432 329.362 C 180.844 334.236, 181.928 339.861, 181.840 341.862 L 181.680 345.500 181.301 342 C 181.092 340.075, 179.599 333.550, 177.983 327.500 C 176.366 321.450, 174.133 312.696, 173.019 308.047 C 171.905 303.397, 170.654 299.254, 170.239 298.839 C 168.938 297.538, 158.650 303.396, 156.417 306.709 C 153.653 310.811, 152.631 341.850, 154.215 373.595 C 155.400 397.326, 154.621 405.646, 150.835 409.675 C 146.715 414.061, 133.933 421.237, 127.226 422.930 C 119.981 424.758, 117.756 426.796, 120.023 429.528 C 121.273 431.034, 122.881 431.143, 134.465 430.502 C 141.634 430.105, 152.992 429.717, 159.705 429.640 C 176.362 429.449, 176.547 429.230, 174.219 412.500 C 172.940 403.312, 174.314 389.095, 178.068 372.678 C 179.681 365.626, 181.064 358.426, 181.142 356.678 C 181.272 353.773, 181.336 353.843, 181.892 357.500 L 182.500 361.500 188.150 354.677 C 198.397 342.302, 198.578 341.693, 197.321 323.840 C 196.605 313.683, 195.300 304.654, 193.458 297.118 C 191.501 289.110, 190.969 285.272, 191.665 284.170 C 193.293 281.588, 197.430 281.109, 203.499 282.798 C 208.189 284.103, 210.128 284.176, 214.691 283.219 C 220.686 281.962, 225.113 283.018, 227.893 286.369 C 229.823 288.697, 230.060 288.631, 215 289.927 C 191.447 291.952, 192.846 291.157, 195.515 301 C 196.335 304.025, 197.294 310.404, 197.647 315.175 C 198.448 326.007, 198.593 326.221, 205.676 327.105 C 222.871 329.250, 249.708 327.460, 262 323.348 C 268.283 321.247, 270.068 321.012, 273 321.902 C 276.259 322.890, 301.875 341.718, 321.112 357.264 C 325.715 360.984, 332.892 365.802, 337.060 367.970 C 342.354 370.724, 346.727 374.069, 351.569 379.068 C 355.381 383.003, 365.124 391.577, 373.220 398.121 C 381.316 404.664, 388.499 411.027, 389.182 412.259 C 389.865 413.492, 391.416 416.600, 392.628 419.167 L 394.831 423.834 392.353 428.489 C 388.798 435.167, 389.831 436, 401.668 436 C 410.413 436, 411.273 435.818, 413.619 433.472 C 415.663 431.428, 416.018 430.356, 415.472 427.874 C 414.336 422.700, 407.239 409.826, 403.166 405.549 C 401.045 403.322, 396.927 397.450, 394.014 392.500 C 380.760 369.980, 375.085 363.305, 358.500 350.731 C 347.808 342.625, 345.020 339.406, 334.484 323 C 320.294 300.903, 318.541 298.345, 313.932 293 C 311.323 289.975, 307.486 284.575, 305.404 281 C 300.157 271.989, 293.871 266.105, 276.748 254.176 C 268.635 248.524, 257.838 240.016, 252.754 235.271 C 247.671 230.525, 237.120 221.864, 229.309 216.025 C 213.126 203.929, 210.241 200.766, 204.848 189.208 C 200.071 178.972, 194.491 169.932, 186.511 159.500 C 183.145 155.100, 179.174 149.387, 177.685 146.804 C 170.899 135.029, 131.260 97.493, 108.940 81.707 C 100.294 75.592, 98.814 74.879, 97.043 75.974" />
     </svg>
   );
 }

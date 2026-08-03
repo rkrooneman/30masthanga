@@ -1,19 +1,11 @@
 /**
- * Karnapidasana — Ear-Pressure Pose, original stick-figure pose icon.
+ * Karnapidasana — Ear-Pressure Pose (Karnapidasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Our own original minimal stick figure — round head, single-stroke
- * limbs, no filled body — drawn from the pose's factual body geometry.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: a compact, folded plough. Like Halasana the head and shoulders rest
- * on the floor (right) and the hips lift, but here the whole shape folds tight: the
- * thighs come over the head and the KNEES BEND down to the floor beside the ears,
- * while the shins fold back so the feet tuck up toward the hips — a small curled
- * ball. Distinguished from Halasana (straight legs to distant toes) by the sharply
- * bent knees pressed down beside the head.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -29,32 +21,11 @@ function Karnapidasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 1264 843"
       role="img"
-      aria-label="Ear-Pressure pose"
+      aria-label="Ear-Pressure Pose pose"
     >
-      {/* Faint floor line the shoulders, arm and knees rest along. */}
-      <line x1="18" y1="88" x2="86" y2="88" strokeWidth={2} opacity={0.35} />
-
-      {/* Torso: rises from the shoulders on the floor (right) up to the lifted
-          hips near the top. */}
-      <line x1="66" y1="84" x2="58" y2="34" />
-
-      {/* Bent legs: thigh over the head from the hips down to the knees pressed on
-          the floor beside the head, then the shin folds back so the foot tucks up
-          toward the hips. */}
-      <path d="M58 34 L44 82 L58 62" />
-
-      {/* Arm: rests flat along the floor out past the shoulders to the right. */}
-      <line x1="66" y1="84" x2="84" y2="84" />
-
-      {/* Head: rests on the floor, hugged between the knees at the shoulder end. */}
-      <circle cx="60" cy="82" r="6.5" />
+      <path fill="currentColor" fillRule="evenodd" d="M 549.636 183.010 C 505.423 187.199, 468.138 212.072, 449.962 249.500 C 437.976 274.183, 434.888 299.243, 438.497 342.539 C 444.305 412.202, 451.036 447.967, 469.640 508 C 477.519 533.424, 484 563.688, 484 575.052 L 484 579.904 479.250 578.423 C 443.478 567.264, 408.007 567.111, 364.323 577.925 C 335.932 584.954, 296.564 589.963, 269.114 590.040 C 247.001 590.102, 242.878 588.354, 231.237 573.985 C 223.145 563.995, 217.216 560.584, 208 560.619 C 196.275 560.663, 191.442 564.142, 173.269 585.618 C 160.293 600.952, 150.644 607.602, 127 617.505 C 116.135 622.056, 111.017 624.944, 106.606 629.009 C 103.166 632.180, 101.270 633.074, 96.280 633.877 C 84.896 635.711, 79.172 641.376, 82.217 647.796 C 85.112 653.900, 102.742 656.997, 117.235 653.948 C 121.645 653.021, 130.738 652.699, 147.937 652.863 C 173.454 653.106, 187.048 652.235, 208 649.014 C 251.518 642.325, 287.898 642.694, 358 650.536 C 394.031 654.567, 412.404 656.452, 435.500 658.487 C 444.850 659.311, 458.575 660.925, 466 662.074 C 482.719 664.662, 526.237 665.892, 538 664.110 C 561.201 660.594, 575.524 643.904, 581.431 613.500 C 593.863 549.521, 597.940 424.905, 589.899 354.695 C 589.281 349.303, 588.986 344.681, 589.242 344.425 C 589.722 343.944, 594.356 366.821, 595.488 375.265 C 596.069 379.596, 596.622 380.397, 601.559 384.044 C 610.235 390.453, 610.222 390.413, 610.481 411.269 C 610.686 427.832, 610.949 430.271, 613.354 437.926 C 616.875 449.137, 616.947 448.793, 609.456 456.359 C 600.388 465.516, 600.103 466.455, 598.982 490.894 C 596.964 534.854, 593.300 574.605, 588.977 599.425 C 587.205 609.600, 586.108 614.892, 582.507 630.638 C 582.064 632.575, 582.655 632.896, 588.759 634.033 C 595.174 635.228, 595.815 635.613, 602 641.991 C 611.013 651.285, 616.840 655.455, 624.196 657.875 C 647.351 665.490, 681.452 664.667, 718.504 655.598 C 738.400 650.728, 741.811 650.198, 767.500 647.981 C 793.787 645.712, 810.481 643.414, 837.500 638.344 C 859.353 634.243, 877.379 633.657, 895.500 636.459 C 915.398 639.536, 947.211 640.369, 997.500 639.131 C 1068.412 637.385, 1074.345 637.482, 1080.794 640.484 C 1092.667 646.012, 1093.672 646.127, 1138.500 647.125 C 1174.505 647.926, 1181 647.852, 1184 646.603 C 1185.925 645.802, 1192.241 644.899, 1198.036 644.596 C 1212.731 643.828, 1219 641.413, 1219 636.519 C 1219 631.401, 1214.676 629.545, 1186.500 622.570 C 1176.600 620.119, 1164.675 617.009, 1160 615.657 C 1147.293 611.984, 1142.349 611.212, 1120.870 609.541 C 1095.536 607.571, 1032.028 598.747, 990.500 591.426 C 967.962 587.453, 939.413 583.214, 919.771 580.924 C 903.359 579.010, 899.058 578.880, 877.500 579.647 C 848.326 580.684, 822.268 580.470, 782 578.864 C 765.225 578.194, 735.606 577.624, 716.181 577.596 C 696.755 577.569, 681.230 577.445, 681.681 577.322 C 687.926 575.613, 714.838 573.597, 737.966 573.105 L 766.432 572.500 769.202 567 C 783.872 537.873, 793.394 494.232, 793.422 456 C 793.478 378.975, 768.048 313.346, 718.115 261.652 C 701.159 244.099, 678.339 223.521, 669.151 217.502 C 630.668 192.287, 586.439 179.523, 549.636 183.010 M 435.831 505.954 C 415.049 509.767, 398.522 520.420, 387.373 537.191 C 382.433 544.622, 377.454 557.405, 376.343 565.513 L 375.685 570.313 379.093 569.580 C 408.357 563.288, 440.290 563.497, 469.268 570.169 C 474.139 571.290, 478.345 571.988, 478.614 571.720 C 480.825 569.508, 465.314 507.718, 462.252 506.543 C 459.535 505.501, 440.604 505.079, 435.831 505.954 M 229.891 546.574 C 227.350 547.348, 223.311 549.775, 220.891 551.980 C 215.985 556.451, 215.825 555.996, 224.055 561 C 226.316 562.375, 231.545 567.417, 235.674 572.205 C 245.777 583.919, 248.788 585.357, 264.225 585.841 C 285.027 586.494, 326.385 581.453, 357.573 574.465 C 364.133 572.995, 369.808 571.298, 370.184 570.694 C 371.123 569.186, 372.330 559.997, 371.675 559.341 C 371.383 559.050, 365.824 559.950, 359.322 561.342 C 330.137 567.591, 292.914 571.690, 280.866 569.981 C 271.553 568.660, 267.105 566.193, 258.598 557.631 C 248.116 547.081, 239.333 543.698, 229.891 546.574" />
     </svg>
   );
 }
