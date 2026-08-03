@@ -12,8 +12,9 @@ The full Ashtanga Primary Series takes well over an hour, which makes a daily pr
 
 - **A fresh ~30-minute practice each time.** Generates a varied Primary Series sequence in canonical order: always the Sun Salutations (A ×3, B ×3), a proportional mix of standing, seated, and closing poses, and a shoulderstand and Savasana to close. No two sessions are identical.
 - **Customize it, or take the whole series.** The Overview shows every pose in the series; check or uncheck any to tailor your practice, with a live running total that grows honestly past 30 minutes when you add more. The fixed frame (Sun Salutations, Shoulderstand, Savasana) stays locked. A "Full series" toggle selects everything at once, and "Basics only" narrows it to the essential root poses.
+- **Vinyasas between seated poses.** A "Vinyasas" toggle on the Overview (on by default) weaves a breath-paced half-vinyasa (chaturanga, up dog, down dog, jump through) between consecutive seated poses. It is independent of "Basics only" and "Full series", and its time is budgeted into the 30-minute target, so generation picks slightly fewer seated poses to fit; turn it off, or add poses manually, for more asanas.
 - **Guided Sun Salutations, move by move.** The salutations are modeled as their real vinyasa, one movement per breath phase (inhale or exhale), with Downward Dog held for five breaths. Spoken cues carry you through hands-free, even in Down Dog: "last breath" ending the hold, "step forward" coming out, and "samasthiti" on the return to standing.
-- **Guided practice.** A breathing circle paces every inhale and exhale at your chosen breath speed (a 4-7s slider), with calm transition countdowns between poses and traditional repeats (Navasana ×5, Setu Bandhasana ×3) counted in full. It finishes with a Namaste mark, a short summary (poses, breaths, duration), a soft bell, and a spoken "Namaste". The screen stays awake throughout.
+- **Guided practice.** A breathing circle paces every inhale and exhale at your chosen breath speed (a 4-7s slider), with calm transition countdowns between poses and traditional repeats (Navasana ×5, Setu Bandhasana ×3) counted in full. Multi-stage poses run each stage in turn (Utthita Hasta Padangusthasana moves through toe hold, leg to the side, head-to-knee, and hands-on-hips balance on each leg), and when Vinyasas are on a flow glyph and the current movement name lead you through each half-vinyasa. It finishes with a Namaste mark, a short summary (poses, breaths, duration), a soft bell, and a spoken "Namaste". The screen stays awake throughout.
 - **Optional sound, your way.** Persisted toggles for spoken pose names and cues, soft inhale/exhale breath tones, and a looping CC0 ambient track. The layers mix gracefully: breath tones blend with the ambient bed, and everything dips politely under a voice cue, then returns.
 - **A gentle record of your week.** Home shows the last seven days as small leaves that fill in sage on the days you practice: a quiet, pressure-free nudge rather than a streak counter. Everything stays on-device.
 - **Made to keep.** Sanskrit-first pose names with English, drishti, and a tap-to-hear pronunciation button, original hand-drawn pose art, and an installable, offline-capable PWA.
@@ -48,10 +49,10 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to rende
 
 ## Project structure
 
-- `src/data/poses.ts`: the Ashtanga Primary Series catalog (58 poses): names, category, canonical order, breaths, sides, repeats, drishti, the `isBasic` flag for Smart Start mode, and an optional vinyasa `flow` (carried by the two Sun Salutations) that breaks the salutation into its move-by-move sub-poses and voice cues.
+- `src/data/poses.ts`: the Ashtanga Primary Series catalog (58 poses): names, category, canonical order, breaths, sides, repeats, drishti, the `isBasic` flag for Smart Start mode, and an optional multi-stage `flow` (the two Sun Salutations break into their move-by-move sub-poses and voice cues; Utthita Hasta Padangusthasana breaks into its four stages per leg).
 - `src/lib/generatePractice.ts`: builds a valid, varied, under-30-minute sequence, weights the free budget across sections, protects a finishing pose, and supports Basics-only mode.
 - `src/lib/selectedPractice.ts`: builds the practice from the user-selected set of pose ids, in canonical order, with no 30-minute ceiling so a manual selection can exceed the target honestly.
-- `src/lib/guidedPlan.ts` / `src/lib/timing.ts`: turn a practice into a breath-by-breath timeline, with the variable transition model; the salutation `flow` is expanded into sub-pose labels and per-breath voice cues.
+- `src/lib/guidedPlan.ts` / `src/lib/timing.ts`: turn a practice into a breath-by-breath timeline, with the variable transition model; the salutation `flow` is expanded into sub-pose labels and per-breath voice cues, and when the Vinyasas toggle is on a half-vinyasa is inserted between consecutive seated poses (and budgeted into generation via `vinyasaSeconds`).
 - `src/lib/voice.ts`: spoken pose-name playback (plus "switch sides", "Namaste", and the salutation cues "last breath" / "step/jump forward" / "samasthiti") for guided practice.
 - `src/lib/breathCues.ts`: the soft inhale/exhale breath-tone player that blends with, and ducks alongside, the ambient sound.
 - `src/lib/chime.ts`: the completion bell (`public/audio/effects/bell.mp3`).
@@ -63,6 +64,7 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to rende
 - `public/audio/voice/`: prerecorded pose-name clips plus `namaste.mp3`, `switch_sides.mp3`, and the salutation cues `last_breath.mp3`, `step_jump_forward.mp3`, and `samasthiti.mp3`; `public/audio/effects/` holds `bell.mp3` (the completion bell) and the breath-cue tones `inhale.mp3` and `exhale.mp3`.
 - `src/screens/`: Home, Overview (map + carousel), and the Guided player.
 - `src/components/NamasteMark.tsx`: the completion Namaste mark (original traced SVG vector art).
+- `src/components/FlowMark.tsx`: the abstract flow glyph shown in place of a pose icon during a half-vinyasa.
 - `src/components/poses/`: the 58 pose icons and their registry.
 
 ## Notes
