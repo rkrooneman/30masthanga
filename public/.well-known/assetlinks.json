@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.ashtanga30.twa",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_YOUR_APP_SIGNING_SHA256_FINGERPRINT"
+        "9E:90:33:D9:DB:8E:61:A3:E1:49:D9:60:A2:AE:AD:45:D9:2A:58:BF:5E:FD:52:9B:96:70:EE:F0:8A:51:A5:D3",
+        "D4:B0:83:32:1B:DA:48:11:05:8E:DB:F0:5C:A3:AC:C9:00:31:F2:3E:C7:08:AC:46:39:AD:28:7B:FD:86:71:C0"
       ]
     }
   }
