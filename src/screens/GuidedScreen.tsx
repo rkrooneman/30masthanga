@@ -66,7 +66,12 @@ import {
   stopVoice,
   unlockVoice,
 } from '../lib/voice';
-import { playInhale, playExhale, unlockBreathCues } from '../lib/breathCues';
+import {
+  playInhale,
+  playExhale,
+  stopBreathCues,
+  unlockBreathCues,
+} from '../lib/breathCues';
 import { loadSoundEnabled } from '../lib/preferences';
 import { recordPractice } from '../lib/practiceLog';
 import { OPENING_COUNTDOWN_SECONDS, formatDuration } from '../lib/timing';
@@ -130,6 +135,12 @@ function GuidedScreen({
   // (it schedules across step changes) yet still be cancelable on each skip and
   // cleared on unmount.
   const skipAnnounceTimerRef = useRef<number | null>(null);
+
+  // Set when the practitioner skips (prev/next); the stepping engine reads it to
+  // SKIP playing a breath tone for the landed step, so rapid skipping doesn't
+  // spam the inhale/exhale sound. Cleared by the stepping engine after the first
+  // step it suppresses.
+  const suppressBreathCueRef = useRef(false);
 
   // One-shot guard so the first pose is announced exactly once during the
   // opening countdown, never re-firing on pause/resume of that countdown.
@@ -208,6 +219,11 @@ function GuidedScreen({
       // Cut any in-flight announcement immediately so a stale pose name doesn't
       // play over the jump.
       stopVoice();
+      // Stop any ringing breath tone(s) AND suppress the tone for the step we
+      // land on, so rapid skipping neither stacks nor rapid-fires the inhale/
+      // exhale sound. The suppression flag is cleared by the stepping engine.
+      stopBreathCues();
+      suppressBreathCueRef.current = true;
       // Cancel a previously-scheduled skip announcement; rapid consecutive skips
       // keep cancelling so only the FINAL landed pose is announced.
       if (skipAnnounceTimerRef.current !== null) {
@@ -286,11 +302,17 @@ function GuidedScreen({
       // exhaleMs for an exhale movement (the other is 0).
       const phaseForMovement = step.singlePhase;
       setPhase(phaseForMovement);
-      // Play the matching breath tone at the START of this single phase. Guarded
-      // to breath steps only, never during starting/paused/complete (early
-      // returns above). Both self-guard on the sound + breath-cues toggles.
-      if (phaseForMovement === 'inhale') playInhale();
-      else playExhale();
+      // Play the matching breath tone at the START of this single phase, UNLESS
+      // this step was reached by a manual skip (the flag is set by the skip
+      // handler and cleared here), so rapid skipping doesn't rapid-fire the tone.
+      // Guarded to breath steps only; both self-guard on the sound + cues toggles.
+      if (suppressBreathCueRef.current) {
+        suppressBreathCueRef.current = false;
+      } else if (phaseForMovement === 'inhale') {
+        playInhale();
+      } else {
+        playExhale();
+      }
       const movementMs =
         phaseForMovement === 'inhale' ? step.inhaleMs : step.exhaleMs;
       schedule(advance, movementMs);
@@ -299,13 +321,16 @@ function GuidedScreen({
       // exhale, exactly as before.
       // Start expanding immediately.
       setPhase('inhale');
-      // Play the soft inhale tone at the START of the inhale. This is guarded to
-      // breath steps only (never transitions), and the effect's early returns
-      // above ensure it never fires during the opening "get ready" countdown
-      // (starting), while paused, or after completion. On resume the breath
-      // genuinely restarts from its inhale, so replaying the tone here is
-      // intentional. playInhale self-guards on the sound + breath-cues toggles.
-      playInhale();
+      // Play the soft inhale tone at the START of the inhale, UNLESS this step was
+      // reached by a manual skip (suppress once so rapid skipping doesn't rapid-
+      // fire the tone). Otherwise guarded to breath steps only (never during
+      // starting/paused/complete via the early returns above). On resume the
+      // breath restarts from its inhale, so replaying the tone then is intentional.
+      if (suppressBreathCueRef.current) {
+        suppressBreathCueRef.current = false;
+      } else {
+        playInhale();
+      }
       // Flip to exhale at the inhale/exhale boundary, and play the exhale tone
       // there — inside the scheduled callback, so it fires only when the exhale
       // phase is actually reached (not immediately).

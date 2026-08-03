@@ -151,6 +151,24 @@ export function playExhale(): void {
 }
 
 /**
+ * Immediately stop every breath tone that is currently playing. Used when the
+ * practitioner skips poses (prev/next): without this, each skip starts a fresh
+ * tone while the previous ones are still ringing, so rapid skipping stacks the
+ * inhale/exhale sounds into a cacophony. Best-effort; safe to call anytime.
+ */
+export function stopBreathCues(): void {
+  for (const tone of liveTones) {
+    try {
+      tone.pause();
+      tone.src = '';
+    } catch {
+      /* ignore — best-effort stop */
+    }
+  }
+  liveTones.clear();
+}
+
+/**
  * Optional warm-up for WAV <audio> playback, to be called from within the
  * "Start practice" user gesture (the same window unlockAudio()/unlockVoice()
  * use). It creates and immediately pauses a muted element so the browser has
