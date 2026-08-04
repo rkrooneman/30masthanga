@@ -102,7 +102,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Music toggle — a single floating, icon-only play/pause button in the
+   Music toggle - a single floating, icon-only play/pause button in the
    bottom-right corner. Fixed above every screen; thumb-reachable and out of the
    way of content. The <audio> element is mounted once in the shell and never
    unmounts, so playback + state persist across screen navigation. With one
@@ -258,7 +258,7 @@ body {
   padding-bottom: 2rem;
 }
 
-/* Info button — small, subtle, calm. Sits in the top corner of the Home
+/* Info button - small, subtle, calm. Sits in the top corner of the Home
    content, absolutely positioned so it never disturbs the vertically-centred
    logo / slider / button column. ~44px tap target. */
 .home__info {
@@ -299,7 +299,7 @@ body {
   height: 1.25rem;
 }
 
-/* Footer — small muted copyright, centred at the bottom of the Home screen.
+/* Footer - small muted copyright, centred at the bottom of the Home screen.
    Absolutely positioned so the main content stays vertically centred; sits
    clear of the safe-area inset at the very bottom. */
 .home__footer {
@@ -346,11 +346,11 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Practice week — the calm "last 7 days" row under the Home tagline. Seven
+   Practice week - the calm "last 7 days" row under the Home tagline. Seven
    evenly-spaced day columns, today rightmost: a small petal (empty outline =
    no practice, filled sage = practiced) above a small muted weekday letter.
    Today is subtly highlighted with a faint ring behind its petal and a
-   full-strength label. NOT a streak counter — quiet and anti-pressure.
+   full-strength label. NOT a streak counter - quiet and anti-pressure.
    -------------------------------------------------------------------------- */
 .practice-week {
   margin: 0.5rem 0 0;
@@ -426,7 +426,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   About dialog — a simple in-app modal (Home only), NOT a route. A dim
+   About dialog - a simple in-app modal (Home only), NOT a route. A dim
    backdrop with a calm surface card; closes on the close button, backdrop
    click, or Escape (handled in HomeScreen).
    -------------------------------------------------------------------------- */
@@ -726,7 +726,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Basics only (Smart Start) toggle — a calm, accessible labeled switch that
+   Basics only (Smart Start) toggle - a calm, accessible labeled switch that
    sits just below the Overview header. A real checkbox is visually hidden and
    styled as a sliding track+thumb; the sage accent marks the "on" state, and
    the focus ring matches the app's existing :focus-visible treatment.
@@ -875,7 +875,7 @@ body {
 
 /* Regenerate feedback: when a fresh practice is generated the sections grid is
    remounted (via a changing React key) and replays this quiet, translate-free
-   cross-fade so the change is acknowledged — consistent with the app's
+   cross-fade so the change is acknowledged - consistent with the app's
    reduced-motion cross-fade language elsewhere. Opacity only, no slide. */
 @keyframes pose-map-fade-in {
   from {
@@ -943,7 +943,7 @@ body {
   display: flex;
 }
 
-/* Unselected poses are dimmed to read as an inactive state — clearly out of the
+/* Unselected poses are dimmed to read as an inactive state - clearly out of the
    practice, but still tappable (to open detail) and toggleable (the checkbox
    stays full-strength so it remains an obvious control). */
 .pose-map__cell--inactive .pose-map__thumb {
@@ -951,7 +951,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Pose selection checkbox — a small, calm check pinned to the top-left of each
+   Pose selection checkbox - a small, calm check pinned to the top-left of each
    cell that toggles the pose in/out of the practice. A native checkbox is
    visually hidden (kept accessible + keyboard-operable) and drawn as a custom
    sage box so it stays on-palette. Fixed-frame poses render it checked +
@@ -1073,7 +1073,7 @@ body {
   width: 100%;
 }
 
-/* Small muted-sage pill badge (×2 / ×N) in the top-right corner of the icon. */
+/* Small muted-sage pill badge (x2 / xN) in the top-right corner of the icon. */
 .pose-map__badge {
   position: absolute;
   top: -0.15rem;
@@ -1129,7 +1129,7 @@ body {
    these enter animations re-triggers a calm directional slide + fade. Going
    "next" the incoming card slides in from the right; going "prev", from the
    left. The initial mount fades in only, with no directional slide. Timing is
-   deliberately gentle (~300ms, ease-out-ish) — smooth, not bouncy.
+   deliberately gentle (~300ms, ease-out-ish) - smooth, not bouncy.
    -------------------------------------------------------------------------- */
 @keyframes pose-card-enter-next {
   from {
@@ -1289,7 +1289,7 @@ body {
    Pose placeholder graphic
    A deliberate "artwork coming" stand-in: a soft surface panel with a subtle
    border, a faint neutral ring, the pose initial in a muted tone, and a small
-   category caption. Neutral on purpose — the LotusMark identity is kept out of
+   category caption. Neutral on purpose - the LotusMark identity is kept out of
    here so the lotus stays the app's signature.
    -------------------------------------------------------------------------- */
 .pose-placeholder {
@@ -1466,7 +1466,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Guided player (Slice 5b) — the interactive breathing screen.
+   Guided player (Slice 5b) - the interactive breathing screen.
    Three vertical zones: a quiet top bar (exit + progress), a centred focal
    stage (pose name, breathing circle, breath/segment meta), and a calm bottom
    control bar. The circle is the focal point, so everything else is muted.
@@ -1535,7 +1535,7 @@ body {
   justify-content: flex-end;
 }
 
-/* A small, deliberately muted pose icon in the header — a supporting cue that
+/* A small, deliberately muted pose icon in the header - a supporting cue that
    sits ABOVE the pose name and stays clearly subordinate to the breathing
    circle. Muted tone + reduced opacity so the eye settles on the circle first;
    it must never compete with the breath animation. */
@@ -1635,7 +1635,7 @@ body {
   animation: breathing-blob 14s ease-in-out infinite;
 }
 
-/* Slow, subtle morph of the organic edge — an airy, living wobble that is
+/* Slow, subtle morph of the organic edge - an airy, living wobble that is
    independent of the breath scaling (which is applied via .--inhale/--exhale). */
 @keyframes breathing-blob {
   0%,
@@ -1742,7 +1742,7 @@ body {
   cursor: default;
 }
 
-/* Pause/Resume is the anchor control — a touch more prominent than the jumps. */
+/* Pause/Resume is the anchor control - a touch more prominent than the jumps. */
 .guided-player__control--primary {
   color: var(--color-text);
   font-weight: 500;
@@ -1821,6 +1821,59 @@ body {
   color: var(--color-text-muted);
 }
 
+/* --------------------------------------------------------------------------
+   Leave-practice confirmation dialog (Task 3) - shown when a back gesture (or
+   the in-app Exit control) tries to leave an in-progress guided practice. It
+   reuses the app's existing modal language: the shared .about-backdrop for the
+   dim overlay + entrance fade, and a compact calm surface card sized for two
+   short lines + two actions. The action buttons reuse the shared .button /
+   .button--primary / .button--outline classes so the dialog stays on-brand
+   with the rest of the app (no new design system introduced).
+   -------------------------------------------------------------------------- */
+.leave-dialog {
+  width: 100%;
+  max-width: 22rem;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgb(47 51 48 / 0.18);
+  animation: about-rise 0.18s ease;
+}
+
+.leave-dialog__heading {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+}
+
+.leave-dialog__message {
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+/* Two stacked full-width actions, matching the Overview action stack: the
+   dominant "Leave" primary on top of the calm "Stay" outline, both reusing the
+   shared button footprint so they line up pixel-for-pixel. */
+.leave-dialog__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Respect reduced-motion: drop the card entrance animation (the shared
+   .about-backdrop is already covered by the About dialog's reduced-motion
+   rule above; this covers the leave-dialog card itself). */
+@media (prefers-reduced-motion: reduce) {
+  .leave-dialog {
+    animation: none;
+  }
+}
+
 /* Reduced motion: hold the breathing disc at a calm steady size and never
    scale it. Only the phase word / countdown changes; a short opacity settle
    keeps it from feeling frozen without introducing translation or scaling. */
@@ -1843,10 +1896,10 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Pose-icon contact sheet (dev/review tool — see PosePilot.tsx)
+   Pose-icon contact sheet (dev/review tool - see PosePilot.tsx)
    A full-bleed review surface (not constrained to the app container) that lays
    out all 58 catalog poses in a responsive grid, grouped by section. Calm,
-   palette-driven, legible down to 375px (2–3 columns), more columns when wider.
+   palette-driven, legible down to 375px (2-3 columns), more columns when wider.
    -------------------------------------------------------------------------- */
 .contact-sheet {
   min-height: 100vh;

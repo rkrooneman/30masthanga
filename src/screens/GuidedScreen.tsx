@@ -46,6 +46,76 @@
  * completion, exit, and unmount, with a `visibilitychange` re-acquire (locks
  * drop when the tab is hidden). Feature-detected and fully wrapped in try/catch
  * so unsupported browsers silently continue (progressive enhancement).
+ *
+ * === leave-practice confirmation (Task 3) ===
+ * A back navigation OUT of an in-progress practice (the Android/system back
+ * gesture OR the in-app Exit control -- both funnel through the browser History
+ * back path wired in App.tsx) is intercepted here and gated behind a "Leave
+ * practice?" dialog. "In progress" means the screen is mounted and NOT complete
+ * (the opening countdown counts as in progress too). The completion (Namaste)
+ * screen never shows the dialog -- its back goes straight home, as before.
+ *
+ * How the interception stays consistent with App.tsx's history model (a single
+ * popstate handler that only ever setScreen's, never pushes, so it can't loop):
+ *
+ *   - On mount (real in-progress practice only) we push ONE extra "guard"
+ *     history entry ON TOP of the guided entry App already pushed, carrying
+ *     `state.screen === 'guided'`. So the live stack is
+ *     [home, overview, guided, guided-guard] with us sitting on the guard.
+ *   - A back gesture pops the guard and lands on the guided entry. App's single
+ *     popstate handler reads `event.state.screen === 'guided'` and setScreen's
+ *     'guided' -- a harmless no-op that keeps us visually on guided (no flicker
+ *     to overview). OUR popstate listener sees the practice is in progress,
+ *     RE-PUSHES the single guard entry (restoring the stack exactly, so guard
+ *     entries never accumulate across repeated open/cancel), pauses, and opens
+ *     the dialog.
+ *   - Cancel "Stay": the guard was already re-pushed, so the stack is back to
+ *     [home, overview, guided, guided-guard]; we simply close the dialog and
+ *     resume. No history change.
+ *   - Confirm "Leave": tear down audio/timers, then `history.go(-2)` -- one call
+ *     that pops BOTH the guard AND the guided entry, landing on the overview
+ *     entry. App's popstate handler setScreen's 'overview' (it remains the ONLY
+ *     navigation-driven setScreen). A subsequent back from overview reaches
+ *     home, preserving Task 2. We suppress our own interceptor for this
+ *     programmatic navigation via a one-shot `leavingRef`.
+ *
+ * === back from the completion screen (Task 5) ===
+ * When `complete` flips true we deliberately KEEP the single guard entry in
+ * place (it is NOT torn down), so on the Namaste screen the live stack is
+ * [home, overview, guided, guard] with us sitting on the guard. This makes the
+ * system Back gesture on the completion screen behave exactly like the on-screen
+ * "Return home" button, and both land on HOME (not overview):
+ *
+ *   - "Return home" button AND system back gesture funnel through the SAME path.
+ *     The button calls `history.back()` (see handleReturnHome); the gesture IS a
+ *     back. Either way the guard is popped and we land on the guided entry
+ *     (state.screen === 'guided'), so App's single popstate handler setScreen's
+ *     'guided' -- a no-op that keeps GuidedScreen MOUNTED and `complete` still
+ *     true. Because the screen never unmounts here, the completion bell/Namaste
+ *     effect (guarded by bellPlayedRef/namastePlayedRef) does NOT replay, and
+ *     there is no flicker to overview (screen stays 'guided' throughout).
+ *   - OUR popstate interceptor, seeing `complete` and that the guard was up,
+ *     clears the guard flag, arms `leavingRef`, and calls `onComplete()`
+ *     (App's `history.go(-2)`). By then the stack is [home, overview, guided],
+ *     so go(-2) collapses both remaining forward entries and lands on the base
+ *     home entry; App resolves that to ROOT_SCREEN ('home') and GuidedScreen
+ *     unmounts (audio stops naturally). One further back from home exits the app.
+ *   - The DEV `?complete` hatch mounts with NO guard (never in progress), so the
+ *     button there routes straight through `onComplete()` (App's setScreen) and
+ *     the interceptor never calls history.go on the empty forward stack.
+ *
+ * === pause/resume audio around the dialog (Task 4) ===
+ * On dialog OPEN the interceptor pauses via the existing pause machinery AND
+ * stops any in-flight cue: stopVoice() (which also RELEASES the voice cue's duck,
+ * so the ambient music is never left dipped behind the dialog) and
+ * stopBreathCues() (quiets any live breath tone -- breath tones hold no duck).
+ * Ambient music is deliberately left playing softly, as it is when the user taps
+ * Pause. On "Stay" a bare setPaused(false) resumes cleanly: the stepping effect
+ * restarts the current breath/phase, with no stale timers (the pause already
+ * halted them), no double-scheduling, and no stuck duck (already released). On
+ * "Leave" the teardown adds stopBreathCues() alongside the existing clearTimers +
+ * stopVoice so a paused+leave has no stuck audio or duck. Task 6 will own the
+ * fuller audio-teardown completeness on confirmed leave.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -57,7 +127,7 @@ import BreathingCircle from '../components/BreathingCircle';
 import NamasteMark from '../components/NamasteMark';
 import PoseGraphic from '../components/PoseGraphic';
 import FlowMark from '../components/FlowMark';
-import { unlockAudio, playCompletionBell } from '../lib/chime';
+import { unlockAudio, playCompletionBell, stopChime } from '../lib/chime';
 import {
   speakPose,
   speakNamaste,
@@ -125,6 +195,10 @@ function GuidedScreen({
   // small so the very first inhale is a satisfying expansion.
   const [starting, setStarting] = useState(stepCount > 0);
   const [openingCount, setOpeningCount] = useState(OPENING_COUNTDOWN_SECONDS);
+  // Task 3: whether the "Leave practice?" confirmation dialog is open. Opened by
+  // the popstate interceptor when a back gesture tries to leave an in-progress
+  // practice; closed by "Stay" (resume) or "Leave" (navigate to overview).
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
   // Every active timeout id lives here so cleanup can clear them all. Using a
   // ref (not state) means scheduling/clearing never triggers a re-render.
@@ -150,6 +224,21 @@ function GuidedScreen({
   // the narration effect) because both the manual-skip handler and the opening
   // countdown record into it. See the narration effect for the full contract.
   const lastAnnouncedPoseIndexRef = useRef<number | null>(null);
+
+  // --- Task 3: leave-practice back-interception refs --------------------------
+  // Whether our extra "guard" history entry is currently on the stack (see the
+  // module doc). Guarded push/pop keys off this so guard entries never leak or
+  // accumulate: we only ever push when it is false and pop when it is true.
+  const guardPushedRef = useRef(false);
+  // One-shot suppression flag for the popstate interceptor: set true immediately
+  // before a PROGRAMMATIC history navigation we initiate (confirmed leave's
+  // go(-2), or completion's go-home via onComplete), so our interceptor ignores
+  // the resulting popstate and lets App's single handler drive the screen change.
+  // The interceptor consumes (clears) it, so it never sticks around.
+  const leavingRef = useRef(false);
+  // The dialog element, focused when it opens (accessibility). A ref rather than
+  // autofocus so we can move focus deterministically on open.
+  const leaveDialogRef = useRef<HTMLDivElement | null>(null);
 
   const clearTimers = useCallback(() => {
     for (const id of timeoutsRef.current) window.clearTimeout(id);
@@ -265,6 +354,163 @@ function GuidedScreen({
   );
 
   const togglePause = useCallback(() => setPaused((p) => !p), []);
+
+  // --- Task 3: leave-practice back-interception -------------------------------
+  // "In progress" == the screen is mounted, has steps, and is NOT complete. Per
+  // the human's confirmation the opening countdown counts as in progress, so we
+  // deliberately do NOT exclude `starting`. The DEV-only `?complete` hatch
+  // (startComplete) and the empty-practice bail (stepCount === 0) are never in
+  // progress, so they get no guard entry and no dialog.
+  const inProgress = !complete && stepCount > 0 && !startComplete;
+
+  // Push the single guard history entry once, on mount, for a real in-progress
+  // practice. See the module doc for the full model. Empty deps: this runs once
+  // per mount. The guard is deliberately KEPT UP after completion (Task 5), so
+  // it is only ever popped by a real back gesture / the "Return home" button
+  // (both via the interceptor's complete branch), by a confirmed Leave, or by
+  // unmount -- all keyed off guardPushedRef so we never push or pop it twice.
+  useEffect(() => {
+    if (inProgress && !guardPushedRef.current) {
+      guardPushedRef.current = true;
+      window.history.pushState({ screen: 'guided' }, '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The single popstate interceptor for leaving guided. This is intentionally a
+  // SEPARATE listener from App's (App's is the only NAVIGATION-driven setScreen;
+  // this one never setScreen's -- it only decides whether to BLOCK a leave or,
+  // on the completion screen, redirect it HOME). On a back gesture the guard
+  // entry is popped and we land on the guided entry, so App's handler setScreen's
+  // 'guided' (a no-op that keeps us mounted, so no completion audio replays and
+  // there is no flicker to overview). What we do next depends on whether the
+  // practice is in progress (show the "Leave practice?" dialog) or complete
+  // (Task 5: route home via onComplete, unifying the button and the gesture).
+  useEffect(() => {
+    const onPopState = () => {
+      // Consume a one-shot suppression: our own programmatic navigation
+      // (confirmed leave / completion go-home) -- let App's handler drive it.
+      if (leavingRef.current) {
+        leavingRef.current = false;
+        return;
+      }
+
+      // Task 5: back FROM the completion (Namaste) screen. The guard is still up
+      // on completion (we deliberately do not tear it down), so a back gesture --
+      // or the "Return home" button, which routes through the same history.back()
+      // (see handleReturnHome) -- has just popped it, leaving [home, overview,
+      // guided]. Redirect that single back to HOME so completion never drops the
+      // user into the just-finished overview. We arm leavingRef so the popstate
+      // from onComplete's history.go(-2) is ignored here (App resolves the base
+      // entry to home). Guarded on guardPushedRef so the DEV `?complete` hatch
+      // (no guard, no forward history) never calls history.go on an empty stack.
+      if (complete) {
+        if (!guardPushedRef.current) return;
+        guardPushedRef.current = false;
+        leavingRef.current = true;
+        onComplete();
+        return;
+      }
+
+      // Not in progress (no guard was ever pushed): nothing to intercept; App's
+      // handler has already resolved the screen normally.
+      if (!inProgress || !guardPushedRef.current) return;
+
+      // A back gesture just popped the guard. Re-push it to stay put (this keeps
+      // the guard count at exactly one -- no accumulation across repeated
+      // open/cancel), pause the practice, and open the confirmation dialog.
+      window.history.pushState({ screen: 'guided' }, '');
+      // Pause via the existing, leak-free pause machinery: the stepping effect
+      // is keyed on `paused`, so this halts the current step's timers and (on
+      // resume) restarts the current breath/phase from its start.
+      setPaused((p) => (p ? p : true));
+      // Task 4: silence any IN-FLIGHT cue so nothing talks over the dialog, and
+      // (critically) release any duck it holds so the ambient music returns to
+      // full volume behind the dialog rather than sitting dipped.
+      //   - stopVoice() hard-stops an in-flight utterance AND releases its duck
+      //     (voice cues requestDuck/releaseDuck); if a pose name / vinyasa cue
+      //     was mid-utterance when the user hit back, this is what prevents the
+      //     music being left stuck-ducked while the dialog waits.
+      //   - stopBreathCues() stops any live inhale/exhale tone (breath tones are
+      //     a duck LISTENER, never a ducker, so this releases no duck -- it just
+      //     quiets the tone so the dialog is calm).
+      // Ambient MUSIC is intentionally NOT touched: it persists across screens
+      // by design (ambientPref / MusicPanel) and should keep playing softly
+      // behind the dialog, matching the app's behaviour when the user taps Pause.
+      stopVoice();
+      stopBreathCues();
+      setShowLeaveDialog(true);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+    // Re-subscribe when `inProgress` / `complete` / `onComplete` change so the
+    // closure reads the current values. This listener never pushes on its own
+    // except the deterministic guard re-push above, so it cannot loop.
+  }, [inProgress, complete, onComplete]);
+
+  // Cancel ("Stay"): close the dialog and resume the practice where it was. The
+  // guard was already re-pushed by the interceptor, so history is consistent and
+  // needs no change here.
+  //
+  // Task 4 (resume-audio-where-it-was): `setPaused(false)` is all that is needed
+  // and it is genuinely clean. The stepping effect is keyed on `paused`, so
+  // clearing it re-runs the effect for the CURRENT stepIndex: it clears no stale
+  // timers (the interceptor's pause already halted them via the effect cleanup),
+  // restarts the current breath/phase from its start, and replays that step's
+  // breath tone / lets voice resume normally on the next narration trigger. No
+  // double-scheduling can occur (the effect's cleanup runs before it reschedules)
+  // and no duck can be left stuck: any in-flight cue's duck was already released
+  // by the interceptor's stopVoice(), and breath tones never hold a duck, so on
+  // resume the duck ref-count is already at 0 (music at full volume) and simply
+  // dips again the next time a real voice cue fires. Nothing extra to re-assert.
+  const handleStayInPractice = useCallback(() => {
+    setShowLeaveDialog(false);
+    setPaused(false);
+  }, []);
+
+  // Confirm ("Leave"): tear everything down (mirrors handleExit's teardown --
+  // Task 6 owns fuller audio teardown), then navigate to overview with a single
+  // history.go(-2) that pops BOTH the guard AND the guided entry. App's single
+  // popstate handler does the actual setScreen('overview'); we suppress our own
+  // interceptor for this programmatic navigation via leavingRef.
+  //
+  // Task 4: leaving from a PAUSED state must not leave stuck audio or a stuck
+  // duck. Pause state does not fight teardown -- clearTimers() empties the (in
+  // this case already-halted) timer ref, and the audio stops below are
+  // unconditional and safe to call when nothing is playing:
+  //   - stopVoice(): stops any in-flight utterance AND releases its duck. On the
+  //     dialog path the interceptor already called this, so here it is a no-op
+  //     that keeps the confirmed-leave path correct even if reached another way.
+  //   - stopBreathCues(): stops any live inhale/exhale tone that could still be
+  //     sounding (breath tones hold no duck, so this releases none). Added in
+  //     Task 4 so the paused+leave combination is guaranteed silent.
+  // Ambient music is intentionally NOT stopped here (it persists by design);
+  // Task 6 owns any fuller audio-teardown completeness on confirmed leave.
+  const handleLeavePractice = useCallback(() => {
+    setShowLeaveDialog(false);
+    clearTimers();
+    if (skipAnnounceTimerRef.current !== null) {
+      window.clearTimeout(skipAnnounceTimerRef.current);
+      skipAnnounceTimerRef.current = null;
+    }
+    stopVoice();
+    stopBreathCues();
+    guardPushedRef.current = false;
+    leavingRef.current = true;
+    window.history.go(-2);
+  }, [clearTimers]);
+
+  // Move focus to the dialog when it opens (accessibility) and allow Escape to
+  // cancel ("Stay"). Scoped to while the dialog is open.
+  useEffect(() => {
+    if (!showLeaveDialog) return;
+    leaveDialogRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleStayInPractice();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showLeaveDialog, handleStayInPractice]);
 
   // --- the stepping engine ----------------------------------------------------
   // Owns timers for the current step. Re-runs (and thus cleans up) on every
@@ -401,10 +647,37 @@ function GuidedScreen({
     return clearTimers;
   }, [starting, paused, complete, schedule, clearTimers, steps]);
 
-  // Belt-and-braces: clear any stray timers on unmount (the effect cleanup above
-  // already covers this, but this guards against future refactors). Also clears
-  // the standalone manual-skip announce timer and hard-stops any in-flight voice
-  // so nothing leaks or plays after the screen is gone.
+  // Task 6: the mount-once, unmount-time catch-all audio + timer teardown. This
+  // is the SAFETY NET that guarantees the AC "leaving Guided stops all practice
+  // audio cleanly" no matter HOW the screen unmounts -- a confirmed Leave, the
+  // completion "Return home" / back gesture (Task 5), a raw screen swap in App,
+  // or any future path. The explicit handlers (handleExit / the leave dialog /
+  // handleLeavePractice) stop audio eagerly, but only this cleanup is guaranteed
+  // to run on EVERY unmount, so it is where completeness lives.
+  //
+  // Empty deps means the effect body runs once (nothing) and its cleanup runs
+  // exactly once, on unmount. On unmount we:
+  //   - clearTimers(): clear every tracked stepping/countdown timeout. (The
+  //     stepping effect's own cleanup already covers this while mounted; this
+  //     re-covers it on unmount and against future refactors.)
+  //   - clear the standalone manual-skip announce timer, which lives apart from
+  //     timeoutsRef precisely because it survives step-change cleanups, so it
+  //     could otherwise still be pending at unmount.
+  //   - stopVoice() + stopBreathCues() + stopChime(): hard-stop every persistent
+  //     practice-audio element (the reused voice element, the two breath-tone
+  //     elements, and the completion bell) so no cue, tone, or bell keeps
+  //     sounding after the screen is gone, and any duck those held is released.
+  //
+  // All three stop functions are best-effort, silent on failure, and idempotent
+  // (each clears its own tracking refs / live set and its duck release is guarded
+  // to fire at most once), so double-calling them -- e.g. after handleLeavePractice
+  // already stopped voice + breath cues -- is a safe no-op. Because the audio
+  // modules REUSE module-level persistent elements (the iOS autoplay fix),
+  // stopping here only pauses + rewinds them; the next practice's play() / warm-up
+  // reassigns and restarts them cleanly, so this teardown cannot strand the shared
+  // elements in a bad state. Ambient music is deliberately NOT touched: GuidedScreen
+  // never controls it (it is owned by ambientPref / MusicPanel and persists across
+  // screens by design), and none of these stop functions affect it.
   useEffect(
     () => () => {
       clearTimers();
@@ -413,6 +686,8 @@ function GuidedScreen({
         skipAnnounceTimerRef.current = null;
       }
       stopVoice();
+      stopBreathCues();
+      stopChime();
     },
     [clearTimers],
   );
@@ -641,7 +916,20 @@ function GuidedScreen({
   }, [shouldHoldLock]);
 
   // --- exit: stop everything, then hand back to the shell ---------------------
+  // The in-app Exit control funnels through the SAME browser back path as the
+  // system gesture, so both routes hit the leave-practice interceptor uniformly.
+  // While a practice is in progress, Exit does NOT tear down here -- it just
+  // triggers a back (onExit === history.back() in App), which pops the guard and
+  // fires the popstate our interceptor catches to show the "Leave practice?"
+  // dialog. Teardown then happens only on a confirmed Leave (handleLeavePractice)
+  // or on unmount. When NOT in progress (the empty-practice bail below, which
+  // renders before any guard is pushed), fall back to the original
+  // teardown-then-onExit so that path is unchanged.
   const handleExit = useCallback(() => {
+    if (inProgress) {
+      onExit();
+      return;
+    }
     clearTimers();
     if (skipAnnounceTimerRef.current !== null) {
       window.clearTimeout(skipAnnounceTimerRef.current);
@@ -649,7 +937,28 @@ function GuidedScreen({
     }
     stopVoice();
     onExit();
-  }, [clearTimers, onExit]);
+  }, [inProgress, clearTimers, onExit]);
+
+  // --- Task 5: completion "Return home" -- unified with the system back gesture.
+  // On a real completion the guard entry is still up (we do not tear it down when
+  // `complete` flips), so this button funnels through the EXACT same path as a
+  // system back gesture: history.back() pops the guard, App's popstate handler
+  // keeps us on 'guided' (a no-op -- no unmount, so no completion-audio replay,
+  // no flicker to overview), and OUR interceptor's `complete` branch then calls
+  // onComplete() (App's history.go(-2)) to land on home. Routing the button
+  // through the interceptor is what makes button === gesture.
+  //
+  // The DEV `?complete` hatch mounts with NO guard (never in progress), so there
+  // is no forward history to pop -- calling history.back() there would background
+  // the app. In that case go straight through onComplete() (App's setScreen),
+  // which is exactly the hatch's inline handler.
+  const handleReturnHome = useCallback(() => {
+    if (guardPushedRef.current) {
+      window.history.back();
+    } else {
+      onComplete();
+    }
+  }, [onComplete]);
 
   // ===========================================================================
   // Render
@@ -703,7 +1012,7 @@ function GuidedScreen({
         <button
           type="button"
           className="button button--primary"
-          onClick={onComplete}
+          onClick={handleReturnHome}
         >
           Return home
         </button>
@@ -874,6 +1183,48 @@ function GuidedScreen({
           Skip &rsaquo;
         </button>
       </div>
+
+      {/* Task 3: leave-practice confirmation dialog. Reuses the shared modal
+          language (.about-backdrop overlay + a calm surface card) and the
+          shared .button classes. Backdrop click and Escape both cancel
+          ("Stay"); focus moves to the dialog on open (see the effect above). */}
+      {showLeaveDialog && (
+        <div className="about-backdrop" onClick={handleStayInPractice}>
+          <div
+            ref={leaveDialogRef}
+            className="leave-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="leave-dialog-heading"
+            aria-describedby="leave-dialog-message"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="leave-dialog-heading" className="leave-dialog__heading">
+              Leave practice?
+            </h2>
+            <p id="leave-dialog-message" className="leave-dialog__message">
+              Your practice is in progress.
+            </p>
+            <div className="leave-dialog__actions">
+              <button
+                type="button"
+                className="button button--primary"
+                onClick={handleLeavePractice}
+              >
+                Leave
+              </button>
+              <button
+                type="button"
+                className="button button--outline"
+                onClick={handleStayInPractice}
+              >
+                Stay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

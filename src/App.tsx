@@ -6,12 +6,45 @@
  * value plus the shared practice/breath state, passes handlers down, and renders
  * whichever screen is active. Later slices swap the Overview/Guided placeholders
  * for real screens without touching this wiring.
+ *
+ * === browser-history wiring (TWA/PWA back-gesture navigation) ===
+ * The system/browser Back gesture steps guided -> overview -> home instead of
+ * exiting the app, by mirroring each forward navigation into the real browser
+ * History API. The model, deliberately kept simple and loop-free, is:
+ *
+ *   - FORWARD handlers PUSH a history entry. Going home->overview and
+ *     overview->guided each call `window.history.pushState({ screen }, '')`.
+ *     The initial 'home' screen is the base entry (never pushed).
+ *   - ALL "go back" paths funnel through `window.history.back()` -- both the
+ *     system/browser gesture AND the in-app back controls (Overview Back,
+ *     Guided Exit). In-app buttons do NOT call setScreen directly; they pop
+ *     history, which fires popstate, which is the single place that re-syncs
+ *     React state. This keeps the history stack and the visible screen aligned,
+ *     so one back gesture always steps exactly one screen.
+ *   - A single mount-time `popstate` listener is the ONLY place that calls
+ *     setScreen in response to navigation. It reads the target screen from
+ *     `event.state.screen` (falling back to the navHistory reducer's screenBack
+ *     from the current screen), so a back FROM home lands on the base 'home'
+ *     entry and, one more back, lets the platform close the app / TWA activity
+ *     (we never preventDefault or trap the user on home).
+ *
+ * Because pushes happen only in forward handlers and setScreen happens only in
+ * the popstate handler, there is no double-push and no popstate loop: a
+ * popstate-driven setScreen never pushes, and a forward push never triggers the
+ * back path.
+ *
+ * SEAM FOR TASK 3: the confirm-before-leaving-a-running-practice dialog and
+ * pause semantics are NOT built here. When they land, the guided back event is
+ * the single interception point -- the popstate handler (or the Guided Exit
+ * control that drives history.back()) is where a confirmation would gate the
+ * overview transition. Task 2 leaves that seam clean without adding the dialog.
  */
 
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import type { Screen } from './types/navigation';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
+import { ROOT_SCREEN } from './lib/navHistory';
 import { buildSelectedPractice } from './lib/selectedPractice';
 import { seedFakePractice } from './lib/practiceLog';
 import { requestAmbientPlay } from './lib/ambientPref';
@@ -85,6 +118,28 @@ function App() {
     [selectedIds, breathSeconds, vinyasas],
   );
 
+  // Browser-history <-> screen-state sync (see the module doc for the model).
+  // A single mount-time popstate listener is the ONLY navigation-driven caller
+  // of setScreen. Every FORWARD navigation pushes a history entry carrying its
+  // target in `state.screen`; the ONLY entry without state is the base 'home'
+  // entry (never pushed). So on ANY back event the target is simply
+  // `event.state.screen`, or ROOT_SCREEN ('home') when we have landed back on
+  // that stateless base entry -- this also correctly resolves a multi-step jump
+  // (completion's history.go(-2) lands on the base entry -> home). Reading the
+  // target from the recorded browser stack this way is exactly the navHistory
+  // reducer's stack mode (resolveBack(current, stack)): the browser's entry list
+  // IS the recorded Screen[] stack, so we defer to it rather than duplicating the
+  // fixed BACK_OF chain here. Empty deps: subscribe once, never re-subscribe on
+  // render. This handler never pushes, so it cannot loop.
+  useEffect(() => {
+    const onPopState = (event: PopStateEvent) => {
+      const target = (event.state as { screen?: Screen } | null)?.screen;
+      setScreen(target ?? ROOT_SCREEN);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   // DEV-ONLY pilot escape hatch: visiting `/?pilot` renders the pose-icon
   // contact sheet instead of the normal app. Computed after hooks (Rules of
   // Hooks). `import.meta.env.DEV` is statically false in production builds, so
@@ -151,6 +206,10 @@ function App() {
     seedFromGenerated(pace, basicsOnly, vinyasas);
     setBreathSeconds(pace);
     saveBreathSeconds(pace);
+    // FORWARD push (home->overview): add a real history entry so a later back
+    // gesture pops us back to home. State stays in sync here directly; the
+    // popstate handler only runs on BACK.
+    window.history.pushState({ screen: 'overview' }, '');
     setScreen('overview');
   };
 
@@ -223,15 +282,47 @@ function App() {
     seedFromGenerated(breathSeconds, basicsOnly, next);
   };
 
-  const handleBackHome = () => setScreen('home');
-  const handleBackOverview = () => setScreen('overview');
+  // In-app back controls funnel through history.back() rather than setScreen, so
+  // the history stack and the visible screen stay aligned (the single popstate
+  // handler does the actual setScreen). This is what makes one back gesture --
+  // button OR system gesture -- always step exactly one screen, with no stale
+  // forward entry left behind.
+  const handleBackHome = () => window.history.back();
+  const handleBackOverview = () => window.history.back();
   const handleStartGuided = () => {
     // Also a genuine gesture: ensure ambient is playing (if enabled) by the time
     // the guided run begins, in case the user reached here without an earlier tap
     // that started it.
     requestAmbientPlay();
+    // FORWARD push (overview->guided): mirror the navigation into history so the
+    // back gesture pops guided->overview. setScreen here (forward); popstate only
+    // handles BACK.
+    window.history.pushState({ screen: 'guided' }, '');
     setScreen('guided');
   };
+
+  // Completion (guided->home "fresh start"). Unlike a single back step,
+  // completion collapses BOTH forward entries (overview and guided) so the user
+  // lands on the base 'home' entry with NO dangling forward entry -- one more
+  // back gesture then exits the app rather than doing nothing or dropping the
+  // user back into the just-finished practice.
+  //
+  // Task 5 history contract: while the completion (Namaste) screen is showing,
+  // GuidedScreen keeps its single "guard" history entry ON TOP of the guided
+  // entry (it is NOT torn down on completion). BOTH the completion screen's
+  // "Return home" button AND a system back gesture funnel through the SAME path:
+  // GuidedScreen does history.back() to pop that guard (App's popstate handler
+  // resolves the landed entry's state.screen === 'guided', a no-op that keeps
+  // GuidedScreen mounted so no completion audio replays and there is no flicker
+  // to overview), then GuidedScreen's interceptor calls THIS handler. By then the
+  // live stack is [home(base), overview, guided], so history.go(-2) jumps
+  // straight to the base entry; that fires ONE popstate whose state is null (the
+  // base entry is the one screen we never pushed state for), and the single
+  // handler above resolves that to ROOT_SCREEN ('home'). No push happens, so
+  // there is nothing stale ahead. Keeping the go(-2) here (rather than a bare
+  // back()) is deliberate: the guard has already been popped by the time this
+  // runs, so exactly the overview + guided entries remain above home to collapse.
+  const handleComplete = () => window.history.go(-2);
 
   // DEV-ONLY: render the Guided completion screen directly for `/?complete`,
   // inside the normal app shell (so the MusicPanel + container styling apply).
@@ -259,8 +350,13 @@ function App() {
               practice={devPractice}
               breathSeconds={breathSeconds}
               vinyasas={vinyasas}
-              onExit={handleBackHome}
-              onComplete={handleBackHome}
+              // DEV-ONLY hatch: the app mounted straight into completion with NO
+              // forward history entries, so the normal history-driven back paths
+              // do not apply here. Preserve the prior behaviour (return to the
+              // real Home screen) with a direct setScreen, rather than a
+              // history.back()/go() that would background the app instead.
+              onExit={() => setScreen('home')}
+              onComplete={() => setScreen('home')}
               startComplete
             />
           </Suspense>
@@ -323,8 +419,15 @@ function App() {
               practice={practice}
               breathSeconds={breathSeconds}
               vinyasas={vinyasas}
+              // Exit (mid-practice) is a single back: guided->overview, so it
+              // funnels through history.back(). Complete is a full reset to the
+              // base home entry (see handleComplete) so back after finishing
+              // exits rather than re-entering the just-finished practice. On the
+              // completion screen the "Return home" button and a system back
+              // gesture BOTH reach here via the same path (GuidedScreen pops its
+              // guard, then calls onComplete), so they land on home identically.
               onExit={handleBackOverview}
-              onComplete={handleBackHome}
+              onComplete={handleComplete}
             />
           </Suspense>
         )}
