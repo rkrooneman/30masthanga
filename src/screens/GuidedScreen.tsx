@@ -975,7 +975,7 @@ function GuidedScreen({
         <div className="guided-player__controls">
           <button
             type="button"
-            className="guided-player__control"
+            className="button button--surface guided-player__control"
             onClick={handleExit}
           >
             Exit
@@ -1101,7 +1101,7 @@ function GuidedScreen({
       <header className="guided-player__top">
         <button
           type="button"
-          className="guided-player__exit"
+          className="button button--ghost guided-player__exit"
           onClick={handleExit}
           aria-label="Exit guided practice"
         >
@@ -1188,7 +1188,7 @@ function GuidedScreen({
       <div className="guided-player__controls">
         <button
           type="button"
-          className="guided-player__control"
+          className="button button--surface guided-player__control"
           onClick={goPrevPose}
           disabled={atFirstPose}
           aria-label="Previous pose"
@@ -1198,7 +1198,7 @@ function GuidedScreen({
 
         <button
           type="button"
-          className="guided-player__control guided-player__control--primary"
+          className="button button--surface guided-player__control guided-player__control--primary"
           onClick={togglePause}
           aria-pressed={paused}
         >
@@ -1207,7 +1207,7 @@ function GuidedScreen({
 
         <button
           type="button"
-          className="guided-player__control"
+          className="button button--surface guided-player__control"
           onClick={goNextPose}
           disabled={atLastPose}
           aria-label="Skip pose"

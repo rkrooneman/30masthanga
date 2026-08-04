@@ -43,6 +43,7 @@ import {
   TRANSITION_SIMILAR_SECONDS,
 } from '../lib/timing';
 import PoseGraphic from '../components/PoseGraphic';
+import { BackArrow } from '../components/icons/NavArrow';
 
 /** The full catalog in canonical order — the grid renders every pose. */
 const CATALOG_IN_ORDER = catalog.slice().sort((a, b) => a.order - b.order);
@@ -169,11 +170,11 @@ function PoseMap({
       <header className="overview__header">
         <button
           type="button"
-          className="button button--ghost overview__back"
+          className="button--icon button--icon-ghost overview__back"
           onClick={onBack}
           aria-label="Back to home"
         >
-          &larr;
+          <BackArrow className="overview__back-icon" />
         </button>
         <p className="overview__summary">
           {selectedCount} poses &middot; {formatDuration(totalSeconds)}

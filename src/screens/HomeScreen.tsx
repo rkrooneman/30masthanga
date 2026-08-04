@@ -106,7 +106,7 @@ function HomeScreen({
     <section className="home">
       <button
         type="button"
-        className="home__info"
+        className="button--icon home__info"
         aria-label="About this app"
         onClick={() => setAboutOpen(true)}
       >
@@ -246,7 +246,7 @@ function HomeScreen({
           >
             <button
               type="button"
-              className="about__close"
+              className="button--icon button--icon-ghost about__close"
               aria-label="Close"
               onClick={() => setAboutOpen(false)}
             >

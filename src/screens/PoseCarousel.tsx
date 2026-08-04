@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { TouchEvent } from 'react';
 import type { Pose } from '../types/pose';
 import PoseGraphic from '../components/PoseGraphic';
+import { Chevron } from '../components/icons/NavArrow';
 import { speakPoseName } from '../lib/voice';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
@@ -174,11 +175,12 @@ function PoseCarousel({
       <header className="overview__header">
         <button
           type="button"
-          className="button button--ghost overview__back"
+          className="button button--ghost overview__back-link"
           onClick={onBackToMap}
           aria-label="Back to all poses"
         >
-          &lsaquo; All poses
+          <Chevron direction="left" className="overview__back-link-icon" /> All
+          poses
         </button>
         <p className="overview__summary">
           {index + 1} / {count}
@@ -205,7 +207,7 @@ function PoseCarousel({
             {pose.sanskrit}
             <button
               type="button"
-              className="pose-card__pronounce"
+              className="button--icon button--icon-ghost button--icon-sm pose-card__pronounce"
               onClick={() => speakPoseName(pose.id)}
               aria-label={`Hear how to say ${pose.sanskrit}`}
             >
@@ -259,12 +261,12 @@ function PoseCarousel({
       <div className="carousel-nav">
         <button
           type="button"
-          className="carousel-nav__arrow"
+          className="button button--surface carousel-nav__arrow"
           onClick={goPrev}
           disabled={atStart}
           aria-label="Previous pose"
         >
-          &lsaquo;
+          <Chevron direction="left" className="carousel-nav__arrow-icon" />
         </button>
 
         <div
@@ -289,12 +291,12 @@ function PoseCarousel({
 
         <button
           type="button"
-          className="carousel-nav__arrow"
+          className="button button--surface carousel-nav__arrow"
           onClick={goNext}
           disabled={atEnd}
           aria-label="Next pose"
         >
-          &rsaquo;
+          <Chevron direction="right" className="carousel-nav__arrow-icon" />
         </button>
       </div>
 

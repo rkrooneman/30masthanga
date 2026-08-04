@@ -257,7 +257,7 @@ function MusicPanel() {
       {enabled && (
         <button
           type="button"
-          className="music-toggle__btn"
+          className="button--icon music-toggle__btn"
           onClick={toggleMute}
           aria-label={muted ? 'Unmute ambient sound' : 'Mute ambient sound'}
           aria-pressed={muted}
