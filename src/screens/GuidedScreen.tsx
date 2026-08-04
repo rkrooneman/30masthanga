@@ -1,17 +1,17 @@
-/**
- * GuidedScreen — the interactive guided-practice player (Slice 5b).
+﻿/**
+ * GuidedScreen - the interactive guided-practice player (Slice 5b).
  *
  * Walks the FLAT `buildGuidedPlan(...).steps` timeline in order, driving a
  * breathing circle and auto-advancing. It never re-derives side/round/breath
- * logic — the plan (Slice 5a) already did that; this screen only *plays* it.
+ * logic - the plan (Slice 5a) already did that; this screen only *plays* it.
  *
  * === timer lifecycle (the important part) ===
  * A single `useEffect` keyed on `[stepIndex, paused, complete]` owns the timers
  * for the CURRENT step. It reads the step and schedules it:
- *   - single-phase MOVEMENT breath step (`singlePhase` set — a vinyasa step):
+ *   - single-phase MOVEMENT breath step (`singlePhase` set - a vinyasa step):
  *     sets phase to that single phase, plays the matching breath tone, and
  *     schedules a timeout at half a breath (`breathSeconds / 2`) to advance. It
- *     does NOT schedule the opposite phase — the NEXT movement's opposite phase
+ *     does NOT schedule the opposite phase - the NEXT movement's opposite phase
  *     continues the breath rhythm (inhale expands, the following exhale
  *     contracts), and `advance` leaves the phase in place so the circle flows
  *     smoothly rather than resetting between movements.
@@ -23,7 +23,7 @@
  * All timeout ids are held in a ref array; the effect's cleanup clears every one
  * of them. Because the effect re-runs whenever `stepIndex`, `paused`, or
  * `complete` changes, cleanup fires on EVERY transition between states as well
- * as on unmount — so no timer can outlive its step, and advancing can never
+ * as on unmount - so no timer can outlive its step, and advancing can never
  * double-fire (the old step's advance timeout is cleared before the new effect
  * schedules its own).
  *
@@ -127,6 +127,7 @@ import BreathingCircle from '../components/BreathingCircle';
 import NamasteMark from '../components/NamasteMark';
 import PoseGraphic from '../components/PoseGraphic';
 import FlowMark from '../components/FlowMark';
+import FlowStrip from '../components/FlowStrip';
 import { unlockAudio, playCompletionBell, stopChime } from '../lib/chime';
 import {
   speakPose,
@@ -159,7 +160,7 @@ const SKIP_ANNOUNCE_DELAY_MS = 1000;
 
 /**
  * How long after the opening "get ready" countdown starts to announce the first
- * pose's name — ~1s in, so the name lands before the first breath rather than
+ * pose's name - ~1s in, so the name lands before the first breath rather than
  * on it.
  */
 const FIRST_POSE_ANNOUNCE_DELAY_MS = 1000;
@@ -277,7 +278,7 @@ function GuidedScreen({
   // transition's toPose is the pose we're heading into.
   const totalPoses = poseStarts.length;
 
-  // Total breaths practised across the whole plan — one per 'breath' step.
+  // Total breaths practised across the whole plan - one per 'breath' step.
   // Shown on the completion summary. Memoised over the steps, which only change
   // when the plan itself is rebuilt.
   const totalBreaths = useMemo(
@@ -542,8 +543,8 @@ function GuidedScreen({
     if (step.kind === 'breath' && step.singlePhase !== undefined) {
       // Single-phase MOVEMENT (a vinyasa step): play ONLY this phase for half a
       // breath, then advance. The NEXT movement's opposite phase continues the
-      // rhythm — an inhale movement expands the circle, the following exhale
-      // movement contracts it — so we deliberately do NOT schedule the opposite
+      // rhythm - an inhale movement expands the circle, the following exhale
+      // movement contracts it - so we deliberately do NOT schedule the opposite
       // phase here. The active half's ms is inhaleMs for an inhale movement and
       // exhaleMs for an exhale movement (the other is 0).
       const phaseForMovement = step.singlePhase;
@@ -578,7 +579,7 @@ function GuidedScreen({
         playInhale();
       }
       // Flip to exhale at the inhale/exhale boundary, and play the exhale tone
-      // there — inside the scheduled callback, so it fires only when the exhale
+      // there - inside the scheduled callback, so it fires only when the exhale
       // phase is actually reached (not immediately).
       schedule(() => {
         setPhase('exhale');
@@ -707,7 +708,7 @@ function GuidedScreen({
   }, []);
 
   // --- spoken pose-name narration --------------------------------------------
-  // Announce each DISTINCT pose once, on ENTRY — not on side-switches or rounds.
+  // Announce each DISTINCT pose once, on ENTRY - not on side-switches or rounds.
   //
   // The single source of truth for "which pose are we entering" is the current
   // step's target pose index: a breath step targets its own `poseIndex`; a
@@ -719,7 +720,7 @@ function GuidedScreen({
   // different pose.
   //
   // Same-pose transitions (switch sides / next round) keep the same target
-  // index, so they never trigger a pose re-announcement — instead, at the START
+  // index, so they never trigger a pose re-announcement - instead, at the START
   // of such a transition we play the dedicated "Switch sides" cue.
   //
   // The first pose is announced DURING the opening "get ready" countdown (see
@@ -734,7 +735,7 @@ function GuidedScreen({
 
     // A half-vinyasa's movement steps are tagged with the NEXT pose's index, but
     // they are the transition INTO it, not the pose itself. Do not announce the
-    // pose name during the vinyasa — wait for its first real breath, so the name
+    // pose name during the vinyasa - wait for its first real breath, so the name
     // lands just as the pose actually begins.
     if (step.kind === 'breath' && step.isVinyasa) return;
 
@@ -770,7 +771,7 @@ function GuidedScreen({
   // `last_breath` on the Down Dog HOLD's 5th breath, `step_jump_forward` on the
   // jump-forward (Ardha Uttanasana) inhale MOVEMENT, and `samasthiti` on the
   // closing Samasthiti exhale MOVEMENT. Fire that clip exactly once when its step
-  // becomes current. Only breath steps carry cues — transitions never do.
+  // becomes current. Only breath steps carry cues - transitions never do.
   //
   // A ref of the last step index we cued guards against double-firing across
   // pause/resume (which re-runs effects but leaves `stepIndex` unchanged). This
@@ -808,7 +809,7 @@ function GuidedScreen({
   // only on the first real completion. Deliberately EXCLUDES the DEV-only
   // `?complete` hatch (startComplete): that debug path must never pollute the
   // log. Best-effort (practiceLog swallows storage errors) and needs no user
-  // gesture — it's just localStorage.
+  // gesture - it's just localStorage.
   const practiceRecordedRef = useRef(false);
   useEffect(() => {
     if (complete && !startComplete && !practiceRecordedRef.current) {
@@ -869,7 +870,7 @@ function GuidedScreen({
         try {
           await sentinel.release();
         } catch {
-          /* ignore — best-effort release */
+          /* ignore - best-effort release */
         }
       }
     };
@@ -964,7 +965,7 @@ function GuidedScreen({
   // Render
   // ===========================================================================
 
-  // Empty practice (should never happen) — bail calmly.
+  // Empty practice (should never happen) - bail calmly.
   if (stepCount === 0) {
     return (
       <section className="screen guided-player">
@@ -1050,6 +1051,24 @@ function GuidedScreen({
   const isVinyasaStep =
     currentStep?.kind === 'breath' && currentStep.isVinyasa === true;
 
+  // The live flow-position strip takes over the pose-icon slot ONLY for a real
+  // multi-position flow breath: a salutation / UHP step that carries a
+  // `flowIndex` (so we know the current position) whose owning `pose.flow` has
+  // more than one position. This excludes non-flow poses, half-vinyasa steps
+  // (flowIndex undefined), transitions, the opening countdown (no flow step
+  // yet), and completion - in all of those cases the single pose icon (or the
+  // vinyasa FlowMark) is shown instead. The two locals are the narrowed
+  // (defined) values passed to the strip in the pose-icon slot below.
+  const flowStripPositions =
+    currentStep?.kind === 'breath' &&
+    currentStep.flowIndex !== undefined &&
+    currentStep.pose.flow !== undefined &&
+    currentStep.pose.flow.length > 1
+      ? currentStep.pose.flow
+      : undefined;
+  const flowStripActiveIndex =
+    currentStep?.kind === 'breath' ? currentStep.flowIndex : undefined;
+
   // During a salutation breath the current flow step tags a `subPoseLabel`
   // (e.g. "Adho Mukha Svanasana"). When present, show the sub-pose large (as the
   // primary Sanskrit name) and the salutation name small underneath, so the
@@ -1096,7 +1115,20 @@ function GuidedScreen({
       {/* Middle: the focal stage. */}
       <div className="guided-player__stage">
         <div className="guided-player__pose">
-          {isVinyasaStep ? (
+          {/* The pose-icon slot is polymorphic: for a real multi-position flow
+              step (salutation / UHP) the FlowStrip REPLACES the single pose icon
+              here, becoming the icon for the whole flow and highlighting the
+              current position; a half-vinyasa still shows the FlowMark; every
+              other (normal) pose still shows the single PoseGraphic. The strip
+              sits centred in this slot, above the pose name, exactly where the
+              single icon used to. */}
+          {flowStripPositions !== undefined &&
+          flowStripActiveIndex !== undefined ? (
+            <FlowStrip
+              flow={flowStripPositions}
+              activeIndex={flowStripActiveIndex}
+            />
+          ) : isVinyasaStep ? (
             <FlowMark size={44} className="guided-player__pose-icon" />
           ) : (
             shownPose && (
@@ -1136,7 +1168,7 @@ function GuidedScreen({
         <div className="guided-player__meta">
           {starting && <p className="guided-player__cue">Get ready&hellip;</p>}
           {/* Breath counter: only for full breaths (Down Dog hold / non-flow).
-              Hidden during single-phase movements — a movement is one
+              Hidden during single-phase movements - a movement is one
               half-breath with no meaningful "N of M". */}
           {!starting && isHoldOrFullBreath && (
             <p className="guided-player__breath-count">

@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Guided-practice planner.
  *
  * SLICE 5a SCOPE: pure logic only. No UI, no React, no timers.
  *
  * Turns a practice (an ordered `Pose[]` + a seconds-per-breath pace) into a
  * FLAT timeline of renderable `GuidedStep`s so the guided screen (Slice 5b) can
- * play the practice by walking the array — never re-deriving side/round/breath
+ * play the practice by walking the array - never re-deriving side/round/breath
  * logic itself.
  *
  * === the practice model ===
@@ -15,11 +15,11 @@
  * split (at 5s/breath: 2.5s in, 2.5s out).
  *
  * Salutation flows are the exception: a vinyasa MOVEMENT is a single breath
- * PHASE (one inhale OR one exhale, `breathSeconds / 2`) — see the salutation
+ * PHASE (one inhale OR one exhale, `breathSeconds / 2`) - see the salutation
  * section below.
  *
  * A countdown is inserted BEFORE every segment except the very first segment of
- * the whole practice — that covers switching sides, moving to the next
+ * the whole practice - that covers switching sides, moving to the next
  * salutation round, AND moving to the next pose. There is no leading transition
  * before the first breath and no trailing transition after the final breath.
  *
@@ -52,7 +52,7 @@
  * PURE so it stays fully unit-testable.
  *
  * === salutation vinyasa flows (half-breath movements + whole-breath holds) ===
- * A pose MAY carry an ordered `flow` (see FlowStep) — currently the two Sun
+ * A pose MAY carry an ordered `flow` (see FlowStep) - currently the two Sun
  * Salutations. When it does, each SEGMENT (round) is expanded by walking the
  * flow rather than emitting `pose.breaths` identical breaths. A flow step is
  * EITHER a single half-breath MOVEMENT (`phase` set) or a whole-breath HOLD
@@ -67,7 +67,7 @@
  *     single-phase steps and shows only the phase word + sub-pose label);
  *   - a HOLD emits `breaths` full inhale+exhale BreathSteps (no `singlePhase`),
  *     with `breathNumber`/`breathCount` counting WITHIN the hold so the Down Dog
- *     reads "Breath 1..5 of 5" — the ONLY place the counter shows during a flow;
+ *     reads "Breath 1..5 of 5" - the ONLY place the counter shows during a flow;
  *   - every emitted step is tagged with `subPoseLabel = flowStep.label` so the
  *     guided screen shows the current sub-pose ("Adho Mukha Svanasana") instead
  *     of just "Surya Namaskara A";
@@ -84,7 +84,7 @@
  * Each MOVEMENT adds `breathSeconds / 2 * 1000` ms; each HOLD breath adds
  * `breathSeconds * 1000` ms (inhale+exhale). Because a card's `breaths` is
  * defined as the whole-breath-equivalent (movements count 0.5, holds count their
- * whole breaths — validated in validate-poses.ts), the per-segment duration
+ * whole breaths - validated in validate-poses.ts), the per-segment duration
  * equals `pose.breaths * breathSeconds` exactly, so `totalMs` and the timing.ts
  * `poseHoldSeconds` reconciliation identity stay in agreement with fractional
  * `breaths` representing real time.
@@ -105,16 +105,16 @@ export type GuidedPhase = 'inhale' | 'exhale';
  * there). It is a 4-movement single-breath-phase mini-flow modelled exactly like
  * the salutation MOVEMENT steps: each entry is one breath PHASE lasting
  * `breathSeconds / 2`, so the whole vinyasa is 4 half-breaths = `2 *
- * breathSeconds` — reconciled with `vinyasaSeconds` in timing.ts.
+ * breathSeconds` - reconciled with `vinyasaSeconds` in timing.ts.
  *
- * Steps (breath-paced, silent — no voice cues):
- *   1. exhale — Chaturanga Dandasana
- *   2. inhale — Urdhva Mukha Svanasana (Up Dog)
- *   3. exhale — Adho Mukha Svanasana (Down Dog)
- *   4. inhale — Jump through (return to seated)
+ * Steps (breath-paced, silent - no voice cues):
+ *   1. exhale - Chaturanga Dandasana
+ *   2. inhale - Urdhva Mukha Svanasana (Up Dog)
+ *   3. exhale - Adho Mukha Svanasana (Down Dog)
+ *   4. inhale - Jump through (return to seated)
  *
  * `breaths: 1` is pinned for schema consistency with `FlowStep` (a MOVEMENT's
- * `breaths` is ignored for counting — a movement is always a single half-breath).
+ * `breaths` is ignored for counting - a movement is always a single half-breath).
  * These are NOT stored on any catalog pose; they are emitted by the guided plan
  * in place of the seated→seated transition, so `validate-poses.ts` is unaffected.
  */
@@ -130,7 +130,7 @@ export interface BuildGuidedPlanOptions {
   /**
    * When true, insert a half-vinyasa (see {@link HALF_VINYASA_FLOW}) between two
    * consecutive DISTINCT seated poses, in place of the plain between-seated-pose
-   * transition. Default false — existing callers/tests are unaffected unless
+   * transition. Default false - existing callers/tests are unaffected unless
    * they opt in.
    */
   vinyasas?: boolean;
@@ -189,6 +189,15 @@ export interface BreathStep {
    */
   subPoseLabel?: string;
   /**
+   * When this breath step belongs to a pose `flow` (Surya A/B, UHP),
+   * `flowIndex` is the 0-based index of the originating `FlowStep` within
+   * `pose.flow`. Undefined for steps that are not part of a flow (plain holds,
+   * side-only poses). Lets a UI highlight the exact flow position
+   * unambiguously, even when the same `subPoseLabel` repeats or a hold spans
+   * multiple breaths.
+   */
+  flowIndex?: number;
+  /**
    * True for the movement steps of a half-vinyasa inserted BETWEEN two seated
    * poses (the "Vinyasas" toggle). These steps are tagged with the NEXT pose's
    * `poseIndex` (so the timeline stays ordered), but they are not that pose yet:
@@ -199,7 +208,7 @@ export interface BreathStep {
   isVinyasa?: boolean;
   /**
    * A prerecorded voice cue id to play WHEN this breath begins (maps to
-   * `/audio/voice/<id>.mp3`). Set on the flow step's cue breath (per `cueOn`) —
+   * `/audio/voice/<id>.mp3`). Set on the flow step's cue breath (per `cueOn`) - 
    * e.g. `'last_breath'` on the Down Dog's 5th breath. Undefined for silent
    * breaths.
    */
@@ -289,7 +298,7 @@ function cueFor(
   if (pose.sides === 2 && pose.repeat === 1) {
     return 'Switch sides';
   }
-  // New round (or combined) — fall back to the segment label; it always exists
+  // New round (or combined) - fall back to the segment label; it always exists
   // here because this branch only runs for multi-segment poses.
   return segmentLabelFor(pose, segmentIndex) ?? 'Continue';
 }
@@ -301,12 +310,12 @@ function cueFor(
  *     - a MOVEMENT step (`phase` set) emits ONE single-phase BreathStep lasting
  *       `halfMs` (breathSeconds / 2), with `singlePhase` = its phase, the ACTIVE
  *       half's ms set to `halfMs` and the other to 0, `subPoseLabel` = its label,
- *       and its `cueId` on that single phase (`voiceCueId`) — e.g.
+ *       and its `cueId` on that single phase (`voiceCueId`) - e.g.
  *       `step_jump_forward` on the jump-forward inhale movement and `samasthiti`
  *       on the closing Samasthiti exhale movement;
  *     - a HOLD step (`phase` absent) emits `breaths` FULL inhale+exhale
  *       BreathSteps with per-hold `breathNumber`/`breathCount` (so it reads
- *       "N of 5") and its `cueId` on the first/last breath per `cueOn` — e.g.
+ *       "N of 5") and its `cueId` on the first/last breath per `cueOn` - e.g.
  *       `last_breath` on the Down Dog hold's last breath.
  * - Otherwise, emit `pose.breaths` plain full BreathSteps with whole-segment
  *   `breathNumber`/`breathCount` (unchanged legacy behaviour).
@@ -329,7 +338,7 @@ function emitSegmentBreaths(
   const pushFullBreath = (
     breathNumber: number,
     breathCount: number,
-    extras: Pick<BreathStep, 'subPoseLabel' | 'voiceCueId'>,
+    extras: Pick<BreathStep, 'subPoseLabel' | 'voiceCueId' | 'flowIndex'>,
   ): void => {
     steps.push({
       kind: 'breath',
@@ -350,7 +359,7 @@ function emitSegmentBreaths(
   /** Push a single half-breath MOVEMENT playing only `phase` for `halfMs`. */
   const pushMovement = (
     phase: GuidedPhase,
-    extras: Pick<BreathStep, 'subPoseLabel' | 'voiceCueId'>,
+    extras: Pick<BreathStep, 'subPoseLabel' | 'voiceCueId' | 'flowIndex'>,
   ): void => {
     steps.push({
       kind: 'breath',
@@ -373,18 +382,24 @@ function emitSegmentBreaths(
 
   if (pose.flow && pose.flow.length > 0) {
     // Flow-driven expansion: movements are single half-breaths; only the Down
-    // Dog HOLD is whole breaths (counted "N of 5").
-    for (const flowStep of pose.flow) {
+    // Dog HOLD is whole breaths (counted "N of 5"). Every emitted step carries
+    // `flowIndex` = its 0-based position in `pose.flow`, so a UI strip can
+    // highlight the exact flow position even when a hold spans multiple breaths
+    // or a `subPoseLabel` repeats.
+    pose.flow.forEach((flowStep, flowIndex) => {
       if (flowStep.phase !== undefined) {
         // MOVEMENT: a single half-breath phase. Its cue (if any) fires on this
-        // one phase — there is only one, so cueOn is irrelevant.
+        // one phase - there is only one, so cueOn is irrelevant.
         pushMovement(flowStep.phase, {
           subPoseLabel: flowStep.label,
           voiceCueId: flowStep.cueId,
+          flowIndex,
         });
-        continue;
+        return;
       }
-      // HOLD: whole breaths, each a full inhale+exhale.
+      // HOLD: whole breaths, each a full inhale+exhale. All breaths of the hold
+      // share the SAME `flowIndex` (the hold's index) so the strip highlights
+      // one position for the whole hold.
       for (let b = 1; b <= flowStep.breaths; b++) {
         const isCueBreath =
           flowStep.cueId !== undefined &&
@@ -395,9 +410,10 @@ function emitSegmentBreaths(
         pushFullBreath(b, flowStep.breaths, {
           subPoseLabel: flowStep.label,
           voiceCueId: isCueBreath ? flowStep.cueId : undefined,
+          flowIndex,
         });
       }
-    }
+    });
     return addedMs;
   }
 
@@ -414,7 +430,7 @@ function emitSegmentBreaths(
  * poses (the "Vinyasas" toggle). Each step is a single half-breath MOVEMENT
  * (`singlePhase` set, `subPoseLabel` = the vinyasa label, `halfMs` on its active
  * phase, silent), tagged to the ENTERED `pose`'s segment 0 so it reads as that
- * pose's entry — the same modelling salutation movements use.
+ * pose's entry - the same modelling salutation movements use.
  *
  * Returns the milliseconds added (`HALF_VINYASA_FLOW.length * halfMs`), so the
  * caller keeps `totalMs` exact and reconciled with `vinyasaSeconds` in timing.ts.
@@ -474,7 +490,7 @@ function emitVinyasaMovements(
  * salutation movement). The vinyasa is tagged with the ENTERED pose's index /
  * segment 0, so it reads as that pose's entry (matching how salutation flows
  * belong to their pose). Same-pose side/round switches, standing→seated,
- * seated→closing, and every other boundary are UNCHANGED — a half-vinyasa is
+ * seated→closing, and every other boundary are UNCHANGED - a half-vinyasa is
  * emitted ONLY between two consecutive distinct seated poses. When `vinyasas` is
  * false, behaviour is exactly as before.
  */

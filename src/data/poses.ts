@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Ashtanga Primary Series (Yoga Chikitsa) pose catalog.
  *
  * SLICE 1 SCOPE: data + types only. No UI, no generation logic.
@@ -28,7 +28,7 @@
  * The following are marked alwaysInclude:true:
  *   - surya_namaskara_a    (opening, structural)
  *   - surya_namaskara_b    (opening, structural)
- *   - salamba_sarvangasana (Supported Shoulderstand — mandatory safe close)
+ *   - salamba_sarvangasana (Supported Shoulderstand - mandatory safe close)
  *   - savasana             (final rest, safety)
  * Shoulderstand is always included so every shortened practice ends with a
  * proper inversion-based close before Savasana (a deliberate safety/tradition
@@ -36,7 +36,7 @@
  * (Sirsasana headstand, Padmasana, Utpluthih, etc.) remains
  * alwaysInclude:false, selectable:true so the generator keeps freedom to build
  * a ~30-minute practice. To make more finishing poses mandatory, flip those
- * flags here — no other code depends on it.
+ * flags here - no other code depends on it.
  *
  * === breaths ===
  * Most held asanas = 5 breaths (traditional). Salutation cards carry the whole
@@ -54,7 +54,7 @@
  *
  * === isBasic (Basics only / Smart Start mode) ===
  * `isBasic: true` marks a curated root/basic pose that is included in the app's
- * "Basics only" (Smart Start) mode — a shorter practice built from the essential
+ * "Basics only" (Smart Start) mode - a shorter practice built from the essential
  * root poses per a teaching guide. Poses with `isBasic: false` only appear in
  * the full "All poses" mode. The fixed frame (both salutations, Shoulderstand,
  * Savasana) is marked `isBasic: true` so the always-present frame remains valid
@@ -67,9 +67,9 @@
  * === repeat ===
  * How many times a card is performed back-to-back. Nearly every pose is 1.
  * Following traditional Ashtanga practice the sun salutations are repeated:
- * Surya A ×3 and Surya B ×3 at the start of every practice (repeat: 3 on both).
+ * Surya A x3 and Surya B x3 at the start of every practice (repeat: 3 on both).
  * Timing counts all repeats plus the internal transitions between them. Tune
- * the repetition counts here — no other code depends on the specific values.
+ * the repetition counts here - no other code depends on the specific values.
  */
 
 import type { Pose } from '../types/pose';
@@ -84,7 +84,7 @@ export const poses: Pose[] = [
     category: 'sun_a',
     group: 'salutation',
     order: 10,
-    // 9.5 breaths per round (half-breath movement model) — the FULL authentic
+    // 9.5 breaths per round (half-breath movement model) - the FULL authentic
     // Surya A vinyasa. Each vinyasa MOVEMENT is a single breath PHASE (one inhale
     // OR one exhale, `breathSeconds / 2`), so it counts as HALF a breath; only
     // the Downward Dog is HELD for 5 whole breaths. 9 movement phases (=4.5
@@ -99,39 +99,39 @@ export const poses: Pose[] = [
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
-    drishti: 'Nasagrai (tip of the nose) — varies through the flow',
+    drishti: 'Nasagrai (tip of the nose) - varies through the flow',
     isBasic: true,
     // Surya A vinyasa (half-breath movement model): 9 single-phase MOVEMENTS
     // (alternating inhale/exhale) around a 5-breath Down Dog HOLD. Movement 6 is
-    // the EXHALE INTO Down Dog modelled AS the hold's first breath — i.e. the
+    // the EXHALE INTO Down Dog modelled AS the hold's first breath - i.e. the
     // hold IS the Down Dog, entered on that exhale and held for 5 whole breaths.
     // `last_breath` plays on the LAST (5th) breath of the hold; `step_jump_forward`
     // plays on the jump-forward inhale movement (step 7); the `samasthiti` cue
-    // plays on the closing Samasthiti exhale movement (step 10) — all data-driven.
+    // plays on the closing Samasthiti exhale movement (step 10) - all data-driven.
     flow: [
-      { label: 'Urdhva Hastasana', phase: 'inhale', breaths: 1 }, // 1 inhale — reach up
-      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 2 exhale — fold
-      { label: 'Ardha Uttanasana', phase: 'inhale', breaths: 1 }, // 3 inhale — halfway lift
-      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 4 exhale — jump back
-      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 5 inhale — up dog
+      { label: 'Urdhva Hastasana', phase: 'inhale', breaths: 1 }, // 1 inhale - reach up
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 2 exhale - fold
+      { label: 'Ardha Uttanasana', phase: 'inhale', breaths: 1 }, // 3 inhale - halfway lift
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 4 exhale - jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 5 inhale - up dog
       {
-        label: 'Adho Mukha Svanasana', // 6 down dog — the 5-breath HOLD (entered on the exhale)
+        label: 'Adho Mukha Svanasana', // 6 down dog - the 5-breath HOLD (entered on the exhale)
         breaths: 5,
         hold: true,
         cueId: 'last_breath',
         cueOn: 'last',
       },
       {
-        label: 'Ardha Uttanasana', // 7 inhale — jump forward, halfway lift
+        label: 'Ardha Uttanasana', // 7 inhale - jump forward, halfway lift
         phase: 'inhale',
         breaths: 1,
         cueId: 'step_jump_forward',
         cueOn: 'first',
       },
-      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 8 exhale — fold
-      { label: 'Urdhva Hastasana', phase: 'inhale', breaths: 1 }, // 9 inhale — rise up
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 8 exhale - fold
+      { label: 'Urdhva Hastasana', phase: 'inhale', breaths: 1 }, // 9 inhale - rise up
       {
-        label: 'Samasthiti', // 10 exhale — return to standing stillness, closing the round
+        label: 'Samasthiti', // 10 exhale - return to standing stillness, closing the round
         phase: 'exhale',
         breaths: 1,
         cueId: 'samasthiti',
@@ -147,7 +147,7 @@ export const poses: Pose[] = [
     category: 'sun_b',
     group: 'salutation',
     order: 20,
-    // 13.5 breaths per round (half-breath movement model) — the FULL authentic
+    // 13.5 breaths per round (half-breath movement model) - the FULL authentic
     // Surya B vinyasa, fully modeled (both intermediate Down Dogs present as
     // single exhale movements, only the FINAL Down Dog is HELD). Each vinyasa
     // MOVEMENT is a single breath PHASE (one inhale OR one exhale, `breathSeconds
@@ -160,7 +160,7 @@ export const poses: Pose[] = [
     repeat: 3,
     alwaysInclude: true,
     selectable: false,
-    drishti: 'Nasagrai (tip of the nose) — varies through the flow',
+    drishti: 'Nasagrai (tip of the nose) - varies through the flow',
     isBasic: true,
     // Surya B vinyasa (half-breath movement model): 17 single-phase MOVEMENTS
     // (alternating inhale/exhale) with the FINAL Down Dog as the 5-breath HOLD.
@@ -170,40 +170,40 @@ export const poses: Pose[] = [
     // / fold / chair) is counted as movements, closing with the Samasthiti return.
     // `last_breath` plays on the LAST (5th) breath of the final Down Dog hold;
     // `step_jump_forward` plays on the jump-forward inhale movement (step 15); the
-    // `samasthiti` cue plays on the closing Samasthiti exhale movement (step 18) —
+    // `samasthiti` cue plays on the closing Samasthiti exhale movement (step 18) - 
     // all data-driven.
     flow: [
-      { label: 'Utkatasana', phase: 'inhale', breaths: 1 }, // 1  inhale — chair
-      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 2  exhale — fold
-      { label: 'Ardha Uttanasana', phase: 'inhale', breaths: 1 }, // 3  inhale — halfway lift
-      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 4  exhale — jump back
-      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 5  inhale — up dog
-      { label: 'Adho Mukha Svanasana', phase: 'exhale', breaths: 1 }, // 6  exhale — down dog (single)
-      { label: 'Virabhadrasana A (right)', phase: 'inhale', breaths: 1 }, // 7  inhale — warrior 1 right
-      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 8  exhale — jump back
-      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 9  inhale — up dog
-      { label: 'Adho Mukha Svanasana', phase: 'exhale', breaths: 1 }, // 10 exhale — down dog (intermediate)
-      { label: 'Virabhadrasana A (left)', phase: 'inhale', breaths: 1 }, // 11 inhale — warrior 1 left
-      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 12 exhale — jump back
-      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 13 inhale — up dog
+      { label: 'Utkatasana', phase: 'inhale', breaths: 1 }, // 1  inhale - chair
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 2  exhale - fold
+      { label: 'Ardha Uttanasana', phase: 'inhale', breaths: 1 }, // 3  inhale - halfway lift
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 4  exhale - jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 5  inhale - up dog
+      { label: 'Adho Mukha Svanasana', phase: 'exhale', breaths: 1 }, // 6  exhale - down dog (single)
+      { label: 'Virabhadrasana A (right)', phase: 'inhale', breaths: 1 }, // 7  inhale - warrior 1 right
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 8  exhale - jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 9  inhale - up dog
+      { label: 'Adho Mukha Svanasana', phase: 'exhale', breaths: 1 }, // 10 exhale - down dog (intermediate)
+      { label: 'Virabhadrasana A (left)', phase: 'inhale', breaths: 1 }, // 11 inhale - warrior 1 left
+      { label: 'Chaturanga Dandasana', phase: 'exhale', breaths: 1 }, // 12 exhale - jump back
+      { label: 'Urdhva Mukha Svanasana', phase: 'inhale', breaths: 1 }, // 13 inhale - up dog
       {
-        label: 'Adho Mukha Svanasana', // 14 final downward dog — the 5-breath HOLD (entered on the exhale)
+        label: 'Adho Mukha Svanasana', // 14 final downward dog - the 5-breath HOLD (entered on the exhale)
         breaths: 5,
         hold: true,
         cueId: 'last_breath',
         cueOn: 'last',
       },
       {
-        label: 'Ardha Uttanasana', // 15 inhale — jump forward, halfway lift
+        label: 'Ardha Uttanasana', // 15 inhale - jump forward, halfway lift
         phase: 'inhale',
         breaths: 1,
         cueId: 'step_jump_forward',
         cueOn: 'first',
       },
-      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 16 exhale — fold
-      { label: 'Utkatasana', phase: 'inhale', breaths: 1 }, // 17 inhale — chair
+      { label: 'Uttanasana', phase: 'exhale', breaths: 1 }, // 16 exhale - fold
+      { label: 'Utkatasana', phase: 'inhale', breaths: 1 }, // 17 inhale - chair
       {
-        label: 'Samasthiti', // 18 exhale — return to standing stillness, closing the round
+        label: 'Samasthiti', // 18 exhale - return to standing stillness, closing the round
         phase: 'exhale',
         breaths: 1,
         cueId: 'samasthiti',
@@ -405,13 +405,13 @@ export const poses: Pose[] = [
     repeat: 1,
     alwaysInclude: false,
     selectable: true,
-    drishti: 'Padhayoragrai (toes)',
+    drishti: 'Padhayoragrai (toes) - varies through the flow',
     isBasic: false,
     flow: [
-      { label: 'Utthita Hasta Padangusthasana', breaths: 5, hold: true }, // toe hold, leg forward
-      { label: 'Parsva Hasta Padangusthasana', breaths: 5, hold: true }, // leg out to the side, gaze side
-      { label: 'Utthita Hasta Padangusthasana', breaths: 1, hold: true }, // back to front, head to knee, then upright
-      { label: 'Utthita Hasta Padangusthasana', breaths: 5, hold: true }, // hands on hips, leg lifted, balance
+      { label: 'Utthita Hasta Padangusthasana', breaths: 5, hold: true }, // a: toe hold, leg forward (5 breaths)
+      { label: 'Parsva Hasta Padangusthasana', breaths: 5, hold: true }, // b: leg to the side, gaze sideways (5 breaths)
+      { label: 'Utthita Hasta Padangusthasana (head to knee)', breaths: 1, hold: true }, // c: leg and gaze back to front, head to knee (1 breath)
+      { label: 'Utthita Hasta Padangusthasana (hands on hips)', breaths: 5, hold: true }, // d: release foot, raise up, hands on hips, raise foot (5 breaths)
     ],
   },
   {

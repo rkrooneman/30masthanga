@@ -1513,6 +1513,120 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Live sun-salutation / UHP flow strip: a compact horizontal row of small
+   position icons that takes over the pose-icon slot in the stage, one per flow
+   position, highlighting the current one. It sits centred where the single pose
+   icon would be (above the pose name), so it reads as the "icon" for the whole
+   flow. Kept calm and shallow so it does not compete with the focal circle.
+
+   Fixed-center slide (filmstrip): this element is the VIEWPORT - a fixed window
+   that clips the row (`overflow: hidden`) and shows a few cells of context on
+   each side of the centered active one. Its width holds ~5 cells (--cell each),
+   which fits a 375px screen with room to spare; the rest of the row slides
+   through. It is centred in the stage via `margin: 0 auto`. The active cell is
+   always centered here and the row slides past it - no native scrolling, so the
+   old `overflow-x: auto` + `scrollIntoView` jump (Surya B, ~Warrior 1) is gone.
+   `--cell` is the fixed per-cell width shared by the track and cells; cells have
+   no flex gap, so the row math is exact. */
+.guided-player__flow-strip {
+  --cell: 3rem;
+  position: relative;
+  display: block;
+  width: calc(var(--cell) * 5);
+  max-width: 100%;
+  height: 3rem;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* The TRACK: the flex row of all cells at its natural full width (never
+   scrolled). Its origin is pinned to the viewport center (`left: 50%`), then it
+   translates left by the active cell's center offset
+   (`--active-index * --cell + --cell / 2`) so the active cell lands dead-center.
+   The translate is deliberately NOT clamped, so at index 0 the row sits to the
+   right of center (blank gutter on the left) and at the last index it sits to
+   the left (blank gutter on the right) - option A: active is always centered.
+   `--active-index` is set inline from the activeIndex prop. The 300ms transform
+   transition makes advancing slide smoothly; reduced-motion snaps it (below). */
+.guided-player__flow-track {
+  --active-index: 0;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  transform: translateX(
+    calc(-1 * (var(--active-index) * var(--cell) + var(--cell) / 2))
+  );
+  transition: transform 300ms ease;
+  will-change: transform;
+}
+
+/* Each position: a fixed square cell so the row keeps a steady rhythm whether a
+   cell holds an icon or the neutral fallback dot. `--cell` is 3rem (48px) - big
+   enough to frame the 44px ACTIVE icon (matched to the normal single pose icon)
+   with a little padding, while the smaller 28px INACTIVE icons sit centered in
+   the SAME box. Every cell shares this one constant box width, so the
+   fixed-center slide math (--active-index * --cell + --cell / 2) stays exact
+   even though the active icon LOOKS bigger. No flex gap between cells - the
+   fixed `--cell` width is the whole box. Inactive cells are muted and dimmed so
+   the active (sage) cell reads clearly. A gentle colour/opacity transition eases
+   the highlight as the flow advances. */
+.guided-player__flow-cell {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 0.5rem;
+  color: var(--color-text-muted);
+  opacity: 0.45;
+  transition:
+    color 200ms ease,
+    opacity 200ms ease,
+    background-color 200ms ease;
+}
+
+/* The current position: full-strength sage on a pale sage pill, fully opaque so
+   the eye finds "where am I" at a glance. The pill fills the full 3rem cell box
+   with a soft radius so it frames the 44px active icon comfortably (a rounded
+   square, not a cramped circle) and reads as a clear peer of the normal pose
+   icon. */
+.guided-player__flow-cell--active {
+  color: var(--color-accent);
+  opacity: 1;
+  background: var(--color-accent-soft);
+  border-radius: 0.75rem;
+}
+
+.guided-player__flow-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Neutral fallback when a flow label has no icon (should not happen for
+   in-scope poses); keeps the position count correct. */
+.guided-player__flow-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guided-player__flow-cell {
+    transition: none;
+  }
+
+  /* Snap the slide instantly instead of animating the transform. */
+  .guided-player__flow-track {
+    transition: none;
+  }
+}
+
 /* The focal stage grows to fill the space between the bars and centres its
    contents vertically, so the circle sits calmly in the middle of the screen. */
 .guided-player__stage {

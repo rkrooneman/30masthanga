@@ -1,24 +1,28 @@
 /**
- * Pose-icon registry — maps every catalog pose `id` to its stick-figure icon
- * component, so screens can look an icon up by id without importing each one.
+ * Pose-icon registry - maps every catalog pose `id` to its icon component, so
+ * screens can look an icon up by id without importing each one.
  *
  * The icon components all share the same shape: a default export taking
- * `{ size?, className? }` and drawing with `stroke="currentColor"` (the caller
- * sets the colour via CSS `color`). See any component (e.g. SuryaNamaskaraA.tsx)
- * or PosePilot.tsx for the shared drawing conventions.
+ * `{ size?, className? }` and inheriting their colour from CSS `color` via
+ * `currentColor`. Two drawing styles coexist: the older stroke-based line
+ * figures draw with `stroke="currentColor"`, while the newer filled silhouettes
+ * (the current convention, e.g. AdhoMukhaSvanasana.tsx) draw with
+ * `fill="currentColor"`. See any component or PosePilot.tsx for the shared
+ * conventions.
  *
  * === coverage / gaps ===
- * The registry is built ONLY from icon components that actually exist. One
- * catalog pose currently has NO dedicated icon:
- *   - `utkatasana` (Fierce / Chair Pose) — there is no Utkatasana.tsx. Surya
- *     Namaskara B was drawn with a chair emblem, but utkatasana is its own pose,
- *     so we deliberately do NOT reuse SuryaNamaskaraB for it. It is simply
- *     omitted here; `getPoseIcon('utkatasana')` returns undefined and callers
- *     should render a "no icon" placeholder. Drop an `Utkatasana.tsx` in and add
- *     the mapping below to close the gap.
+ * The registry is built ONLY from icon components that actually exist, and it is
+ * keyed by CATALOG pose `id`. Every catalog pose now has an icon: `utkatasana`
+ * (Fierce / Chair Pose) is mapped to its own `Utkatasana` silhouette below (it
+ * does NOT reuse SuryaNamaskaraB's chair emblem).
  *
- * `AdhoMukhaSvanasana.tsx` also exists (a pilot sample) but Down Dog is not a
- * catalog pose id, so it is intentionally not referenced here.
+ * Salutation / UHP FLOW positions are a separate concern: they are
+ * `flow[].label` strings (not catalog ids) and most have no catalog `id`, so
+ * they are not in this map. They are handled by the label-keyed lookup in
+ * `flowIcons.ts` (`flowIconFor(label)`). Several silhouettes exist only to serve
+ * that flow map - e.g. `AdhoMukhaSvanasana.tsx` (Down Dog) is a wired flow
+ * silhouette with no catalog id, so it is intentionally absent here but IS used
+ * via `flowIcons.ts`.
  *
  * Run `npx tsx src/components/poses/verify-coverage.ts` to check this registry
  * against the catalog (missing icons + orphaned entries).
@@ -95,9 +99,9 @@ export type PoseIconComponent = (props: {
 }) => ReactElement;
 
 /**
- * Map of catalog pose `id` → icon component. Keys are the snake_case pose ids
- * from `src/data/poses.ts`. Poses without an icon (currently `utkatasana`) are
- * absent; look them up with {@link getPoseIcon}, which returns undefined.
+ * Map of catalog pose `id` -> icon component. Keys are the snake_case pose ids
+ * from `src/data/poses.ts`. Every catalog pose currently has an icon; look ids
+ * up with {@link getPoseIcon}, which returns undefined for an unknown id.
  */
 export const poseIcons: Record<string, PoseIconComponent> = {
   surya_namaskara_a: SuryaNamaskaraA,
@@ -161,8 +165,9 @@ export const poseIcons: Record<string, PoseIconComponent> = {
 };
 
 /**
- * Look up the icon component for a pose id. Returns undefined when the pose has
- * no dedicated icon (e.g. `utkatasana`), so callers can render a placeholder.
+ * Look up the icon component for a catalog pose id. Returns undefined for an
+ * unknown id, so callers can render a placeholder. Note: salutation / UHP flow
+ * positions are not catalog ids - use `flowIconFor(label)` from `flowIcons.ts`.
  */
 export function getPoseIcon(id: string): PoseIconComponent | undefined {
   return poseIcons[id];

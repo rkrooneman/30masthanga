@@ -551,6 +551,58 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
       `+ 3 samasthiti)`,
   );
 
+  // flowIndex: every flow-derived breath carries the 0-based index of its
+  // originating FlowStep in pose.flow. For the 10-entry Surya A flow (index 5 is
+  // the 5-breath Down Dog HOLD), one round's 14 breath steps carry the sequence
+  // 0,1,2,3,4,5,5,5,5,5,6,7,8,9 - the 5 consecutive hold breaths all share
+  // flowIndex 5 (the hold's index), and the movements around it map 1:1.
+  const expectedFlowIndexSeq = [0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 9];
+  for (let seg = 0; seg < 3; seg++) {
+    const segBreaths = breaths.filter((b) => b.segmentIndex === seg);
+    check(
+      segBreaths.map((b) => b.flowIndex).join(',') ===
+        expectedFlowIndexSeq.join(','),
+      `flow: Surya A round ${seg + 1} flowIndex sequence must be ` +
+        `${expectedFlowIndexSeq.join(',')} (got ` +
+        `${segBreaths.map((b) => b.flowIndex).join(',')})`,
+    );
+  }
+  // (a) The Down Dog hold's 5 consecutive breaths share ONE flowIndex (5), so a
+  // strip highlights a single flow position for the whole hold.
+  check(
+    firstRoundHold.length === 5 &&
+      firstRoundHold.every((b) => b.flowIndex === 5),
+    `flow: the Down Dog hold's consecutive breaths must all share flowIndex 5 ` +
+      `(got ${firstRoundHold.map((b) => b.flowIndex).join(',')})`,
+  );
+  // (b) flowIndex values are 0-based and match pose.flow positions: the
+  // originating flow step at each breath's flowIndex must have the same label.
+  check(
+    breaths.every((b) => {
+      const fs = suryaA?.flow?.[b.flowIndex as number];
+      return fs !== undefined && fs.label === b.subPoseLabel;
+    }),
+    `flow: each breath's flowIndex must point at the FlowStep whose label ` +
+      `matches its subPoseLabel`,
+  );
+  // Every flow breath carries a defined, in-range flowIndex.
+  check(
+    breaths.every(
+      (b) =>
+        typeof b.flowIndex === 'number' &&
+        b.flowIndex >= 0 &&
+        b.flowIndex < (suryaA?.flow?.length ?? 0),
+    ),
+    `flow: every Surya A breath must carry an in-range 0-based flowIndex`,
+  );
+  // pose.flow is reachable from a BreathStep (it carries `pose`), so a strip can
+  // read step.pose.flow.length for "N of M" without a separate flowCount field.
+  check(
+    breaths.every((b) => b.pose.flow?.length === 10),
+    `flow: pose.flow must be reachable from a BreathStep (length 10) so no ` +
+      `separate flowCount field is needed`,
+  );
+
   // Non-flow legacy expansion is unchanged: a plain flow-less pose emits no
   // subPoseLabel / voiceCueId / singlePhase and keeps whole-segment counts.
   const plain = buildGuidedPlan([makePose({ breaths: 5 })], 5).steps.filter(isBreath);
@@ -562,6 +614,11 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
         b.singlePhase === undefined,
     ),
     `flow: flow-less poses must not carry subPoseLabel/voiceCueId/singlePhase`,
+  );
+  // (c) Non-flow poses carry an undefined flowIndex.
+  check(
+    plain.every((b) => b.flowIndex === undefined),
+    `flow: flow-less poses must not carry a flowIndex`,
   );
   check(
     plain.every((b) => b.breathCount === 5),
@@ -849,6 +906,12 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
     check(
       vinyasaSteps.every((b) => b.voiceCueId === undefined),
       `vinyasa ON: half-vinyasa movements are silent (no voice cue)`,
+    );
+    // Half-vinyasa steps are out of scope for the flow strip: flowIndex stays
+    // undefined so it never collides with a real pose's flow semantics.
+    check(
+      vinyasaSteps.every((b) => b.flowIndex === undefined),
+      `vinyasa ON: half-vinyasa movements must not carry a flowIndex`,
     );
     // The vinyasa sits BETWEEN the two poses: after Seated A's 5 breaths, before
     // Seated B's 5 breaths. It is tagged to the ENTERED pose (Seated B / index 1).

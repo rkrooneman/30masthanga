@@ -1,18 +1,11 @@
 /**
- * AdhoMukhaSvanasana — Downward-Facing Dog, original stick-figure pose icon.
+ * AdhoMukhaSvanasana - Downward-Facing Dog (Adho Mukha Svanasana).
  *
- * Part of the ashtanga30 pose-icon system (see PosePilot.tsx for the shared
- * conventions). Every figure is our own original, minimal stick figure — round
- * head, single-stroke limbs, no filled body — drawn from the pose's factual body
- * geometry, NOT traced from any existing chart.
- *
- * Shared system: viewBox 0 0 100 100, stroke currentColor (caller sets colour),
- * strokeWidth 4, round caps/joins, head radius 6.5, implied floor at y = 92.
- *
- * Composition: an inverted "V". Hands press the floor front-left, feet press the
- * floor back-right, the hips lift high to the apex. Arms run up from the hands to
- * the hips (the apex), legs run down from the hips to the feet, and the head
- * hangs low between the arms near the hands.
+ * A minimalist filled silhouette, traced to clean vector paths from an original
+ * Firefly-generated pose illustration and recoloured to the app's sage accent
+ * (fill: currentColor, so the icon inherits the container's colour like the
+ * other pose icons). Even-odd fill preserves the open negative space between
+ * the limbs. Part of the ashtanga30 pose-icon system.
  */
 
 interface PoseIconProps {
@@ -28,25 +21,17 @@ function AdhoMukhaSvanasana({ size = 120, className }: PoseIconProps) {
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 512 512"
       role="img"
       aria-label="Downward-Facing Dog pose"
     >
-      {/* Faint floor line the hands and feet press into. */}
-      <line x1="14" y1="92" x2="86" y2="92" strokeWidth={2} opacity={0.35} />
-
-      {/* Arms: from the hands on the floor (front) up to the lifted hips (apex). */}
-      <path d="M22 88 L50 30" />
-      {/* Legs: from the lifted hips (apex) down to the feet on the floor (back). */}
-      <path d="M50 30 L78 88" />
-
-      {/* Head: hangs low between the arms, near the hands. */}
-      <circle cx="30.5" cy="72" r="6.5" />
+      {/* Horizontally mirrored within the 512 viewBox so the figure faces
+          RIGHT, matching the standing/lunge/updog icons in the set. The mirror
+          (translate(512,0) scale(-1,1)) reflects the traced path in place; the
+          path data itself is unchanged. */}
+      <g transform="translate(512,0) scale(-1,1)">
+        <path fill="currentColor" fillRule="evenodd" d="M315.49 118.85C307.15 119.84 300.24 122.46 291.58 127.92 282.18 133.84 272.58 141.74 262.13 152.16 251.15 163.11 243.79 171.75 218.01 203.98 198.14 228.82 196.53 231.32 194.68 240.3 193.49 246.06 193.36 248.35 194.21 248.35 194.53 248.35 196.77 246.34 199.17 243.88 202.99 239.98 203.5 239.62 203.15 241.03 202.54 243.55 200.36 246.95 196.64 251.22 190.71 258.02 188.32 262.35 184.3 273.54 183.12 276.82 181.59 280.64 180.9 282.02 178.18 287.44 164.36 307.17 159.76 312.21 158.26 313.84 154.36 317.19 151.08 319.64 144.23 324.77 139.51 329.55 128.89 342.05 112.97 360.81 101.35 372.98 97.44 375.01 95.07 376.23 93.7 376.48 86.6 376.92 80.64 377.29 77.39 377.77 74.41 378.72 72.17 379.43 64.63 381.48 57.65 383.28 50.67 385.07 44.64 386.81 44.24 387.14 43.84 387.47 43.52 388.31 43.52 389.02 43.52 390.88 45.98 391.94 50.32 391.94 53.09 391.94 54.23 392.19 55.29 393.03 57.01 394.38 60.28 394.44 66.1 393.22 69.11 392.59 74.62 392.24 85.06 392L99.79 391.67 101.97 390.05C103.18 389.15 106.91 386.32 110.28 383.76 113.65 381.19 123.45 374.16 132.07 368.14 160 348.61 164.58 344.75 173.49 333.15 176.24 329.57 182.04 322.5 186.39 317.44 195.93 306.33 204.19 295.4 208.32 288.44 209.99 285.61 213.28 280.03 215.63 276.03 220.44 267.84 225.14 262.55 229.83 260.07 231.41 259.22 232.83 258.66 232.99 258.82 233.15 258.98 231.27 261.38 228.82 264.16 223.38 270.31 220.52 274.51 215.02 284.38 207.93 297.13 201.27 306.23 187.03 322.69 183.5 326.77 180.61 330.34 180.61 330.61 180.61 331.27 185.82 332.7 191.07 333.48 196.04 334.21 201.62 333.52 206.96 331.52 213.86 328.92 218.23 325.28 221.02 319.78 222.93 316.02 223.59 315.56 229.92 313.64 230.67 313.42 232.19 312.77 233.31 312.21 234.92 311.4 235.34 310.88 235.33 309.7 235.32 308.89 234.84 307.62 234.26 306.87 232.82 305.03 232.9 304.39 234.8 302.99 236.1 302.03 236.43 301.38 236.43 299.78 236.43 298.5 236.72 297.66 237.24 297.46 237.78 297.25 238.05 296.4 238.05 294.91 238.05 293.31 238.44 292.21 239.41 291.06 241.18 288.95 241.22 286.15 239.51 284.44 238.82 283.75 236.01 282.03 233.26 280.61 230.52 279.19 228.02 277.55 227.71 276.97 226.19 274.15 229.3 270.01 233.95 268.66 235.57 268.19 240.79 267.62 245.97 267.35 255.96 266.84 258.5 266.2 263.56 262.95 268.61 259.71 271.85 254.45 274.9 244.55 277.32 236.7 278.39 234.82 284.14 228.32 291.3 220.23 292.75 217.73 295.96 208 300.24 195 302.49 191.36 308.63 187.54 310.05 186.66 311.2 185.9 311.2 185.85 311.19 185.8 310.71 183.93 310.12 181.7 308.89 177 308.87 176.82 309.54 176.82 310.36 176.82 313.01 181.92 317.37 191.84 325.87 211.24 336.16 226.82 353.71 246.88 358.34 252.18 361.35 256.25 364.04 260.84 369.15 269.58 371.52 272.39 379.56 279.31 387.05 285.73 389.67 288.92 395.74 299.01 400.14 306.32 407.23 317.01 410.64 321.5 411.89 323.14 415.22 327.89 418.05 332.07 430.39 350.26 434.52 359.24 433.04 364.65 432.08 368.17 428.83 370.67 418.18 376.08 407.05 381.74 401.43 383.82 397.25 383.82 393.55 383.82 391.94 384.86 391.94 387.27 391.94 391.77 397.1 393.13 414.43 393.22 422.15 393.26 427.88 393.02 430.69 392.55 433.3 392.11 440.2 391.78 448.07 391.71 460.7 391.61 461.2 391.56 463.78 390.29 467.5 388.44 468.48 386.41 468.2 381.11 467.96 376.75 467.1 374.66 461.25 364.26 457.55 357.71 449.69 337.39 441.46 313.1 436.72 299.12 431.54 288.15 426.47 281.38 424.56 278.83 419.85 273.39 416.01 269.29 401.17 253.48 399.91 251.24 390.6 223.96 385.28 208.38 384.06 205.46 375.96 188.74 369.09 174.56 367.39 170.2 364.1 158.32 359.79 142.78 355.53 135.2 346.98 127.91 339.13 121.21 326.43 117.56 315.49 118.85M178.72 261.71C175.74 262.43 171.27 264 168.79 265.2 161.22 268.86 155.21 275.85 152.67 283.95 151.39 288.03 151.11 295.66 152.07 300.19 152.9 304.05 155.47 310.12 156.29 310.12 156.86 310.12 166.42 297.35 171.6 289.68 176.6 282.27 178.39 278.8 181.09 271.24 182.23 268.04 183.69 264.39 184.33 263.14 186.08 259.7 186.5 259.81 178.72 261.71" />
+      </g>
     </svg>
   );
 }
