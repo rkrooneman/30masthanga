@@ -11,6 +11,17 @@
  * are swallowed. If audio can't play, the app simply stays silent rather than
  * erroring.
  *
+ * === iOS Safari: reuse ONE gesture-unlocked element (the important part) ===
+ * On iOS Safari only an <audio> element that was actually played DURING a user
+ * gesture is "unlocked" for later programmatic playback. A freshly-constructed
+ * `new Audio(src)` played later from a timer / step-advance (NOT a gesture) is
+ * silently blocked. So we do NOT create a new element per cue: we keep a SINGLE
+ * persistent module-level element (`voiceEl`), prime it inside the Start-practice
+ * gesture (see `unlockVoice`), and then REUSE that same element for every cue
+ * (set `.src`, call `.play()`). Because that element was played during a gesture,
+ * its later programmatic `.play()` calls are permitted — so the 2nd, 3rd, … pose
+ * announcements play instead of only the first.
+ *
  * === toggles ===
  * A cue only plays when BOTH the master sound toggle (loadSoundEnabled) and the
  * voice toggle (loadVoiceEnabled) are on. Either being off makes speak* a no-op.
@@ -38,13 +49,42 @@ const VOICE_BASE = '/audio/voice/';
 const MAX_UTTERANCE_MS = 8000;
 
 /**
- * The currently-playing voice element and its one-shot duck release, tracked so
- * `stopVoice()` can hard-stop an in-flight utterance and release the duck it
- * holds. There is only ever one voice clip playing at a time in the guided
- * player, so a single ref suffices. Both are null when nothing is playing.
+ * The SINGLE persistent voice element, reused for every cue so that the
+ * gesture-unlock done in `unlockVoice()` carries over to later programmatic
+ * playback on iOS Safari. Created lazily and guarded for SSR / no-DOM (only
+ * constructed when `Audio` exists). Null until first accessed, or if `Audio` is
+ * unavailable — callers then simply stay silent.
  */
-let currentAudio: HTMLAudioElement | null = null;
+let voiceEl: HTMLAudioElement | null = null;
+
+/**
+ * Lazily construct (once) and return the shared voice element, or null when the
+ * environment has no `Audio` constructor (SSR / tests / no DOM). Best-effort:
+ * returns null rather than throwing if construction fails.
+ */
+function getVoiceEl(): HTMLAudioElement | null {
+  if (voiceEl) return voiceEl;
+  if (typeof Audio === 'undefined') return null;
+  try {
+    voiceEl = new Audio();
+  } catch {
+    voiceEl = null;
+  }
+  return voiceEl;
+}
+
+/**
+ * The one-shot duck release for the currently-playing utterance, plus the
+ * named `ended`/`error` handlers currently attached to the shared element.
+ * Tracked so `stopVoice()` can hard-stop an in-flight utterance and release the
+ * duck it holds, and so a fresh cue can detach the previous cue's listeners
+ * before attaching its own (listeners must not accumulate on the reused
+ * element). There is only ever one voice clip playing at a time in the guided
+ * player, so single refs suffice. All are null when nothing is playing.
+ */
 let currentRelease: (() => void) | null = null;
+let currentEndedHandler: (() => void) | null = null;
+let currentErrorHandler: (() => void) | null = null;
 
 /**
  * Build the public URL for a voice clip. Ids are already safe snake_case slugs,
@@ -80,12 +120,20 @@ function playClip(src: string, gate: () => boolean = narrationEnabled): void {
   if (!gate()) return;
 
   // Never let two voice clips overlap: hard-stop and un-duck any in-flight one
-  // before starting this one.
+  // before starting this one. With a single shared element this also naturally
+  // enforces "only one cue at a time".
   stopVoice();
 
+  const audio = getVoiceEl();
+  if (!audio) return; // no Audio available (SSR / no DOM) — stay silent
+
   try {
-    const audio = new Audio(src);
+    // Reuse the SAME gesture-unlocked element: point it at this clip and reset.
     // Speed is baked into the files — do NOT set playbackRate.
+    audio.src = src;
+    audio.currentTime = 0;
+    audio.muted = false;
+    audio.volume = 1;
 
     let released = false;
 
@@ -93,23 +141,34 @@ function playClip(src: string, gate: () => boolean = narrationEnabled): void {
       if (released) return;
       released = true;
       window.clearTimeout(timeoutId);
-      // Clear the module refs if they still point at THIS clip (a later clip
-      // may have already replaced them).
-      if (currentAudio === audio) {
-        currentAudio = null;
+      // Detach THIS cue's listeners from the shared element so they can never
+      // fire for a later cue (listeners would otherwise accumulate on reuse).
+      audio.removeEventListener('ended', endedHandler);
+      audio.removeEventListener('error', errorHandler);
+      // Clear the module refs if they still point at THIS cue (a later cue may
+      // have already replaced them).
+      if (currentRelease === release) {
         currentRelease = null;
+        currentEndedHandler = null;
+        currentErrorHandler = null;
       }
       releaseDuck();
     };
 
-    audio.addEventListener('ended', release, { once: true });
-    audio.addEventListener('error', release, { once: true });
+    // Named handlers (not inline) so they can be removed on release/stop and
+    // never pile up on the reused element.
+    const endedHandler = () => release();
+    const errorHandler = () => release();
+    audio.addEventListener('ended', endedHandler);
+    audio.addEventListener('error', errorHandler);
 
     // Duck first, then play, so the music is already dipping as the clip starts.
     requestDuck();
-    // Track this as the current clip so stopVoice() can interrupt it.
-    currentAudio = audio;
+    // Track this as the current cue so stopVoice() can interrupt it and detach
+    // its listeners.
     currentRelease = release;
+    currentEndedHandler = endedHandler;
+    currentErrorHandler = errorHandler;
 
     // Safety net: if the element never fires ended/error (stalled decode), make
     // sure the music un-ducks anyway. (clearTimeout on an already-fired id is a
@@ -124,8 +183,8 @@ function playClip(src: string, gate: () => boolean = narrationEnabled): void {
       });
     }
   } catch {
-    // new Audio / play threw synchronously. We may or may not have requested a
-    // duck; releaseDuck() is clamped at 0, so an unmatched release is a safe
+    // Assigning src / play threw synchronously. We may or may not have requested
+    // a duck; releaseDuck() is clamped at 0, so an unmatched release is a safe
     // no-op. Call it to be safe against a leaked request.
     try {
       releaseDuck();
@@ -199,21 +258,30 @@ export function speakCue(cueId: string): void {
  * music and no double-release.
  */
 export function stopVoice(): void {
-  const audio = currentAudio;
   const release = currentRelease;
+  const endedHandler = currentEndedHandler;
+  const errorHandler = currentErrorHandler;
   // Clear refs first so a re-entrant call (e.g. from within release) is a no-op.
-  currentAudio = null;
   currentRelease = null;
-  if (audio) {
+  currentEndedHandler = null;
+  currentErrorHandler = null;
+  if (voiceEl) {
     try {
-      audio.pause();
-      // Detach so the paused element's own events can't double-release later.
-      audio.src = '';
+      // Pause the SHARED element to cut the in-flight cue. We deliberately do
+      // NOT clear `.src` here: that could break the gesture-unlock / reuse for
+      // the next cue. Pausing plus firing the pending release is enough, and the
+      // next playClip() assigns a fresh src anyway.
+      voiceEl.pause();
+      // Detach this cue's handlers so the paused element's own events can't
+      // double-release later (release() also detaches, but do it defensively in
+      // case release throws or was already consumed).
+      if (endedHandler) voiceEl.removeEventListener('ended', endedHandler);
+      if (errorHandler) voiceEl.removeEventListener('error', errorHandler);
     } catch {
       /* ignore — best-effort stop */
     }
   }
-  // Release the duck this clip requested (guarded: fires at most once).
+  // Release the duck this cue requested (guarded: fires at most once).
   if (release) {
     try {
       release();
@@ -224,25 +292,42 @@ export function stopVoice(): void {
 }
 
 /**
- * Optional warm-up for MP3 <audio> playback, to be called from within the
- * "Start practice" user gesture (the same window unlockAudio() uses for Web
- * Audio). It creates and immediately pauses a muted element so the browser has
- * seen an audio play attempt during a gesture; later programmatic play() calls
- * are then more likely to be permitted. Fully best-effort and silent on failure.
+ * Warm up MP3 <audio> playback, to be called from within the "Start practice"
+ * user gesture (the same window unlockAudio() uses for Web Audio).
+ *
+ * CRITICAL for iOS Safari: this unlocks the SAME persistent element (`voiceEl`)
+ * that later plays every cue — not a throwaway. Within the gesture we mute it,
+ * `.play()` then immediately `.pause()`, reset `currentTime`, and unmute, so the
+ * browser has seen a play attempt on THIS element during a gesture. Later
+ * programmatic `.play()` calls on it are then permitted, so the 2nd+ cues play.
+ * Fully best-effort and silent on failure.
  */
 export function unlockVoice(): void {
+  const audio = getVoiceEl();
+  if (!audio) return;
   try {
-    const audio = new Audio();
     audio.muted = true;
     const playback = audio.play();
     if (playback && typeof playback.then === 'function') {
       playback
         .then(() => {
           audio.pause();
+          try {
+            audio.currentTime = 0;
+          } catch {
+            /* ignore — best-effort reset */
+          }
+          audio.muted = false;
         })
         .catch(() => {
-          /* ignore — best-effort warm-up */
+          // Unmute even if the warm-up play was rejected, so a real cue later
+          // isn't left silently muted.
+          audio.muted = false;
         });
+    } else {
+      // Synchronous / no-promise play(): pause and unmute immediately.
+      audio.pause();
+      audio.muted = false;
     }
   } catch {
     /* ignore — best-effort warm-up */

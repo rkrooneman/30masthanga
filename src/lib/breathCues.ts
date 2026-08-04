@@ -4,10 +4,20 @@
  * Two short prerecorded clips live in `public/audio/effects/` and are served from
  * the site root at `/audio/effects/inhale.mp3` and `/audio/effects/exhale.mp3`.
  * `playInhale()` fires at the start of a breath's inhale phase; `playExhale()`
- * fires at the exhale boundary. Playback mirrors voice.ts: a short-lived
- * `new Audio(src)`, everything best-effort and wrapped in try/catch, and
- * `.play()` rejections (autoplay policy, interrupted playback) are swallowed. If
- * a tone can't play, the app simply stays silent rather than erroring.
+ * fires at the exhale boundary. Playback mirrors voice.ts: everything is
+ * best-effort and wrapped in try/catch, and `.play()` rejections (autoplay
+ * policy, interrupted playback) are swallowed. If a tone can't play, the app
+ * simply stays silent rather than erroring.
+ *
+ * === iOS Safari: reuse gesture-unlocked elements ===
+ * Like voice.ts, we do NOT create a `new Audio(src)` per tone — on iOS Safari a
+ * freshly-created element played later from a timer (not a gesture) is silently
+ * blocked, so only the first tone would ever sound. Instead there are exactly
+ * two sounds, so we keep TWO dedicated persistent elements (`inhaleEl`,
+ * `exhaleEl`), pre-assign their `.src` once, unlock BOTH inside the Start-
+ * practice gesture (see `unlockBreathCues`), and REUSE each for its tone (reset
+ * `currentTime`, set volume, `.play()`). Because they were played during a
+ * gesture, later programmatic plays are permitted.
  *
  * === toggles ===
  * A tone only plays when BOTH the master sound toggle (loadSoundEnabled) and the
@@ -58,9 +68,40 @@ const FULL_VOLUME = 1;
 let ducked = false;
 
 /**
- * Every breath tone that is currently playing. Tones add themselves on play and
- * remove themselves on `ended`/`error`, so the duck listener can adjust exactly
- * the live ones and the set can never leak stale elements.
+ * The two persistent, reusable tone elements — one per sound. Created lazily and
+ * guarded for SSR / no-DOM (only constructed when `Audio` exists), each with its
+ * `.src` pre-assigned once. Reused for every play so the gesture-unlock in
+ * `unlockBreathCues()` carries over to later programmatic playback on iOS. Null
+ * until first accessed, or if `Audio` is unavailable.
+ */
+let inhaleEl: HTMLAudioElement | null = null;
+let exhaleEl: HTMLAudioElement | null = null;
+
+/**
+ * Lazily construct (once) the two tone elements with their sources pre-assigned.
+ * Best-effort: leaves them null when there is no `Audio` constructor (SSR /
+ * tests / no DOM) or if construction fails, so callers simply stay silent.
+ */
+function ensureToneEls(): void {
+  if (typeof Audio === 'undefined') return;
+  try {
+    if (!inhaleEl) {
+      inhaleEl = new Audio(INHALE_SRC);
+    }
+    if (!exhaleEl) {
+      exhaleEl = new Audio(EXHALE_SRC);
+    }
+  } catch {
+    /* ignore — best-effort; stay silent if construction fails */
+  }
+}
+
+/**
+ * Every breath tone element that is currently playing. Tones add themselves on
+ * play and remove themselves on `ended`/`error`, so the duck listener can adjust
+ * exactly the live ones and the set can never leak stale elements. Because there
+ * are only two shared elements, an element re-added on a rapid replay is a
+ * harmless Set no-op.
  */
 const liveTones = new Set<HTMLAudioElement>();
 
@@ -93,18 +134,22 @@ function breathCuesEnabled(): boolean {
 }
 
 /**
- * Play one breath tone. Best-effort; silent on any failure. Does NOT requestDuck
- * (breath tones blend with the music, they don't duck it). The element starts at
- * the current ducked volume, so a tone that begins mid-duck is already lowered,
- * and is added to `liveTones` so the duck listener can re-level it if the state
- * flips while it's still playing. It removes itself from the set on end/error.
+ * Play one breath tone by REUSING its persistent element. Best-effort; silent on
+ * any failure. Does NOT requestDuck (breath tones blend with the music, they
+ * don't duck it). The element starts at the current ducked volume, so a tone
+ * that begins mid-duck is already lowered, and is added to `liveTones` so the
+ * duck listener can re-level it if the state flips while it's still playing. It
+ * removes itself from the set on end/error. Reusing the (gesture-unlocked)
+ * element is what makes the 2nd+ tones play on iOS Safari.
  */
-function playClip(src: string): void {
+function playTone(audio: HTMLAudioElement | null): void {
   if (!breathCuesEnabled()) return;
+  if (!audio) return; // no Audio available (SSR / no DOM) — stay silent
 
   try {
-    const audio = new Audio(src);
     // Speed/pitch are baked into the files — do NOT touch playbackRate.
+    // Rewind so a rapid replay restarts the tone from its head.
+    audio.currentTime = 0;
 
     // Start at whatever the current duck state dictates, so a tone that STARTS
     // while ducked begins already lowered rather than blaring for a frame.
@@ -115,9 +160,13 @@ function playClip(src: string): void {
       if (removed) return;
       removed = true;
       liveTones.delete(audio);
+      // Detach so the shared element's own events can't fire cleanup again for a
+      // later replay (listeners must not accumulate across reuses).
+      audio.removeEventListener('ended', cleanup);
+      audio.removeEventListener('error', cleanup);
     };
-    audio.addEventListener('ended', cleanup, { once: true });
-    audio.addEventListener('error', cleanup, { once: true });
+    audio.addEventListener('ended', cleanup);
+    audio.addEventListener('error', cleanup);
 
     // Track as live BEFORE play() so a duck flip during startup still catches it.
     liveTones.add(audio);
@@ -130,7 +179,7 @@ function playClip(src: string): void {
       });
     }
   } catch {
-    /* new Audio / play threw synchronously — best-effort, stay silent */
+    /* play threw synchronously — best-effort, stay silent */
   }
 }
 
@@ -139,7 +188,8 @@ function playClip(src: string): void {
  * No-op unless both sound and breath cues are on.
  */
 export function playInhale(): void {
-  playClip(INHALE_SRC);
+  ensureToneEls();
+  playTone(inhaleEl);
 }
 
 /**
@@ -147,7 +197,8 @@ export function playInhale(): void {
  * No-op unless both sound and breath cues are on.
  */
 export function playExhale(): void {
-  playClip(EXHALE_SRC);
+  ensureToneEls();
+  playTone(exhaleEl);
 }
 
 /**
@@ -160,7 +211,10 @@ export function stopBreathCues(): void {
   for (const tone of liveTones) {
     try {
       tone.pause();
-      tone.src = '';
+      // Rewind so the next play starts cleanly, but do NOT clear `.src`: these
+      // are the persistent, gesture-unlocked elements and must stay reusable for
+      // the next tone (clearing src could break iOS reuse).
+      tone.currentTime = 0;
     } catch {
       /* ignore — best-effort stop */
     }
@@ -169,28 +223,44 @@ export function stopBreathCues(): void {
 }
 
 /**
- * Optional warm-up for WAV <audio> playback, to be called from within the
- * "Start practice" user gesture (the same window unlockAudio()/unlockVoice()
- * use). It creates and immediately pauses a muted element so the browser has
- * seen an audio play attempt during a gesture; later programmatic play() calls
- * are then more likely to be permitted on mobile. Fully best-effort and silent
- * on failure.
+ * Warm up breath-tone <audio> playback, to be called from within the "Start
+ * practice" user gesture (the same window unlockAudio()/unlockVoice() use).
+ *
+ * CRITICAL for iOS Safari: this unlocks the SAME two persistent elements
+ * (`inhaleEl`, `exhaleEl`) that later play every tone — not throwaways. For each,
+ * within the gesture we mute it, `.play()` then immediately `.pause()`, reset
+ * `currentTime`, and unmute, so later programmatic plays are permitted and the
+ * 2nd+ tones actually sound. Fully best-effort and silent on failure.
  */
 export function unlockBreathCues(): void {
-  try {
-    const audio = new Audio();
-    audio.muted = true;
-    const playback = audio.play();
-    if (playback && typeof playback.then === 'function') {
-      playback
-        .then(() => {
-          audio.pause();
-        })
-        .catch(() => {
-          /* ignore — best-effort warm-up */
-        });
+  ensureToneEls();
+  for (const audio of [inhaleEl, exhaleEl]) {
+    if (!audio) continue;
+    try {
+      audio.muted = true;
+      const playback = audio.play();
+      if (playback && typeof playback.then === 'function') {
+        playback
+          .then(() => {
+            audio.pause();
+            try {
+              audio.currentTime = 0;
+            } catch {
+              /* ignore — best-effort reset */
+            }
+            audio.muted = false;
+          })
+          .catch(() => {
+            // Unmute even if warm-up play was rejected, so a real tone later
+            // isn't left silently muted.
+            audio.muted = false;
+          });
+      } else {
+        audio.pause();
+        audio.muted = false;
+      }
+    } catch {
+      /* ignore — best-effort warm-up */
     }
-  } catch {
-    /* ignore — best-effort warm-up */
   }
 }

@@ -11,6 +11,13 @@
  *   open the playback window; by the time the completion bell fires, playback is
  *   permitted. `unlockAudio()` also warms up an AudioContext for any other Web
  *   Audio consumers.
+ * - iOS Safari specifically only permits later programmatic playback on an
+ *   <audio> element that was itself played DURING a user gesture. The completion
+ *   bell fires much later (end of practice) from a non-gesture context, so a
+ *   freshly-constructed `new Audio(BELL_SRC)` would be blocked. We therefore keep
+ *   ONE persistent bell element, prime it inside the Start-practice gesture
+ *   (`unlockAudio()`), and REUSE it when the bell plays — mirroring voice.ts /
+ *   breathCues.ts.
  * - Everything is wrapped in try/catch and `.play()` rejections are swallowed: if
  *   audio is unavailable or blocked, the app simply stays silent rather than
  *   erroring.
@@ -58,12 +65,70 @@ function getContext(): AudioContext | null {
 }
 
 /**
+ * The SINGLE persistent bell element, reused so the gesture-unlock done in
+ * `unlockAudio()` carries over to the later (non-gesture) completion bell on iOS
+ * Safari. Created lazily with its `.src` pre-assigned once, and guarded for SSR /
+ * no-DOM (only when `Audio` exists). Null until first accessed, or if `Audio` is
+ * unavailable — the bell then simply stays silent.
+ */
+let bellEl: HTMLAudioElement | null = null;
+
+/**
+ * Lazily construct (once) and return the shared bell element with its source
+ * pre-assigned, or null when there is no `Audio` constructor (SSR / tests / no
+ * DOM). Best-effort: returns null rather than throwing if construction fails.
+ */
+function getBellEl(): HTMLAudioElement | null {
+  if (bellEl) return bellEl;
+  if (typeof Audio === 'undefined') return null;
+  try {
+    bellEl = new Audio(BELL_SRC);
+  } catch {
+    bellEl = null;
+  }
+  return bellEl;
+}
+
+/**
  * Open the audio playback window from within a user gesture (e.g. the "Start
  * practice" tap) so later programmatic playback is allowed. Warms up an
- * AudioContext (for any Web Audio consumers) and is safe to call repeatedly;
- * no-ops gracefully when audio is unavailable.
+ * AudioContext (for any Web Audio consumers) AND primes the persistent bell
+ * <audio> element (muted play+pause) so the later completion bell is permitted
+ * on iOS Safari. Safe to call repeatedly; no-ops gracefully when audio is
+ * unavailable.
  */
 export function unlockAudio(): void {
+  // Prime the bell <audio> element within the gesture (iOS Safari requirement).
+  const bell = getBellEl();
+  if (bell) {
+    try {
+      bell.muted = true;
+      const warmup = bell.play();
+      if (warmup && typeof warmup.then === 'function') {
+        warmup
+          .then(() => {
+            bell.pause();
+            try {
+              bell.currentTime = 0;
+            } catch {
+              /* ignore — best-effort reset */
+            }
+            bell.muted = false;
+          })
+          .catch(() => {
+            // Unmute even if the warm-up was rejected, so the real bell later
+            // isn't left silently muted.
+            bell.muted = false;
+          });
+      } else {
+        bell.pause();
+        bell.muted = false;
+      }
+    } catch {
+      /* ignore — best-effort warm-up */
+    }
+  }
+
   const context = getContext();
   if (!context) return;
   try {
@@ -87,18 +152,39 @@ export function playCompletionBell(): void {
   // errors, or the safety timeout elapses.
   let released = false;
   let timer: number | undefined;
+  // Handler refs so `release` can detach them from the SHARED element — without
+  // this, listeners would accumulate on the reused element across completions.
+  let endedHandler: (() => void) | null = null;
+  let errorHandler: (() => void) | null = null;
+  const audio = getBellEl();
   const release = () => {
     if (released) return;
     released = true;
     if (timer !== undefined) window.clearTimeout(timer);
+    if (audio) {
+      if (endedHandler) audio.removeEventListener('ended', endedHandler);
+      if (errorHandler) audio.removeEventListener('error', errorHandler);
+    }
     releaseDuck();
   };
   requestDuck();
 
+  if (!audio) {
+    // No Audio available (SSR / no DOM) — release the duck we just requested and
+    // stay silent.
+    release();
+    return;
+  }
+
   try {
-    const audio = new Audio(BELL_SRC);
-    audio.addEventListener('ended', release);
-    audio.addEventListener('error', release);
+    // Reuse the SAME gesture-unlocked element so the bell is permitted on iOS.
+    audio.currentTime = 0;
+    audio.muted = false;
+    audio.volume = 1;
+    endedHandler = () => release();
+    errorHandler = () => release();
+    audio.addEventListener('ended', endedHandler);
+    audio.addEventListener('error', errorHandler);
     // Safety net: release the duck even if the clip never signals completion.
     timer = window.setTimeout(release, BELL_MAX_DURATION_MS);
     void audio.play().catch(() => {
@@ -106,8 +192,8 @@ export function playCompletionBell(): void {
       release();
     });
   } catch {
-    // Construction/playback failed — release the duck we requested so the music
-    // can never be stranded at low volume.
+    // Playback failed — release the duck we requested so the music can never be
+    // stranded at low volume.
     release();
   }
 }
