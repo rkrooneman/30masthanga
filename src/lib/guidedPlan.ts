@@ -400,6 +400,18 @@ function emitSegmentBreaths(
       // HOLD: whole breaths, each a full inhale+exhale. All breaths of the hold
       // share the SAME `flowIndex` (the hold's index) so the strip highlights
       // one position for the whole hold.
+      //
+      // Optionally play a half-breath ENTRY movement to move INTO the pose
+      // (e.g. the held Down Dog is entered on an exhale), THEN the hold's
+      // breaths. The entry shares the hold's `flowIndex` and `subPoseLabel` so
+      // the strip shows ONE position covering entry + hold, and it carries NO
+      // cue so the hold's cue stays on its own breaths.
+      if (flowStep.enterPhase !== undefined) {
+        pushMovement(flowStep.enterPhase, {
+          subPoseLabel: flowStep.label,
+          flowIndex,
+        });
+      }
       for (let b = 1; b <= flowStep.breaths; b++) {
         const isCueBreath =
           flowStep.cueId !== undefined &&

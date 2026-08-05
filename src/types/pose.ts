@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Pose type definitions for the 30-minute Ashtanga companion.
  *
  * === drishti convention ===
@@ -9,12 +9,11 @@
  * KPJAYI tradition and David Swenson's "The Practice Manual".
  *
  * Any pose whose standardized gaze the drafter was not confident about carries
- * the exact sentinel string `"__UNVERIFIED__"` — treat that as "do not trust,
+ * the exact sentinel string `"__UNVERIFIED__"` - treat that as "do not trust,
  * verify me". The older `"NEEDS VERIFICATION"` sentinel may still appear in
  * `phonetic` or `group` on the rare occasion the drafter was genuinely unsure.
  *
- * Numeric fields (`order`, `breaths`, `sides`) are NEVER marked unverified —
- * where a traditional count is ambiguous a sensible default is used and can be
+ * Numeric fields (`order`, `breaths`, `sides`) are NEVER marked unverified -  * where a traditional count is ambiguous a sensible default is used and can be
  * tuned later.
  */
 
@@ -74,26 +73,26 @@ export type PoseCategory =
 
 /**
  * One step within a salutation's vinyasa `flow`. A step is EITHER a single
- * half-breath MOVEMENT or a whole-breath HOLD — this distinction is the heart of
+ * half-breath MOVEMENT or a whole-breath HOLD - this distinction is the heart of
  * the Sun Salutation model.
  *
- * === MOVEMENT (single half-breath) — `phase` is SET ===
+ * === MOVEMENT (single half-breath) - `phase` is SET ===
  * A Sun Salutation moves ONE movement per breath PHASE: inhale = arms up,
  * exhale = fold, inhale = halfway lift, exhale = chaturanga, and so on. So a
- * MOVEMENT step lasts exactly ONE half-breath — a single inhale OR a single
- * exhale — whose duration is `breathSeconds / 2`. Its `phase` ('inhale' |
+ * MOVEMENT step lasts exactly ONE half-breath - a single inhale OR a single
+ * exhale - whose duration is `breathSeconds / 2`. Its `phase` ('inhale' |
  * 'exhale') says which half it is; the player plays ONLY that phase and then the
  * NEXT movement's opposite phase continues the rhythm (an inhale movement
  * expands the circle, the following exhale movement contracts it). A movement's
- * `breaths` field is NOT used for whole-breath counting — it is pinned to 1 for
+ * `breaths` field is NOT used for whole-breath counting - it is pinned to 1 for
  * schema consistency, but the CANONICAL duration of a movement is half a breath
  * (validate-poses.ts counts a movement as 1 HALF-breath). A movement's cue (if
- * any) fires on its single phase — there is only one — so `cueOn` is irrelevant
+ * any) fires on its single phase - there is only one - so `cueOn` is irrelevant
  * for movements (both `'first'` and `'last'` resolve to the same one phase).
  *
- * === HOLD (whole breaths) — `phase` is ABSENT ===
+ * === HOLD (whole breaths) - `phase` is ABSENT ===
  * When `phase` is absent the step is a HOLD of `breaths` WHOLE breaths (the
- * Downward Dog, `breaths: 5, hold: true`) — each hold breath is a full
+ * Downward Dog, `breaths: 5, hold: true`) - each hold breath is a full
  * inhale-then-exhale, exactly as a normal held asana. The on-screen "Breath N of
  * M" counts within the hold, so it reads "Breath 1..5 of 5". This is the ONLY
  * kind of step that shows the breath counter; movements hide it and show only
@@ -110,7 +109,7 @@ export type PoseCategory =
  *             says which phase it is ('inhale' expands, 'exhale' contracts). When
  *             ABSENT, the step is a whole-breath HOLD.
  * - `breaths` For a HOLD, how many WHOLE breaths it lasts (5 for the Down Dog).
- *             For a MOVEMENT, pinned to 1 but IGNORED for counting — a movement
+ *             For a MOVEMENT, pinned to 1 but IGNORED for counting - a movement
  *             is always a single half-breath regardless.
  * - `hold`    true for the multi-breath Downward Dog hold (informational; a hold
  *             is identified structurally by the ABSENCE of `phase`).
@@ -129,6 +128,14 @@ export interface FlowStep {
    * phase for `breathSeconds / 2`. When absent, the step is a whole-breath HOLD.
    */
   phase?: 'inhale' | 'exhale';
+  /**
+   * For a HOLD step, an optional half-breath MOVEMENT phase played to move INTO
+   * the pose, BEFORE the hold's breaths. e.g. the held Down Dog is entered on an
+   * exhale: enterPhase: 'exhale' then `breaths` full breaths. Undefined for holds
+   * with no distinct entry movement and for MOVEMENT steps (which already have
+   * `phase`). Does not add a separate flow position - it is part of this hold.
+   */
+  enterPhase?: 'inhale' | 'exhale';
   breaths: number;
   hold?: boolean;
   cueId?: string;

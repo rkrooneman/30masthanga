@@ -118,6 +118,7 @@ export const poses: Pose[] = [
         label: 'Adho Mukha Svanasana', // 6 down dog - the 5-breath HOLD (entered on the exhale)
         breaths: 5,
         hold: true,
+        enterPhase: 'exhale',
         cueId: 'last_breath',
         cueOn: 'last',
       },
@@ -190,6 +191,7 @@ export const poses: Pose[] = [
         label: 'Adho Mukha Svanasana', // 14 final downward dog - the 5-breath HOLD (entered on the exhale)
         breaths: 5,
         hold: true,
+        enterPhase: 'exhale',
         cueId: 'last_breath',
         cueOn: 'last',
       },
