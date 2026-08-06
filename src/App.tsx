@@ -1,5 +1,5 @@
-/**
- * App — the navigation shell + shared state for ashtanga30.
+﻿/**
+ * App - the navigation shell + shared state for ashtanga30.
  *
  * SLICE 3 SCOPE: router-free navigation. There is no router library (a
  * deliberate design decision); instead this component holds a single `screen`
@@ -59,11 +59,16 @@ import {
   saveVinyasasEnabled,
 } from './lib/preferences';
 import HomeScreen from './screens/HomeScreen';
-import OverviewScreen from './screens/OverviewScreen';
 import MusicPanel from './components/MusicPanel';
-// DEV-ONLY (pose-icon contact sheet): reached via the `?pilot` query string.
-// Gated behind import.meta.env.DEV so it is tree-shaken out of production.
-import PosePilot from './components/poses/PosePilot';
+
+// OverviewScreen is heavy: it pulls in PoseMap -> PoseGraphic -> the pose-icon
+// registry (59 icon SVGs) and FlowStrip -> flowIcons (more icon SVGs), roughly
+// 350 KB of icon components. Home uses ZERO pose icons, so statically importing
+// Overview here dragged that whole icon layer into the main chunk. Lazy-loading
+// it (same pattern as GuidedScreen below) lets vite/rollup split the icons into
+// their own chunk, so the initial Home load doesn't pay for them. It has a
+// default export, which React.lazy requires.
+const OverviewScreen = lazy(() => import('./screens/OverviewScreen'));
 
 // GuidedScreen is heavy (buildGuidedPlan, BreathingCircle, PoseGraphic + its 58
 // pose-icon SVGs, voice/chime, etc.) and is only needed once a practice starts
@@ -71,6 +76,14 @@ import PosePilot from './components/poses/PosePilot';
 // vite/rollup split it into its own chunk so Home/Overview don't pay for it up
 // front. It has a default export, which React.lazy requires.
 const GuidedScreen = lazy(() => import('./screens/GuidedScreen'));
+
+// DEV-ONLY (pose-icon contact sheet): reached via the `?pilot` query string.
+// Lazy-loaded (not a static top-level import) because PosePilot imports the pose
+// registry (all 59 icon SVGs); a static import would pull that icon weight into
+// the PRODUCTION main chunk even though the render is gated behind
+// import.meta.env.DEV. As a lazy chunk it stays out of the prod main bundle
+// while the DEV `?pilot` hatch still works. It has a default export.
+const PosePilot = lazy(() => import('./components/poses/PosePilot'));
 
 // DEV-ONLY seed guard: ensures the `?seedweek` hatch seeds the practice log at
 // most once per page load (module scope survives re-renders, unlike a ref that
@@ -94,11 +107,11 @@ function App() {
   // Mutually exclusive with "Basics only" (enforced by the toggle handlers).
   const [fullSeries, setFullSeries] = useState<boolean>(loadFullSeriesEnabled);
   // "Vinyasas" mode (a half-vinyasa between consecutive seated poses), remembered
-  // across visits, DEFAULT ON. Orthogonal to Basics/Full series — it can combine
+  // across visits, DEFAULT ON. Orthogonal to Basics/Full series - it can combine
   // with either. Threads into both generation (budget) and the guided plan.
   const [vinyasas, setVinyasas] = useState<boolean>(loadVinyasasEnabled);
 
-  // The fixed frame — poses that must always be included and are NOT toggleable
+  // The fixed frame - poses that must always be included and are NOT toggleable
   // (Sun Salutations A/B, Shoulderstand, Savasana). Derived once from the
   // catalog; used to seed selections and to guard the toggle handler.
   const fixedFrameIds = useMemo(
@@ -108,7 +121,7 @@ function App() {
 
   // The DERIVED practice the Overview + Guided run consume: all catalog poses
   // whose id is in the selection, in canonical order, with a recomputed total
-  // (no 30-min ceiling — a manual selection may exceed it, shown honestly).
+  // (no 30-min ceiling - a manual selection may exceed it, shown honestly).
   // Null until Home generates the first practice.
   const practice = useMemo(
     () =>
@@ -143,9 +156,14 @@ function App() {
   // DEV-ONLY pilot escape hatch: visiting `/?pilot` renders the pose-icon
   // contact sheet instead of the normal app. Computed after hooks (Rules of
   // Hooks). `import.meta.env.DEV` is statically false in production builds, so
-  // this branch and the PosePilot import are stripped from the prod bundle.
+  // this branch is stripped from the prod bundle. PosePilot is lazy-loaded, so
+  // its render is wrapped in Suspense (quiet fallback while its chunk resolves).
   if (import.meta.env.DEV && window.location.search.includes('pilot')) {
-    return <PosePilot />;
+    return (
+      <Suspense fallback={null}>
+        <PosePilot />
+      </Suspense>
+    );
   }
 
   // DEV-ONLY seed escape hatch: visiting `/?seedweek` seeds a few days into the
@@ -171,7 +189,7 @@ function App() {
   const devComplete =
     import.meta.env.DEV && window.location.search.includes('complete');
   // Generate the throwaway practice for the `?complete` hatch once (only when the
-  // hatch is active). Not stateful — this render path never re-renders normally.
+  // hatch is active). Not stateful - this render path never re-renders normally.
   const devPractice = devComplete
     ? generatePractice(poses, { breathSeconds, basicsOnly, vinyasas })
     : null;
@@ -199,7 +217,7 @@ function App() {
 
   // Generate a real (randomised) practice and advance to the overview.
   const handleGenerate = (pace: number) => {
-    // This tap is a genuine user gesture — use it to start ambient sound if the
+    // This tap is a genuine user gesture - use it to start ambient sound if the
     // preference is enabled, since the initial autoplay on load was blocked and
     // this may be the user's first interaction. No-op when ambient is disabled.
     requestAmbientPlay();
@@ -215,7 +233,7 @@ function App() {
 
   // "New sequence": wipe the current selection and generate a fresh <=30-min set
   // at the same breath pace (re-seeding the selected set), turning Full series
-  // off. Manual customisation is discarded — this is a clean regenerate.
+  // off. Manual customisation is discarded - this is a clean regenerate.
   const handleRegenerate = () => {
     seedFromGenerated(breathSeconds, basicsOnly, vinyasas);
   };
@@ -242,7 +260,7 @@ function App() {
 
   // Toggle "Basics only" mode: remember the choice and re-seed the selection
   // from a fresh generated set in the new mode, so the Overview reflects it
-  // right away. Mutually exclusive with Full series — seedFromGenerated turns
+  // right away. Mutually exclusive with Full series - seedFromGenerated turns
   // Full series off. Uses `next` (not the async state) for the rebuild.
   const handleToggleBasics = (next: boolean) => {
     setBasicsOnly(next);
@@ -264,7 +282,7 @@ function App() {
       setSelectedIds(new Set(poses.map((p) => p.id)));
     } else {
       // Regenerate a fresh <=30-min set. seedFromGenerated also clears Full
-      // series (already false here) — harmless and keeps the invariant.
+      // series (already false here) - harmless and keeps the invariant.
       seedFromGenerated(breathSeconds, basicsOnly, vinyasas);
     }
   };
@@ -273,7 +291,7 @@ function App() {
   // fresh generated set with the new flag, so the pose count reflects the new
   // budget immediately (a vinyasa practice budgets in the seated→seated
   // half-vinyasas, so it selects fewer seated poses). Orthogonal to Basics /
-  // Full series — it does not touch either. Uses `next` (not the async state).
+  // Full series - it does not touch either. Uses `next` (not the async state).
   // If Full series is currently on, seedFromGenerated turns it off (a generated
   // set is capped at 30 min), consistent with the Basics toggle.
   const handleToggleVinyasas = (next: boolean) => {
@@ -333,7 +351,7 @@ function App() {
         <div className="app__container">
           {/*
             GuidedScreen is lazy-loaded (its own chunk). The Suspense fallback is
-            a quiet, empty guided-player screen — matching the guided layout so
+            a quiet, empty guided-player screen - matching the guided layout so
             there's no jarring flash of text while the chunk resolves (near-instant
             from the same origin on a warm cache). aria-busy announces the wait.
           */}
@@ -370,7 +388,7 @@ function App() {
       {/*
         Rendered at the shell level, OUTSIDE the per-screen conditionals below,
         so the music panel is present on every screen and its <audio> element
-        never unmounts on navigation — playback persists across Home → Overview
+        never unmounts on navigation - playback persists across Home → Overview
         → Guided. Collapsed by default; it only toggles a CSS class.
       */}
       <MusicPanel />
@@ -385,21 +403,35 @@ function App() {
         )}
 
         {screen === 'overview' && practice && selectedIds && (
-          <OverviewScreen
-            practice={practice}
-            breathSeconds={breathSeconds}
-            selectedIds={selectedIds}
-            onToggleSelected={handleToggleSelected}
-            onBack={handleBackHome}
-            onStartGuided={handleStartGuided}
-            onRegenerate={handleRegenerate}
-            basicsOnly={basicsOnly}
-            onToggleBasics={handleToggleBasics}
-            fullSeries={fullSeries}
-            onToggleFullSeries={handleToggleFullSeries}
-            vinyasas={vinyasas}
-            onToggleVinyasas={handleToggleVinyasas}
-          />
+          // OverviewScreen is lazy-loaded (its own chunk, carrying the pose-icon
+          // layer); the Suspense fallback is a quiet, empty overview screen
+          // matching the overview layout (no text flash) while its chunk
+          // resolves. aria-busy announces the brief wait.
+          <Suspense
+            fallback={
+              <section
+                className="screen overview"
+                aria-busy="true"
+                aria-label="Loading overview"
+              />
+            }
+          >
+            <OverviewScreen
+              practice={practice}
+              breathSeconds={breathSeconds}
+              selectedIds={selectedIds}
+              onToggleSelected={handleToggleSelected}
+              onBack={handleBackHome}
+              onStartGuided={handleStartGuided}
+              onRegenerate={handleRegenerate}
+              basicsOnly={basicsOnly}
+              onToggleBasics={handleToggleBasics}
+              fullSeries={fullSeries}
+              onToggleFullSeries={handleToggleFullSeries}
+              vinyasas={vinyasas}
+              onToggleVinyasas={handleToggleVinyasas}
+            />
+          </Suspense>
         )}
 
         {screen === 'guided' && practice && (
