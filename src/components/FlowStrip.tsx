@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FlowStrip - a compact horizontal strip of a flow's position icons.
  *
  * Shown in the pose-icon slot of the Guided player stage during a live
@@ -64,7 +64,7 @@ interface FlowStripProps {
  * icon does NOT shrink when the stage swaps its single pose icon for the strip:
  * the centered cell is a proper peer of that 44px pose icon.
  */
-const ACTIVE_ICON_SIZE = 44;
+const ACTIVE_ICON_SIZE = 72;
 
 /**
  * Pixel size of the INACTIVE (context) strip icons - deliberately smaller than
@@ -73,7 +73,7 @@ const ACTIVE_ICON_SIZE = 44;
  * fixed cell box as the active icon (see `--cell` in index.css), so all cells
  * keep one constant box width and the fixed-center slide math stays exact.
  */
-const INACTIVE_ICON_SIZE = 28;
+const INACTIVE_ICON_SIZE = 40;
 
 /**
  * Track style carrying the custom properties the fixed-center CSS math reads:

@@ -1129,13 +1129,13 @@ function GuidedScreen({
               activeIndex={flowStripActiveIndex}
             />
           ) : isVinyasaStep ? (
-            <FlowMark size={44} className="guided-player__pose-icon" />
+            <FlowMark size={72} className="guided-player__pose-icon" />
           ) : (
             shownPose && (
               <PoseGraphic
                 poseId={shownPose.id}
                 name={shownPose.english}
-                size={44}
+                size={72}
                 className="guided-player__pose-icon"
               />
             )
