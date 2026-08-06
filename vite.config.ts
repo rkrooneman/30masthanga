@@ -50,27 +50,26 @@ export default defineConfig({
         // pose-name / switch-sides / Namaste voice clips (.mp3), the completion
         // bell (.mp3), and the soft inhale/exhale breath-cue tones (.wav) under
         // public/audio/**, so guided-practice audio works fully offline. The
-        // large background-music track (public/music/**, ~36 MB) is deliberately
-        // EXCLUDED from precache so first load stays light; it is runtime-cached
-        // on first play instead (see runtimeCaching below).
+        // nature-ambience tracks (public/ambient/**: forest, rain, ocean, each
+        // ~0.5-1.4 MB) live under a DIFFERENT top-level dir and are NOT matched
+        // by the audio/** glob, so they are deliberately EXCLUDED from precache
+        // to keep first load light; they are runtime-cached on first play
+        // instead (see runtimeCaching below).
         globPatterns: [
           '**/*.{js,css,html,svg,png,ico,woff2}',
           'audio/**/*.mp3',
         ],
         runtimeCaching: [
           {
-            // Background music: cache-first, populated the first time the track
-            // is played, so it is available offline thereafter without forcing a
-            // ~36 MB download on every visitor up front.
-            urlPattern: ({ url }) => url.pathname.startsWith('/music/'),
+            // Nature ambience: cache-first, populated the first time a track is
+            // played, so it is available offline thereafter without forcing the
+            // audio download on every visitor up front.
+            urlPattern: ({ url }) => url.pathname.startsWith('/ambient/'),
             handler: 'CacheFirst',
             options: {
-              cacheName: 'music-audio',
-              // The single ambient track is ~36 MB, well above Workbox's default
-              // range-request handling threshold; allow it explicitly.
-              rangeRequests: true,
+              cacheName: 'ambient-audio',
               expiration: {
-                maxEntries: 4,
+                maxEntries: 5,
                 maxAgeSeconds: 60 * 60 * 24 * 60, // 60 days
               },
               cacheableResponse: {

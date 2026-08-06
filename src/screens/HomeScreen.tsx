@@ -23,7 +23,13 @@ import {
   poseCueToIndex,
   indexToPoseCue,
 } from '../lib/guidance';
-import { getAmbientEnabled, setAmbientEnabled } from '../lib/ambientPref';
+import { getAmbient, setAmbient } from '../lib/ambientPref';
+import {
+  type AmbientChoice,
+  AMBIENT_LABELS,
+  ambientToIndex,
+  indexToAmbient,
+} from '../lib/ambient';
 import LotusMark from '../components/LotusMark';
 import PracticeWeek from '../components/PracticeWeek';
 
@@ -80,16 +86,21 @@ function HomeScreen({
     saveBreathCuesOn(next);
   };
 
-  // Ambient-sound toggle. The persistent enable/disable preference for the
-  // background ambient track. Unlike voice guidance, this must reach MusicPanel
-  // (which owns the <audio> at the app shell) live, so it flows through the
-  // ambientPref pub/sub — setAmbientEnabled() both persists and notifies the
-  // panel. Seeded from the shared getter (which reads storage on module load).
-  const [ambientEnabled, setAmbientEnabledState] = useState<boolean>(getAmbientEnabled);
+  // Ambient-sound choice (off | forest | rain | ocean). A 4-stop slider picking
+  // WHICH nature loop plays (or none), mirroring the pose-cues slider. Unlike
+  // voice guidance, this must reach MusicPanel (which owns the <audio> at the
+  // app shell) live, so it flows through the ambientPref pub/sub - setAmbient()
+  // both persists and notifies the panel. Seeded from the shared getter (which
+  // reads storage on module load).
+  const [ambient, setAmbientState] = useState<AmbientChoice>(getAmbient);
 
-  const handleAmbientToggle = (next: boolean) => {
-    setAmbientEnabledState(next);
-    setAmbientEnabled(next);
+  // Synchronous on purpose: setAmbient() must run inside this input event so
+  // MusicPanel's play() fires within the user gesture (browsers block audio
+  // started outside a gesture). Do NOT debounce or defer this.
+  const handleAmbientChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const next = indexToAmbient(Number(event.target.value));
+    setAmbientState(next);
+    setAmbient(next); // persists + notifies MusicPanel synchronously within the gesture
   };
 
   // Close the About dialog on Escape while it's open.
@@ -223,23 +234,30 @@ function HomeScreen({
           </p>
         </div>
 
-        <div className="basics-toggle home__ambient-toggle">
-          <label className="basics-toggle__label" htmlFor="ambient-sound-switch">
-            <span className="basics-toggle__text">Ambient sound</span>
-            <input
-              type="checkbox"
-              id="ambient-sound-switch"
-              className="basics-toggle__input"
-              checked={ambientEnabled}
-              onChange={(e) => handleAmbientToggle(e.target.checked)}
-            />
-            <span className="basics-toggle__track" aria-hidden="true">
-              <span className="basics-toggle__thumb" />
-            </span>
-          </label>
-          <p className="basics-toggle__hint">
-            Plays a calm ambient track during practice.
-          </p>
+        <div className="field home__ambient">
+          <div className="field__label-row">
+            <label className="field__label" htmlFor="ambient">
+              Ambient
+            </label>
+            <span className="field__value">{AMBIENT_LABELS[ambient]}</span>
+          </div>
+          <input
+            id="ambient"
+            className="slider"
+            type="range"
+            min={0}
+            max={3}
+            step={1}
+            value={ambientToIndex(ambient)}
+            onChange={handleAmbientChange}
+            aria-valuetext={AMBIENT_LABELS[ambient]}
+          />
+          <div className="home__ambient-stops" aria-hidden="true">
+            <span>Off</span>
+            <span>Forest</span>
+            <span>Rain</span>
+            <span>Ocean</span>
+          </div>
         </div>
       </div>
 

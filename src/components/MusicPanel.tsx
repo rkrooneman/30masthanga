@@ -1,42 +1,75 @@
 /**
- * MusicPanel — the background ambient sound for ashtanga30.
+ * MusicPanel - the background nature ambience for ashtanga30.
  *
  * Rendered ONCE at the app-shell level (see App.tsx) so it is present on every
- * screen (Home, Overview, Guided) and never unmounts on navigation — the single
- * <audio> element stays in the DOM for the life of the app, so playback (and
+ * screen (Home, Overview, Guided) and never unmounts on navigation - the Web
+ * Audio graph it owns stays alive for the life of the app, so playback (and
  * mute state) persists across screen changes.
  *
- * There is one long, looping CC0 (public-domain) ambient track (see
- * src/lib/music.ts + CREDITS.md) served from `public/music/`.
+ * === gapless engine (Web Audio, not <audio loop>) ===
+ * It plays a SELECTABLE nature-ambience loop - off / forest / rain / ocean -
+ * via the Web Audio API rather than a native <audio loop> element. The native
+ * `loop` attribute is NOT gapless: it re-primes the media element at the loop
+ * point and leaves an audible hiccup no matter how the file is authored. An
+ * AudioBufferSourceNode with `.loop = true`, by contrast, loops the decoded
+ * PCM sample-accurately with no gap. The graph is:
  *
- * === enable vs. mute (two distinct controls) ===
+ *     AudioBufferSourceNode(loop=true) -> GainNode -> ctx.destination
+ *
+ * The GainNode is the single point of volume control - it carries the base bed
+ * level, the duck ramp, AND the mute, all at once.
+ *
+ * For a nature choice we fetch(/ambient/<name>.mp3) -> arrayBuffer() ->
+ * ctx.decodeAudioData() and cache the decoded AudioBuffer in an in-memory Map
+ * keyed by choice, so re-selecting a previously-played sound is instant (the
+ * service worker's CacheFirst rule for /ambient/ already handles the network /
+ * offline layer, so a plain fetch is enough). Because a BufferSourceNode is
+ * one-shot, each start creates a NEW source, points it at the cached buffer,
+ * sets loop=true, connects it through the gain node, and starts it; switching
+ * stops and disconnects the old source first. 'off' stops the source and leaves
+ * the graph idle. Decoding is async, so a monotonic choice ref guards against
+ * races: a source is only started if its choice is still the current one when
+ * decode resolves. If the Web Audio API is unavailable (SSR / old browser) the
+ * panel degrades gracefully to silence - it never throws.
+ *
+ * === choice vs. mute (two distinct controls) ===
  * There are two separate concepts, driven by two separate controls:
- *   - ENABLE/DISABLE is the *persistent preference* the user sets with the
- *     "Ambient sound" switch on Home. When enabled, the track auto-plays; when
- *     disabled, it pauses. This flows in via the ambientPref pub/sub, which also
- *     persists it (preferences.ts). This panel only listens.
+ *   - CHOICE is the *persistent preference* the user sets with the ambience
+ *     slider on Home (off / forest / rain / ocean). A nature choice auto-plays
+ *     its loop; 'off' stops. This flows in via the ambientPref pub/sub, which
+ *     also persists it (preferences.ts). This panel only listens.
  *   - MUTE/UNMUTE is the *momentary* control on the floating corner button. It
- *     toggles audio.muted for the currently-playing track WITHOUT touching the
- *     Home preference — a quick "silence this now" that doesn't disable ambient.
- * Because there is nothing to mute when ambient is disabled, the corner button
- * is HIDDEN entirely while disabled (cleanest — no dead/no-op control) and only
- * appears, as a mute toggle, once ambient is enabled.
+ *     forces the gain node's effective output to 0 for the currently-playing
+ *     loop WITHOUT touching the Home preference - a quick "silence this now"
+ *     that doesn't change the choice. Mute state persists across track
+ *     switches: a muted user stays muted when switching to another nature
+ *     sound, and unmuting reveals the current duck/full level.
+ * Because there is nothing to mute when the choice is 'off', the corner button
+ * is HIDDEN entirely while 'off' (cleanest - no dead/no-op control) and only
+ * appears, as a mute toggle, once a nature sound is chosen.
  *
- * === autoplay-safe start ===
- * Browsers block audio until a user gesture. When ambient is enabled we attempt
- * play() immediately (best-effort; it may reject), AND install a one-time global
- * gesture listener (pointerdown/keydown) that retries play() if it was blocked.
- * Once a successful (or attempted) play happens, the listener removes itself.
- * Turning the preference OFF pauses the audio.
+ * === autoplay unlock ===
+ * The context here is the ONE shared AudioContext (see src/lib/audioContext.ts),
+ * also used by the chime bell - iOS is unreliable with multiple concurrent
+ * contexts, so a single shared context means one unlock covers both. A fresh
+ * AudioContext usually starts 'suspended' and cannot make sound until a user
+ * gesture. When a nature sound is chosen we call ctx.resume() and start;
+ * if the context is still suspended (no gesture yet) we install a ONE-TIME
+ * global gesture listener (pointerdown/keydown) that resumes the context and
+ * starts playback, then removes itself. subscribeAmbientPlayRequest (Generate /
+ * Start practice) is the reliable path when a sound is pre-selected on load
+ * with no prior interaction: the user's first tap resumes + starts.
  *
- * === ducking (unchanged) ===
+ * === ducking ===
  * The panel subscribes to the audioBus (see src/lib/audioBus.ts). When a spoken
- * pose name or the completion bell requests a duck, the ambient volume ramps
- * down to DUCK_VOLUME; when released, it ramps back to FULL_VOLUME. Only the
- * <audio> element's `volume` is touched — never its play/pause state. Muting is
- * independent: audio.muted overrides output regardless of volume, so mute and
- * the duck volume ramp coexist without conflict (a muted track stays silent
- * whatever the ramped volume is; unmuting reveals the current ramped volume).
+ * pose name or the completion bell requests a duck, the gain ramps down to
+ * DUCK_VOLUME; when released, it ramps back to FULL_VOLUME, using an asymmetric
+ * eased curve (quicker to duck, slower to release) driven by requestAnimationFrame.
+ * Only the gain node's target level is touched - never the source's running
+ * state. Muting is independent: while muted the effective gain is forced to 0
+ * regardless of the ramp target, so mute and the duck ramp coexist without
+ * conflict (a muted track stays silent whatever the ramped target is; unmuting
+ * reveals the current ramped level).
  *
  * Accessibility: the corner button carries a state-aware aria-label
  * (Mute ambient sound / Unmute ambient sound) and aria-pressed reflects muted;
@@ -44,17 +77,23 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { TRACKS } from '../lib/music';
+import { type AmbientChoice, ambientSrc } from '../lib/ambient';
 import { subscribeDuck } from '../lib/audioBus';
+import { getSharedAudioContext } from '../lib/audioContext';
 import {
-  subscribeAmbient,
+  getAmbient,
+  subscribeAmbientChoice,
   subscribeAmbientPlayRequest,
 } from '../lib/ambientPref';
 
 /** Volume while ducked (ambient dipped so a cue can be heard over it). */
 const DUCK_VOLUME = 0.15;
-/** Normal (un-ducked) volume. */
-const FULL_VOLUME = 1;
+/**
+ * Normal (un-ducked) ambient volume. Kept deliberately below 1.0 so the nature
+ * ambience sits as a quiet bed UNDER the practice (breath cues, bell, voice)
+ * rather than competing with it. Roughly -6 dB.
+ */
+const FULL_VOLUME = 0.5;
 /**
  * Ramp durations are asymmetric and eased for an organic feel: the ambient dips
  * fairly quickly but smoothly when a cue starts (DUCK), then swells back in more
@@ -71,43 +110,123 @@ function easeInOutCubic(t: number): number {
 }
 
 function MusicPanel() {
-  // Persistent enable/disable preference (from Home via ambientPref). Drives
-  // auto-play/pause and whether the corner mute button is shown at all.
-  const [enabled, setEnabled] = useState<boolean>(false);
-  // Momentary mute state of the currently-playing track (corner button).
+  // Persistent ambience choice (from Home via ambientPref). Drives which loop
+  // plays (or silence for 'off') and whether the corner mute button is shown at
+  // all. Seeded synchronously from the current preference so the corner
+  // button's visibility is correct from the first render.
+  const [choice, setChoice] = useState<AmbientChoice>(getAmbient);
+  // Momentary mute state of the currently-playing loop (corner button). Driven
+  // entirely from React state now that there is no <audio> element to observe.
   const [muted, setMuted] = useState<boolean>(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  // Mirror of `enabled` for use inside the (stable, mount-once) gesture callback
-  // so it reads the latest value without the enable effect having to re-subscribe.
-  const enabledRef = useRef<boolean>(false);
-  // Holds the id of an in-flight volume ramp (requestAnimationFrame) so it can
-  // be cancelled if a new duck/unduck arrives mid-ramp or on cleanup.
+  // Mirror of `choice` for use inside the (stable, mount-once) gesture callback
+  // so it reads the latest value without the choice effect having to re-subscribe.
+  const choiceRef = useRef<AmbientChoice>(getAmbient());
+
+  // --- Web Audio graph (owned for the life of the app shell) -----------------
+  // Local ref pointing at the ONE shared AudioContext (see audioContext.ts),
+  // populated on first use via getSharedAudioContext(). The context itself is
+  // shared with chime.ts (iOS is unreliable with multiple contexts); only the
+  // gain node and source below are this panel's own, built on that shared
+  // context. Kept null until first needed (and null forever when Web Audio is
+  // unavailable).
+  const ctxRef = useRef<AudioContext | null>(null);
+  // The single GainNode - the one volume control for base level, duck AND mute.
+  const gainRef = useRef<GainNode | null>(null);
+  // The currently-playing source, or null when idle ('off' or not yet started).
+  // Sources are one-shot, so this is replaced on every (re)start.
+  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  // In-memory cache of decoded buffers keyed by nature choice, so re-selecting a
+  // previously-played sound starts instantly without re-fetching/decoding.
+  const bufferCacheRef = useRef<Map<AmbientChoice, AudioBuffer>>(new Map());
+
+  // Duck/mute state modelled cleanly so they stay independent:
+  //   - currentTargetRef is the duck/full target the ramp is moving toward.
+  //   - mutedRef is the momentary mute.
+  // The gain actually applied = muted ? 0 : currentTarget. Ramps update
+  // currentTargetRef and, when NOT muted, the gain node; muting forces gain to
+  // 0 without disturbing the target; unmuting restores gain to the target. This
+  // keeps a muted user silent across track switches and duck events, and reveals
+  // the right level on unmute.
+  const currentTargetRef = useRef<number>(FULL_VOLUME);
+  const mutedRef = useRef<boolean>(false);
+  // Holds the id of an in-flight gain ramp (requestAnimationFrame) so it can be
+  // cancelled if a new duck/unduck arrives mid-ramp or on cleanup.
   const rampRef = useRef<number | null>(null);
 
-  // A single long ambient track that loops — no playlist / track-change logic.
-  const currentTrack = TRACKS[0];
-
-  // The corner button toggles MUTE/UNMUTE for the current track. It does NOT
-  // change the Home enable preference and never touches play/pause.
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const next = !audio.muted;
-    audio.muted = next;
-    setMuted(next);
+  // --- lazy context/graph creation -------------------------------------------
+  // Obtain the ONE shared AudioContext (created lazily by audioContext.ts) and,
+  // on first use, build this panel's own GainNode on it, connect gain ->
+  // destination, and seed the gain to the current effective level. Best-effort:
+  // returns null when Web Audio is unavailable or construction fails, so callers
+  // degrade to silence.
+  const getContext = (): AudioContext | null => {
+    if (ctxRef.current) return ctxRef.current;
+    const context = getSharedAudioContext();
+    if (!context) return null;
+    try {
+      const gain = context.createGain();
+      gain.gain.value = mutedRef.current ? 0 : currentTargetRef.current;
+      gain.connect(context.destination);
+      ctxRef.current = context;
+      gainRef.current = gain;
+      return context;
+    } catch {
+      return null;
+    }
   };
 
-  // --- enable-driven playback (auto-play / pause) ----------------------------
-  // Subscribe to the ambient preference. On the immediate sync + every change:
-  //   enabled  -> best-effort play() now, plus a one-time gesture retry if the
-  //              browser blocked autoplay.
-  //   disabled -> pause.
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+  // Apply the effective gain (muted ? 0 : currentTarget) to the gain node right
+  // now, without ramping. Used by mute/unmute so the change is immediate.
+  const applyEffectiveGain = () => {
+    const gain = gainRef.current;
+    if (!gain) return;
+    try {
+      gain.gain.value = mutedRef.current ? 0 : currentTargetRef.current;
+    } catch {
+      /* ignore - best-effort */
+    }
+  };
 
-    // A one-time global gesture listener used to retry a blocked play(). Kept in
-    // a ref-like closure var so we can install/remove exactly one at a time.
+  // Stop and disconnect the current source (if any). Best-effort; a source that
+  // was never started, or already stopped, is handled gracefully.
+  const stopSource = () => {
+    const source = sourceRef.current;
+    sourceRef.current = null;
+    if (!source) return;
+    try {
+      source.stop();
+    } catch {
+      /* ignore - may not have started, or already stopped */
+    }
+    try {
+      source.disconnect();
+    } catch {
+      /* ignore - best-effort */
+    }
+  };
+
+  // The corner button toggles MUTE/UNMUTE for the current loop. It does NOT
+  // change the Home ambience choice and never stops/starts the source - it only
+  // forces the effective gain to 0 (mute) or restores it to the current
+  // duck/full target (unmute). Persistent across track switches via mutedRef.
+  const toggleMute = () => {
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    setMuted(next);
+    applyEffectiveGain();
+  };
+
+  // --- choice-driven playback (auto-play / off / switch) ---------------------
+  // Subscribe to the ambience choice. On the immediate sync + every change:
+  //   nature sound -> get/decode + cache the buffer, then start a fresh looping
+  //                   source through the gain node; resume the context now, and
+  //                   arm a one-time gesture retry if it is still suspended.
+  //   'off'        -> stop + disconnect the source (silence), leave graph idle.
+  // Decoding is async, so each start is guarded against races: it only starts if
+  // the decoded choice is still the current one (choiceRef) when decode resolves.
+  useEffect(() => {
+    // A one-time global gesture listener used to resume a suspended context and
+    // start playback. Kept in a closure var so we install/remove exactly one.
     let removeGestureRetry: (() => void) | null = null;
 
     const clearGestureRetry = () => {
@@ -117,21 +236,98 @@ function MusicPanel() {
       }
     };
 
-    const tryPlay = () => {
-      // Best-effort: play() may reject if no user gesture has happened yet.
-      audio.play().catch(() => {
-        /* autoplay blocked — the gesture listener below will retry */
-      });
+    // Start (or restart) a looping source for `target`, but only if `target` is
+    // still the current choice by the time its buffer is ready. Fetches +
+    // decodes on a cache miss, caches the result, then builds a fresh one-shot
+    // BufferSourceNode -> gain -> destination and starts it.
+    const startChoice = (target: AmbientChoice) => {
+      const src = ambientSrc(target);
+      if (!src) return; // 'off' has no source
+      const context = getContext();
+      if (!context) return; // Web Audio unavailable - stay silent
+
+      const cached = bufferCacheRef.current.get(target);
+      if (cached) {
+        playBuffer(target, cached);
+        return;
+      }
+
+      // Cache miss: fetch -> arrayBuffer -> decodeAudioData, then cache + play.
+      // Every step is best-effort; on any failure we simply stay silent.
+      fetch(src)
+        .then((res) => res.arrayBuffer())
+        .then((data) => context.decodeAudioData(data))
+        .then((buffer) => {
+          bufferCacheRef.current.set(target, buffer);
+          playBuffer(target, buffer);
+        })
+        .catch(() => {
+          /* fetch/decode failed - stay silent, best-effort */
+        });
+    };
+
+    // Build and start a fresh looping source for `target` from a decoded buffer.
+    // Race guard: bail if the user switched/turned off while a decode was in
+    // flight, so a stale source is never started. Also resumes the context and
+    // arms a gesture retry when the context is suspended.
+    const playBuffer = (target: AmbientChoice, buffer: AudioBuffer) => {
+      // Stale-decode guard: only start if this is still the current choice.
+      if (choiceRef.current !== target) return;
+      const context = ctxRef.current;
+      const gain = gainRef.current;
+      if (!context || !gain) return;
+
+      // Replace any running source (a switch or a re-start): sources are one-shot.
+      stopSource();
+
+      let source: AudioBufferSourceNode;
+      try {
+        source = context.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        source.connect(gain);
+        source.start();
+      } catch {
+        return; // best-effort - stay silent on any graph error
+      }
+      sourceRef.current = source;
+
+      // Resume the context now; if still suspended (no gesture yet), arm a
+      // one-time gesture retry that resumes it. The already-started, looping
+      // source will produce sound as soon as the context resumes.
+      tryResume();
+    };
+
+    // Resume the context; if it is still suspended (autoplay not yet unlocked),
+    // install a one-time pointerdown/keydown listener that resumes it.
+    const tryResume = () => {
+      const context = ctxRef.current;
+      if (!context) return;
+      try {
+        if (context.state === 'suspended') {
+          void context.resume().catch(() => {
+            /* ignore - the gesture retry below covers this */
+          });
+        }
+      } catch {
+        /* ignore - best-effort */
+      }
+      if (context.state === 'suspended') installGestureRetry();
     };
 
     const installGestureRetry = () => {
       if (removeGestureRetry) return; // already armed
       const onGesture = () => {
-        // Only retry if still enabled and not already playing.
-        if (enabledRef.current && audio.paused) {
-          audio.play().catch(() => {
-            /* still blocked/interrupted — leave paused, best-effort */
-          });
+        const context = ctxRef.current;
+        // Only resume if a nature sound is still chosen.
+        if (context && choiceRef.current !== 'off') {
+          try {
+            void context.resume().catch(() => {
+              /* still blocked - leave suspended, best-effort */
+            });
+          } catch {
+            /* ignore - best-effort */
+          }
         }
         clearGestureRetry();
       };
@@ -143,26 +339,40 @@ function MusicPanel() {
       };
     };
 
-    const unsubscribe = subscribeAmbient((next) => {
-      enabledRef.current = next;
-      setEnabled(next);
-      if (next) {
-        tryPlay();
-        // Arm a one-time gesture retry in case the immediate play() was blocked.
-        installGestureRetry();
-      } else {
+    const unsubscribe = subscribeAmbientChoice((next) => {
+      const prev = choiceRef.current;
+      choiceRef.current = next;
+      setChoice(next);
+      if (next === 'off') {
+        // 'off': stop the source and leave the graph idle. The gesture retry is
+        // no longer relevant with nothing to play.
         clearGestureRetry();
-        audio.pause();
+        stopSource();
+        return;
       }
+      // Re-notifying the SAME nature choice while it is already playing should
+      // not restart a happily-looping source (that would introduce a seam).
+      if (next === prev && sourceRef.current) {
+        // Still make sure the context is running (e.g. re-sync after suspend).
+        tryResume();
+        return;
+      }
+      startChoice(next);
     });
 
     // Explicit play requests fired from real user gestures (Generate / Start
-    // practice). This is the reliable path when the preference is already enabled
-    // on load with no prior interaction: the initial autoplay is blocked, and the
-    // user's first tap must start playback. Calling play() synchronously inside
-    // that gesture-driven request satisfies the browser's autoplay policy.
+    // practice). This is the reliable path when a sound is already chosen on
+    // load with no prior interaction: the initial autoplay is blocked, and the
+    // user's first tap must start playback. Resuming/starting synchronously
+    // inside that gesture-driven request satisfies the browser's autoplay policy.
     const unsubscribePlayRequest = subscribeAmbientPlayRequest(() => {
-      if (enabledRef.current && audio.paused) tryPlay();
+      const current = choiceRef.current;
+      if (current === 'off') return;
+      if (sourceRef.current) {
+        tryResume();
+      } else {
+        startChoice(current);
+      }
     });
 
     return () => {
@@ -172,41 +382,27 @@ function MusicPanel() {
     };
   }, []);
 
-  // Keep the muted UI in sync with the ACTUAL audio state (so the icon always
-  // reflects reality even if muted changes by some other path). The track loops
-  // natively via the audio `loop` attribute.
+  // --- ducking ---------------------------------------------------------------
+  // Subscribe to the audio bus and smoothly ramp the ambient gain between full
+  // and ducked. Only the gain TARGET is affected - the source's running state
+  // and the mute are never touched. While muted, the ramp still updates the
+  // target (so unmuting reveals the right level) but does not drive audible gain.
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleVolumeChange = () => setMuted(audio.muted);
-
-    audio.addEventListener('volumechange', handleVolumeChange);
-
-    return () => {
-      audio.removeEventListener('volumechange', handleVolumeChange);
-    };
-  }, []);
-
-  // --- ducking (unchanged) ---------------------------------------------------
-  // Subscribe to the audio bus and smoothly ramp the ambient volume between full
-  // and ducked. Only volume is affected — play/pause and mute are never touched.
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    // Smoothly move audio.volume to `target` using an eased cubic curve over a
-    // direction-aware duration (quicker to duck, slower to release), replacing
+    // Smoothly move currentTargetRef to `target` using an eased cubic curve over
+    // a direction-aware duration (quicker to duck, slower to release), replacing
     // any ramp already in flight so overlapping duck/unduck events don't fight.
+    // The gain node is written only while unmuted; while muted it stays at 0 and
+    // applyEffectiveGain() (on unmute) picks up the final target.
     const rampTo = (target: number) => {
       if (rampRef.current !== null) {
         cancelAnimationFrame(rampRef.current);
         rampRef.current = null;
       }
-      const from = audio.volume;
+      const from = currentTargetRef.current;
       const delta = target - from;
       if (Math.abs(delta) < 0.001) {
-        audio.volume = target;
+        currentTargetRef.current = target;
+        applyEffectiveGain();
         return;
       }
       // Ducking down is quicker; swelling back up is gentler and slower.
@@ -215,7 +411,16 @@ function MusicPanel() {
       const step = (now: number) => {
         const t = Math.min(1, (now - start) / duration);
         const eased = easeInOutCubic(t);
-        audio.volume = Math.max(0, Math.min(1, from + delta * eased));
+        const value = Math.max(0, Math.min(1, from + delta * eased));
+        currentTargetRef.current = value;
+        // Only drive the audible gain while unmuted; a muted track stays at 0.
+        if (!mutedRef.current && gainRef.current) {
+          try {
+            gainRef.current.gain.value = value;
+          } catch {
+            /* ignore - best-effort */
+          }
+        }
         if (t < 1) {
           rampRef.current = requestAnimationFrame(step);
         } else {
@@ -235,26 +440,42 @@ function MusicPanel() {
         cancelAnimationFrame(rampRef.current);
         rampRef.current = null;
       }
-      // Restore full volume so a later re-mount / re-play isn't left dipped.
-      audio.volume = FULL_VOLUME;
+      // Restore the full target so a later re-play isn't left dipped.
+      currentTargetRef.current = FULL_VOLUME;
+    };
+  }, []);
+
+  // --- teardown on unmount ---------------------------------------------------
+  // Best-effort cleanup of the whole graph: stop the source, disconnect the gain
+  // node, and cancel any in-flight ramp. Kept separate (empty-dep, runs once at
+  // unmount) so it doesn't fight the choice/duck effects during the app's life.
+  useEffect(() => {
+    return () => {
+      if (rampRef.current !== null) {
+        cancelAnimationFrame(rampRef.current);
+        rampRef.current = null;
+      }
+      stopSource();
+      const gain = gainRef.current;
+      if (gain) {
+        try {
+          gain.disconnect();
+        } catch {
+          /* ignore - best-effort */
+        }
+      }
     };
   }, []);
 
   return (
     <div className="music-toggle">
       {/*
-        The single, persistent audio element. Never rendered conditionally so it
-        survives navigation. Loops the one long ambient track; src is already
-        percent-encoded in TRACKS.
+        The corner button is a MUTE toggle for the currently-playing nature
+        loop. It is only meaningful while a nature sound is chosen (there is
+        nothing to mute otherwise), so it is hidden entirely when the choice is
+        'off'.
       */}
-      <audio ref={audioRef} src={currentTrack.src} loop preload="metadata" />
-
-      {/*
-        The corner button is a MUTE toggle for the currently-playing ambient
-        sound. It is only meaningful while ambient is enabled (there is nothing
-        to mute otherwise), so it is hidden entirely when disabled.
-      */}
-      {enabled && (
+      {choice !== 'off' && (
         <button
           type="button"
           className="button--icon music-toggle__btn"

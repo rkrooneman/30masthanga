@@ -27,6 +27,10 @@
  */
 
 import { requestDuck, releaseDuck } from './audioBus';
+import {
+  getSharedAudioContext,
+  resumeSharedAudioContext,
+} from './audioContext';
 
 /** Public URL of the bundled bell sound. */
 const BELL_SRC = '/audio/effects/bell.mp3';
@@ -51,32 +55,6 @@ const TRANSITION_BELL_MAX_DURATION_MS = 4000;
  * end-of-practice chime. Same audio asset, separate element.
  */
 const TRANSITION_BELL_VOLUME = 0.7;
-
-type AudioContextClass = typeof AudioContext;
-
-function getAudioContextClass(): AudioContextClass | undefined {
-  if (typeof window === 'undefined') return undefined;
-  return (
-    window.AudioContext ??
-    (window as unknown as { webkitAudioContext?: AudioContextClass })
-      .webkitAudioContext
-  );
-}
-
-// A single shared context for the life of the page (browsers recommend reuse).
-let ctx: AudioContext | null = null;
-
-function getContext(): AudioContext | null {
-  if (ctx) return ctx;
-  const Ctor = getAudioContextClass();
-  if (!Ctor) return null;
-  try {
-    ctx = new Ctor({ latencyHint: 'interactive' });
-    return ctx;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * The SINGLE persistent bell element, reused so the gesture-unlock done in
@@ -133,11 +111,11 @@ function getTransitionBellEl(): HTMLAudioElement | null {
 
 /**
  * Open the audio playback window from within a user gesture (e.g. the "Start
- * practice" tap) so later programmatic playback is allowed. Warms up an
- * AudioContext (for any Web Audio consumers) AND primes the persistent bell
- * <audio> element (muted play+pause) so the later completion bell is permitted
- * on iOS Safari. Safe to call repeatedly; no-ops gracefully when audio is
- * unavailable.
+ * practice" tap) so later programmatic playback is allowed. Warms up the ONE
+ * shared AudioContext (see audioContext.ts) - so this single unlock also covers
+ * MusicPanel's ambient engine - AND primes the persistent bell <audio> element
+ * (muted play+pause) so the later completion bell is permitted on iOS Safari.
+ * Safe to call repeatedly; no-ops gracefully when audio is unavailable.
  */
 function primeBellElement(bell: HTMLAudioElement): void {
   try {
@@ -179,13 +157,11 @@ export function unlockAudio(): void {
   const transitionBell = getTransitionBellEl();
   if (transitionBell) primeBellElement(transitionBell);
 
-  const context = getContext();
-  if (!context) return;
-  try {
-    if (context.state === 'suspended') void context.resume();
-  } catch {
-    /* ignore — audio is a best-effort enhancement */
-  }
+  // Warm up the ONE shared AudioContext (created lazily here inside the gesture)
+  // and resume it if suspended. Sharing a single context means this unlock also
+  // covers MusicPanel's ambient engine.
+  getSharedAudioContext();
+  resumeSharedAudioContext();
 }
 
 /**

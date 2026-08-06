@@ -21,11 +21,17 @@ import {
   deriveGuidanceLevel,
   poseCueFromLevel,
 } from './guidance';
+import {
+  type AmbientChoice,
+  ambientFromLegacyEnabled,
+  clampAmbientChoice,
+} from './ambient';
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
 const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
 const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
+const AMBIENT_KEY = 'ashtanga30.ambient';
 const BREATH_CUES_ENABLED_KEY = 'ashtanga30.breathCuesEnabled';
 const GUIDANCE_LEVEL_KEY = 'ashtanga30.guidanceLevel';
 const POSE_CUE_KEY = 'ashtanga30.poseCue';
@@ -121,6 +127,39 @@ export function saveAmbientEnabled(enabled: boolean): void {
     window.localStorage.setItem(AMBIENT_ENABLED_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Load the chosen ambient nature sound ('off' | 'forest' | 'rain' | 'ocean').
+ *
+ * When the new ambient key has been stored it is read back (clamped defensively
+ * via clampAmbientChoice). When it has NOT - the first run after the picker
+ * landed - the choice is MIGRATED from the legacy boolean ambient-enabled
+ * preference: an ambient-ON user becomes 'forest', an ambient-OFF (or absent)
+ * user becomes 'off' (see ambientFromLegacyEnabled). The migrated value is NOT
+ * written back here; the new key is only persisted when the user moves the
+ * slider (saveAmbient). The legacy key is left readable so this migration stays
+ * stable. Safe on storage failure (loadAmbientEnabled returns false -> 'off').
+ */
+export function loadAmbient(): AmbientChoice {
+  try {
+    const raw = window.localStorage.getItem(AMBIENT_KEY);
+    if (raw !== null) {
+      return clampAmbientChoice(raw);
+    }
+  } catch {
+    /* storage unavailable - fall through to migration */
+  }
+  return ambientFromLegacyEnabled(loadAmbientEnabled());
+}
+
+/** Persist the chosen ambient sound as its string value. Silently no-ops on storage failure. */
+export function saveAmbient(choice: AmbientChoice): void {
+  try {
+    window.localStorage.setItem(AMBIENT_KEY, choice);
+  } catch {
+    /* storage unavailable - ignore */
   }
 }
 
