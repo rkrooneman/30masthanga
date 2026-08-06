@@ -23,11 +23,10 @@
  * announcements play instead of only the first.
  *
  * === toggles ===
- * Automatic practice narration follows the single guidance level: a cue only
- * plays when the current level enables the `voice` layer (level 3), i.e.
- * `layersForLevel(loadGuidanceLevel()).voice`. The explicit pronunciation-button
- * tap (speakPoseName) is a separate, always-allowed action and does NOT follow
- * the guidance level (see speakPoseName below).
+ * Automatic practice narration follows the PoseCue: a cue only plays when the
+ * current pose cue is 'voice', i.e. `poseCueSpeaks(loadPoseCue())`. The explicit
+ * pronunciation-button tap (speakPoseName) is a separate, always-allowed action
+ * and does NOT follow the pose cue (see speakPoseName below).
  *
  * === ducking ===
  * Around each utterance we requestDuck()/releaseDuck() (see audioBus) so the
@@ -37,8 +36,8 @@
  * clip that stalls can never leave the music ducked forever.
  */
 
-import { loadGuidanceLevel } from './preferences';
-import { layersForLevel } from './guidance';
+import { loadPoseCue } from './preferences';
+import { poseCueSpeaks } from './guidance';
 import { requestDuck, releaseDuck } from './audioBus';
 
 /** Base path (literal) under which the voice mp3s are served. */
@@ -100,22 +99,21 @@ export function voiceSrc(id: string): string {
 }
 
 /**
- * Whether automatic practice narration is permitted right now: the current
- * guidance level must enable the `voice` layer (level 3). Read fresh each time
- * (not cached) so a level change takes effect on the very next cue.
+ * Whether automatic practice narration is permitted right now: the current pose
+ * cue must be 'voice' (poseCueSpeaks). Read fresh each time (not cached) so a
+ * pose-cue change takes effect on the very next cue.
  */
 function narrationEnabled(): boolean {
-  return layersForLevel(loadGuidanceLevel()).voice;
+  return poseCueSpeaks(loadPoseCue());
 }
 
 /**
  * Play one voice clip with ducking. Best-effort; silent on any failure.
  *
  * The `gate` decides whether playback is allowed: automatic practice cues use
- * `narrationEnabled` (the guidance level's `voice` layer, level 3); an explicit
- * on-demand action like the pronunciation button passes its own gate (an
- * always-true gate, so an explicit tap always speaks). Defaults to
- * `narrationEnabled`.
+ * `narrationEnabled` (the PoseCue being 'voice'); an explicit on-demand action
+ * like the pronunciation button passes its own gate (an always-true gate, so an
+ * explicit tap always speaks). Defaults to `narrationEnabled`.
  *
  * Ducking bookkeeping: requestDuck() is called before playback, and releaseDuck()
  * fires exactly once — guarded by `released` — on the first of `ended`, `error`,
@@ -210,9 +208,9 @@ export function speakPose(poseId: string): void {
 /**
  * Speak a pose's name ON DEMAND (the pronunciation button on the detail card).
  * Unlike speakPose, this is an explicit user action (an intentional tap on the
- * speaker icon to hear a name), so it plays regardless of the guidance level -
- * it is NOT tied to the level's `voice` layer. The gate is always-true so the
- * speaker button stays functional at every guidance level, including Silent.
+ * speaker icon to hear a name), so it plays regardless of the pose cue - it is
+ * NOT tied to the 'voice' cue. The gate is always-true so the speaker button
+ * stays functional at every pose cue, including 'silent'.
  */
 export function speakPoseName(poseId: string): void {
   playClip(voiceSrc(poseId), () => true);

@@ -20,10 +20,10 @@
  * gesture, later programmatic plays are permitted.
  *
  * === toggles ===
- * A tone only plays when the current guidance level enables the `breath` layer
- * (level 2 or 3), i.e. `layersForLevel(loadGuidanceLevel()).breath`. The level
- * is read fresh each call (not cached) so a level change takes effect on the
- * very next breath.
+ * A tone only plays when the separate breath-cues toggle is on, i.e.
+ * `loadBreathCuesOn()`. This is INDEPENDENT of the PoseCue (any pose cue can be
+ * paired with breath cues on or off). The toggle is read fresh each call (not
+ * cached) so a change takes effect on the very next breath.
  *
  * === ducking: "blend with music, duck WITH music" (the key design point) ===
  * Breath tones are part of the calm soundscape and are meant to BLEND with the
@@ -43,8 +43,7 @@
  * them live; each tone removes itself on `ended`/`error` so the set never leaks.
  */
 
-import { loadGuidanceLevel } from './preferences';
-import { layersForLevel } from './guidance';
+import { loadBreathCuesOn } from './preferences';
 import { subscribeDuck } from './audioBus';
 
 /** Public URLs (literal) for the two breath-tone clips. */
@@ -126,12 +125,12 @@ subscribeDuck((isDucked) => {
 });
 
 /**
- * Whether breath cues are permitted right now: the current guidance level must
- * enable the `breath` layer (level 2 or 3). Read fresh each time (not cached) so
- * a level change takes effect on the very next breath.
+ * Whether breath cues are permitted right now: the separate breath-cues toggle
+ * must be on (loadBreathCuesOn), independent of the PoseCue. Read fresh each
+ * time (not cached) so a toggle change takes effect on the very next breath.
  */
 function breathCuesEnabled(): boolean {
-  return layersForLevel(loadGuidanceLevel()).breath;
+  return loadBreathCuesOn();
 }
 
 /**

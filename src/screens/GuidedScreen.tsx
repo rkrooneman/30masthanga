@@ -149,8 +149,8 @@ import {
   stopBreathCues,
   unlockBreathCues,
 } from '../lib/breathCues';
-import { loadGuidanceLevel } from '../lib/preferences';
-import { layersForLevel } from '../lib/guidance';
+import { loadPoseCue } from '../lib/preferences';
+import { poseCueRingsBell, poseCueAnnounces } from '../lib/guidance';
 import { recordPractice } from '../lib/practiceLog';
 import { OPENING_COUNTDOWN_SECONDS, formatDuration } from '../lib/timing';
 
@@ -175,15 +175,16 @@ const FIRST_POSE_ANNOUNCE_DELAY_MS = 1000;
 /**
  * Ring the per-transition bell for a genuine pose ENTRY (a new pose, or a
  * same-pose "Switch sides" transition - each is a "move now" moment), gated on
- * the current guidance level's `bell` layer (level >= 1). The level is read
- * fresh at call time - exactly like voice/breath read their state fresh - so a
- * level change takes effect on the very next transition. A no-op at level 0
- * (Silent). Placed alongside the pose-name announcements so the bell fires in
- * the same situations a name would be spoken at level 3, but gated on `.bell`
- * (level >= 1) rather than `.voice` (level 3).
+ * the PoseCue: the bell rings ONLY at 'bell'. The cue is read fresh at call time
+ * - exactly like voice/breath read their state fresh - so a cue change takes
+ * effect on the very next transition. A no-op at 'silent' AND at 'voice': at
+ * 'voice' the spoken pose name (speakPose / speakSwitchSides, self-gated in
+ * voice.ts) replaces the per-pose bell, so the two never overlap. Placed
+ * alongside the pose-name announcements so the bell fires in the same situations
+ * a name would be spoken, but the two are mutually exclusive by cue.
  */
-function ringTransitionBellForLevel(): void {
-  if (layersForLevel(loadGuidanceLevel()).bell) playTransitionBell();
+function ringPoseBell(): void {
+  if (poseCueRingsBell(loadPoseCue())) playTransitionBell();
 }
 
 function GuidedScreen({
@@ -356,10 +357,10 @@ function GuidedScreen({
         skipAnnounceTimerRef.current = window.setTimeout(() => {
           skipAnnounceTimerRef.current = null;
           // Landing on a new pose after a manual skip is a genuine pose entry:
-          // ring the transition bell (gated on the level's bell layer) alongside
-          // the debounced name announcement.
-          ringTransitionBellForLevel();
-          // speakPose self-guards on the guidance level's voice layer.
+          // ring the transition bell (only at PoseCue 'bell') alongside the
+          // debounced name announcement.
+          ringPoseBell();
+          // speakPose self-guards on the PoseCue voice gate ('voice' only).
           speakPose(landedPose.id);
         }, SKIP_ANNOUNCE_DELAY_MS);
       }
@@ -781,10 +782,10 @@ function GuidedScreen({
       // Gate strictly on the cue so round repeats never say "switch sides".
       if (step.kind === 'transition' && step.cue === 'Switch sides') {
         // A side switch is a genuine "move now" moment: ring the transition bell
-        // (gated on the guidance level's bell layer) alongside the switch-sides
-        // voice cue, so levels 1-3 get the bell and level 3 also speaks.
-        ringTransitionBellForLevel();
-        // Self-guards on the guidance level's voice layer.
+        // (only at PoseCue 'bell') alongside the switch-sides voice cue, so
+        // 'bell' rings and 'voice' speaks instead - never both.
+        ringPoseBell();
+        // Self-guards on the PoseCue voice gate ('voice' only).
         speakSwitchSides();
       }
       return;
@@ -795,12 +796,12 @@ function GuidedScreen({
     // debounce) and any programmatic index change that lands on a new pose.
     lastAnnouncedPoseIndexRef.current = enteredPoseIndex;
     const pose = step.kind === 'breath' ? step.pose : step.toPose;
-    // Ring the transition bell for this genuine pose entry (gated on the level's
-    // bell layer), then announce the name. Fires once per pose change here (not
-    // per breath) because this branch only runs when enteredPoseIndex differs
-    // from the last announced index.
-    ringTransitionBellForLevel();
-    // speakPose self-guards on the guidance level's voice layer, so call
+    // Ring the transition bell for this genuine pose entry (only at PoseCue
+    // 'bell'), then announce the name. Fires once per pose change here (not per
+    // breath) because this branch only runs when enteredPoseIndex differs from
+    // the last announced index.
+    ringPoseBell();
+    // speakPose self-guards on the PoseCue voice gate ('voice' only), so call
     // unconditionally.
     speakPose(pose.id);
   }, [stepIndex, starting, complete, steps]);
@@ -838,11 +839,13 @@ function GuidedScreen({
   }, [stepIndex, starting, complete, steps]);
 
   // Play a single soft bell the moment the practice completes (Namaste screen),
-  // as long as the current guidance level enables the bell layer (level >= 1);
-  // at level 0 (Silent) no completion bell plays. A ref guard ensures it fires
-  // exactly once.
+  // whenever the PoseCue announces the change at all (poseCueAnnounces: 'bell'
+  // OR 'voice'); at 'silent' no completion bell plays. Unlike the per-pose bell,
+  // the completion bell rings at 'voice' too - it marks the end of practice
+  // rather than a single transition. A ref guard ensures it fires exactly once.
   // AFTER the bell has had a moment to establish, speak the closing "Namaste"
-  // (its own toggle-guard applies), sequenced so the two cues don't collide.
+  // (which self-gates on the PoseCue voice gate, so it only speaks at 'voice'),
+  // sequenced so the two cues don't collide.
   const bellPlayedRef = useRef(false);
   const namastePlayedRef = useRef(false);
   // Records the completed practice to the on-device practice log exactly once,
@@ -865,7 +868,7 @@ function GuidedScreen({
     const playCompletionSounds = () => {
       if (bellPlayedRef.current) return;
       bellPlayedRef.current = true;
-      if (layersForLevel(loadGuidanceLevel()).bell) playCompletionBell();
+      if (poseCueAnnounces(loadPoseCue())) playCompletionBell();
       if (!namastePlayedRef.current) {
         namastePlayedRef.current = true;
         // Let the bell establish first, then speak Namaste over its tail.

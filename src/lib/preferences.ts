@@ -14,8 +14,12 @@ import {
 } from './timing';
 import {
   type GuidanceLevel,
+  type PoseCue,
+  breathOnFromLevel,
   clampGuidanceLevel,
+  clampPoseCue,
   deriveGuidanceLevel,
+  poseCueFromLevel,
 } from './guidance';
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
@@ -24,6 +28,8 @@ const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
 const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
 const BREATH_CUES_ENABLED_KEY = 'ashtanga30.breathCuesEnabled';
 const GUIDANCE_LEVEL_KEY = 'ashtanga30.guidanceLevel';
+const POSE_CUE_KEY = 'ashtanga30.poseCue';
+const BREATH_CUES_ON_KEY = 'ashtanga30.breathCuesOn';
 const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
 const FULL_SERIES_KEY = 'ashtanga30.fullSeries';
 const VINYASAS_KEY = 'ashtanga30.vinyasas';
@@ -184,6 +190,97 @@ export function saveGuidanceLevel(level: GuidanceLevel): void {
       GUIDANCE_LEVEL_KEY,
       String(clampGuidanceLevel(level)),
     );
+  } catch {
+    /* storage unavailable - ignore */
+  }
+}
+
+/**
+ * Migrate the (legacy #7) guidance level - reading the stored guidanceLevel key
+ * if present, otherwise deriving from the pre-#7 per-toggle prefs. Shared by the
+ * PoseCue and breath-cue loaders below so both migrate consistently. For a
+ * brand-new user (no stored prefs at all) this resolves to level 3.
+ */
+function migratedGuidanceLevel(): GuidanceLevel {
+  try {
+    const raw = window.localStorage.getItem(GUIDANCE_LEVEL_KEY);
+    if (raw !== null) {
+      return clampGuidanceLevel(Number.parseInt(raw, 10));
+    }
+  } catch {
+    /* storage unavailable - fall through to derivation from legacy prefs */
+  }
+  return deriveGuidanceLevel({
+    soundEnabled: loadSoundEnabled(),
+    voiceEnabled: loadVoiceEnabled(),
+    breathCuesEnabled: loadBreathCuesEnabled(),
+  });
+}
+
+/**
+ * Load how a pose change is announced ('silent' | 'bell' | 'voice').
+ *
+ * When the new poseCue key has been stored it is read back (clamped defensively
+ * via clampPoseCue). When it has NOT - the first run after this split landed -
+ * the cue is MIGRATED: from the stored #7 guidanceLevel if present
+ * (poseCueFromLevel), otherwise from the pre-#7 per-toggle prefs via
+ * deriveGuidanceLevel -> poseCueFromLevel. The migrated value is NOT written
+ * back here; poseCue is only persisted when the user moves the slider
+ * (savePoseCue). Legacy keys are left readable so this migration stays stable.
+ *
+ * Safe on storage failure. For a brand-new user (no stored prefs at all) this
+ * resolves to 'voice' (full guidance).
+ */
+export function loadPoseCue(): PoseCue {
+  try {
+    const raw = window.localStorage.getItem(POSE_CUE_KEY);
+    if (raw !== null) {
+      return clampPoseCue(raw);
+    }
+  } catch {
+    /* storage unavailable - fall through to migration */
+  }
+  return poseCueFromLevel(migratedGuidanceLevel());
+}
+
+/** Persist the pose cue as its string value. Silently no-ops on storage failure. */
+export function savePoseCue(cue: PoseCue): void {
+  try {
+    window.localStorage.setItem(POSE_CUE_KEY, cue);
+  } catch {
+    /* storage unavailable - ignore */
+  }
+}
+
+/**
+ * Load whether the soft breath cues (inhale/exhale tones) are on.
+ *
+ * When the new breathCuesOn key has been stored it is read back (only an
+ * explicit "1" is true). When it has NOT - the first run after this split
+ * landed - the value is MIGRATED: from the stored #7 guidanceLevel if present
+ * (breathOnFromLevel), otherwise from the pre-#7 per-toggle prefs via
+ * deriveGuidanceLevel -> breathOnFromLevel. The migrated value is NOT written
+ * back here; it is only persisted when the user toggles it (saveBreathCuesOn).
+ *
+ * Safe on storage failure. For a brand-new user (no stored prefs at all) this
+ * resolves to true.
+ */
+export function loadBreathCuesOn(): boolean {
+  try {
+    const raw = window.localStorage.getItem(BREATH_CUES_ON_KEY);
+    if (raw !== null) {
+      return raw === '1';
+    }
+  } catch {
+    /* storage unavailable - fall through to migration */
+  }
+  return breathOnFromLevel(migratedGuidanceLevel());
+}
+
+/** Persist the breath-cues-on preference. Silently no-ops on storage failure. */
+export function saveBreathCuesOn(on: boolean): void {
+  try {
+    window.localStorage.setItem(BREATH_CUES_ON_KEY, on ? '1' : '0');
   } catch {
     /* storage unavailable - ignore */
   }

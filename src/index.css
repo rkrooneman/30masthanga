@@ -916,27 +916,28 @@ body {
   border-top: 1px solid var(--color-border);
 }
 
-/* Guidance slider: sits directly under the breath-pace slider so the two
-   "how you practice" dials read as a pair. Reuses the .field / .slider styles;
-   spacing comes from the .home__controls flex gap (no extra margin), so it sits
-   evenly with the other controls. Only the little stop labels need their own
-   rule. */
+/* Pose-cues slider: sits under the breath-pace slider so the two "how you
+   practice" dials read as a pair. Reuses the .field / .slider styles; spacing
+   comes from the .home__controls flex gap (no extra margin), so it sits evenly
+   with the other controls. Only the little stop labels need their own rule. */
 
-/* Calm, muted stop labels under the guidance slider, spread across its width so
+/* Calm, muted stop labels under the pose-cues slider, spread across its width so
    each roughly aligns with a step. Purely decorative (aria-hidden); the value
    line + aria-valuetext carry the accessible name. */
-.home__guidance-stops {
+.home__pose-cues-stops {
   display: flex;
   justify-content: space-between;
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
-/* Home-specific placement: the reused .basics-toggle switch sits in the Home
-   controls column; spacing comes from the .home__controls flex gap (no extra
-   margin) so it lines up evenly with the sliders above. Its label is bolded to
-   match the .field__label weight of the Breath pace / Guidance labels (Home
-   only - the shared .basics-toggle__text stays regular on other screens). */
+/* Home-specific placement: the reused .basics-toggle switches (Breath cues,
+   Ambient sound) sit in the Home controls column; spacing comes from the
+   .home__controls flex gap (no extra margin) so they line up evenly with the
+   sliders above. Their labels are bolded to match the .field__label weight of
+   the Breath pace / Pose cues labels (Home only - the shared
+   .basics-toggle__text stays regular on other screens). */
+.home__breath-toggle .basics-toggle__text,
 .home__ambient-toggle .basics-toggle__text {
   font-weight: 500;
 }

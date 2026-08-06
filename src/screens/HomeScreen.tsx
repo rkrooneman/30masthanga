@@ -12,8 +12,17 @@ import { poses } from '../data/poses';
 import { generatePractice } from '../lib/generatePractice';
 import { formatDuration, MIN_BREATH_SECONDS, MAX_BREATH_SECONDS } from '../lib/timing';
 import { mulberry32 } from '../lib/mulberry32';
-import { loadGuidanceLevel, saveGuidanceLevel } from '../lib/preferences';
-import { type GuidanceLevel, clampGuidanceLevel } from '../lib/guidance';
+import {
+  loadPoseCue,
+  savePoseCue,
+  loadBreathCuesOn,
+  saveBreathCuesOn,
+} from '../lib/preferences';
+import {
+  type PoseCue,
+  poseCueToIndex,
+  indexToPoseCue,
+} from '../lib/guidance';
 import { getAmbientEnabled, setAmbientEnabled } from '../lib/ambientPref';
 import LotusMark from '../components/LotusMark';
 import PracticeWeek from '../components/PracticeWeek';
@@ -27,15 +36,14 @@ import PracticeWeek from '../components/PracticeWeek';
 const ESTIMATE_SEED = 1;
 
 /**
- * Human-readable name for each guidance level. Used for the slider's value line
- * and its aria-valuetext, so screen readers announce "Full guidance" rather
- * than the bare numeric "3". Mirrors the cumulative layer table in guidance.ts.
+ * Human-readable name for each pose cue. Used for the slider's value line and
+ * its aria-valuetext, so screen readers announce "Voice" rather than the bare
+ * numeric index. Mirrors POSE_CUE_ORDER in guidance.ts.
  */
-const GUIDANCE_LABELS: Record<GuidanceLevel, string> = {
-  0: 'Silent',
-  1: 'Bell',
-  2: 'Bell + breath',
-  3: 'Full guidance',
+const POSE_CUE_LABELS: Record<PoseCue, string> = {
+  silent: 'Silent',
+  bell: 'Bell',
+  voice: 'Voice',
 };
 
 function HomeScreen({
@@ -47,21 +55,29 @@ function HomeScreen({
   // (not in the shell) since it's purely presentational and Home-only.
   const [aboutOpen, setAboutOpen] = useState(false);
 
-  // Guidance level (0..3). A single stepped dial that replaces the old separate
-  // Voice + Breath-cues toggles: the guided player and audio libs read the level
-  // fresh from storage (via layersForLevel), so it never needs to thread through
-  // App. Seeded from storage (which one-time-migrates the legacy toggles),
-  // persisted on change.
-  const [guidanceLevel, setGuidanceLevel] = useState<GuidanceLevel>(
-    loadGuidanceLevel,
-  );
+  // Pose cue (silent | bell | voice). How a pose change is announced: a 3-stop
+  // slider whose values are alternatives, not layers. The guided player and
+  // audio libs read the cue fresh from storage, so it never needs to thread
+  // through App. Seeded from storage (which one-time-migrates the legacy #7
+  // level), persisted on change.
+  const [poseCue, setPoseCue] = useState<PoseCue>(loadPoseCue);
 
-  const handleGuidanceChange = (
+  const handlePoseCueChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const next = clampGuidanceLevel(Number(event.target.value));
-    setGuidanceLevel(next);
-    saveGuidanceLevel(next);
+    const next = indexToPoseCue(Number(event.target.value));
+    setPoseCue(next);
+    savePoseCue(next);
+  };
+
+  // Breath cues on/off. Whether the soft inhale/exhale tones play; orthogonal to
+  // the pose cue. Read fresh from storage by the audio libs. Seeded from storage
+  // (which one-time-migrates the legacy #7 level), persisted on change.
+  const [breathCuesOn, setBreathCuesOn] = useState<boolean>(loadBreathCuesOn);
+
+  const handleBreathCuesToggle = (next: boolean) => {
+    setBreathCuesOn(next);
+    saveBreathCuesOn(next);
   };
 
   // Ambient-sound toggle. The persistent enable/disable preference for the
@@ -163,30 +179,48 @@ function HomeScreen({
           </span>
         </p>
 
-        <div className="field home__guidance">
+        <div className="field home__pose-cues">
           <div className="field__label-row">
-            <label className="field__label" htmlFor="guidance-level">
-              Guidance
+            <label className="field__label" htmlFor="pose-cues">
+              Pose cues
             </label>
-            <span className="field__value">{GUIDANCE_LABELS[guidanceLevel]}</span>
+            <span className="field__value">{POSE_CUE_LABELS[poseCue]}</span>
           </div>
           <input
-            id="guidance-level"
+            id="pose-cues"
             className="slider"
             type="range"
             min={0}
-            max={3}
+            max={2}
             step={1}
-            value={guidanceLevel}
-            onChange={handleGuidanceChange}
-            aria-valuetext={GUIDANCE_LABELS[guidanceLevel]}
+            value={poseCueToIndex(poseCue)}
+            onChange={handlePoseCueChange}
+            aria-valuetext={POSE_CUE_LABELS[poseCue]}
           />
-          <div className="home__guidance-stops" aria-hidden="true">
+          <div className="home__pose-cues-stops" aria-hidden="true">
             <span>Silent</span>
             <span>Bell</span>
-            <span>Breath</span>
             <span>Voice</span>
           </div>
+        </div>
+
+        <div className="basics-toggle home__breath-toggle">
+          <label className="basics-toggle__label" htmlFor="breath-cues-switch">
+            <span className="basics-toggle__text">Breath cues</span>
+            <input
+              type="checkbox"
+              id="breath-cues-switch"
+              className="basics-toggle__input"
+              checked={breathCuesOn}
+              onChange={(e) => handleBreathCuesToggle(e.target.checked)}
+            />
+            <span className="basics-toggle__track" aria-hidden="true">
+              <span className="basics-toggle__thumb" />
+            </span>
+          </label>
+          <p className="basics-toggle__hint">
+            Soft inhale and exhale tones to pace your breath.
+          </p>
         </div>
 
         <div className="basics-toggle home__ambient-toggle">
