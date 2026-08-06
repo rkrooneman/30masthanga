@@ -916,22 +916,29 @@ body {
   border-top: 1px solid var(--color-border);
 }
 
-/* Home-specific placement: the reused .basics-toggle switch sits calmly in the
-   Home controls column, given a little breathing room above it. */
-.home__voice-toggle {
-  margin-top: var(--space-3);
+/* Guidance slider: sits directly under the breath-pace slider so the two
+   "how you practice" dials read as a pair. Reuses the .field / .slider styles;
+   spacing comes from the .home__controls flex gap (no extra margin), so it sits
+   evenly with the other controls. Only the little stop labels need their own
+   rule. */
+
+/* Calm, muted stop labels under the guidance slider, spread across its width so
+   each roughly aligns with a step. Purely decorative (aria-hidden); the value
+   line + aria-valuetext carry the accessible name. */
+.home__guidance-stops {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
-/* The ambient-sound switch stacks directly under the voice one with matching
-   spacing, so the two toggles read as a pair. */
-.home__ambient-toggle {
-  margin-top: var(--space-3);
-}
-
-/* The breath-cues switch stacks under the ambient one with matching spacing, so
-   the sound toggles read as a consistent group. */
-.home__breath-toggle {
-  margin-top: var(--space-3);
+/* Home-specific placement: the reused .basics-toggle switch sits in the Home
+   controls column; spacing comes from the .home__controls flex gap (no extra
+   margin) so it lines up evenly with the sliders above. Its label is bolded to
+   match the .field__label weight of the Breath pace / Guidance labels (Home
+   only - the shared .basics-toggle__text stays regular on other screens). */
+.home__ambient-toggle .basics-toggle__text {
+  font-weight: 500;
 }
 
 /* --------------------------------------------------------------------------

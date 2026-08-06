@@ -12,12 +12,8 @@ import { poses } from '../data/poses';
 import { generatePractice } from '../lib/generatePractice';
 import { formatDuration, MIN_BREATH_SECONDS, MAX_BREATH_SECONDS } from '../lib/timing';
 import { mulberry32 } from '../lib/mulberry32';
-import {
-  loadVoiceEnabled,
-  saveVoiceEnabled,
-  loadBreathCuesEnabled,
-  saveBreathCuesEnabled,
-} from '../lib/preferences';
+import { loadGuidanceLevel, saveGuidanceLevel } from '../lib/preferences';
+import { type GuidanceLevel, clampGuidanceLevel } from '../lib/guidance';
 import { getAmbientEnabled, setAmbientEnabled } from '../lib/ambientPref';
 import LotusMark from '../components/LotusMark';
 import PracticeWeek from '../components/PracticeWeek';
@@ -30,6 +26,18 @@ import PracticeWeek from '../components/PracticeWeek';
  */
 const ESTIMATE_SEED = 1;
 
+/**
+ * Human-readable name for each guidance level. Used for the slider's value line
+ * and its aria-valuetext, so screen readers announce "Full guidance" rather
+ * than the bare numeric "3". Mirrors the cumulative layer table in guidance.ts.
+ */
+const GUIDANCE_LABELS: Record<GuidanceLevel, string> = {
+  0: 'Silent',
+  1: 'Bell',
+  2: 'Bell + breath',
+  3: 'Full guidance',
+};
+
 function HomeScreen({
   breathSeconds,
   onBreathSecondsChange,
@@ -39,15 +47,21 @@ function HomeScreen({
   // (not in the shell) since it's purely presentational and Home-only.
   const [aboutOpen, setAboutOpen] = useState(false);
 
-  // Voice-guidance toggle. Purely a Home-side presentational control (like the
-  // About dialog): the guided player reads the preference fresh from storage, so
-  // this never needs to thread through App. Seeded from storage, persisted on
-  // change.
-  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(loadVoiceEnabled);
+  // Guidance level (0..3). A single stepped dial that replaces the old separate
+  // Voice + Breath-cues toggles: the guided player and audio libs read the level
+  // fresh from storage (via layersForLevel), so it never needs to thread through
+  // App. Seeded from storage (which one-time-migrates the legacy toggles),
+  // persisted on change.
+  const [guidanceLevel, setGuidanceLevel] = useState<GuidanceLevel>(
+    loadGuidanceLevel,
+  );
 
-  const handleVoiceToggle = (next: boolean) => {
-    setVoiceEnabled(next);
-    saveVoiceEnabled(next);
+  const handleGuidanceChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const next = clampGuidanceLevel(Number(event.target.value));
+    setGuidanceLevel(next);
+    saveGuidanceLevel(next);
   };
 
   // Ambient-sound toggle. The persistent enable/disable preference for the
@@ -60,19 +74,6 @@ function HomeScreen({
   const handleAmbientToggle = (next: boolean) => {
     setAmbientEnabledState(next);
     setAmbientEnabled(next);
-  };
-
-  // Breath-cues toggle. Like voice guidance, this is a purely Home-side control:
-  // breathCues.ts reads the preference fresh from storage at play time, so it
-  // never needs to thread through App or a pub/sub. Seeded from storage,
-  // persisted on change.
-  const [breathCuesEnabled, setBreathCuesEnabled] = useState<boolean>(
-    loadBreathCuesEnabled,
-  );
-
-  const handleBreathCuesToggle = (next: boolean) => {
-    setBreathCuesEnabled(next);
-    saveBreathCuesEnabled(next);
   };
 
   // Close the About dialog on Escape while it's open.
@@ -162,23 +163,30 @@ function HomeScreen({
           </span>
         </p>
 
-        <div className="basics-toggle home__voice-toggle">
-          <label className="basics-toggle__label" htmlFor="voice-guidance-switch">
-            <span className="basics-toggle__text">Voice guidance</span>
-            <input
-              type="checkbox"
-              id="voice-guidance-switch"
-              className="basics-toggle__input"
-              checked={voiceEnabled}
-              onChange={(e) => handleVoiceToggle(e.target.checked)}
-            />
-            <span className="basics-toggle__track" aria-hidden="true">
-              <span className="basics-toggle__thumb" />
-            </span>
-          </label>
-          <p className="basics-toggle__hint">
-            Announces each pose name as you flow.
-          </p>
+        <div className="field home__guidance">
+          <div className="field__label-row">
+            <label className="field__label" htmlFor="guidance-level">
+              Guidance
+            </label>
+            <span className="field__value">{GUIDANCE_LABELS[guidanceLevel]}</span>
+          </div>
+          <input
+            id="guidance-level"
+            className="slider"
+            type="range"
+            min={0}
+            max={3}
+            step={1}
+            value={guidanceLevel}
+            onChange={handleGuidanceChange}
+            aria-valuetext={GUIDANCE_LABELS[guidanceLevel]}
+          />
+          <div className="home__guidance-stops" aria-hidden="true">
+            <span>Silent</span>
+            <span>Bell</span>
+            <span>Breath</span>
+            <span>Voice</span>
+          </div>
         </div>
 
         <div className="basics-toggle home__ambient-toggle">
@@ -197,25 +205,6 @@ function HomeScreen({
           </label>
           <p className="basics-toggle__hint">
             Plays a calm ambient track during practice.
-          </p>
-        </div>
-
-        <div className="basics-toggle home__breath-toggle">
-          <label className="basics-toggle__label" htmlFor="breath-cues-switch">
-            <span className="basics-toggle__text">Breath cues</span>
-            <input
-              type="checkbox"
-              id="breath-cues-switch"
-              className="basics-toggle__input"
-              checked={breathCuesEnabled}
-              onChange={(e) => handleBreathCuesToggle(e.target.checked)}
-            />
-            <span className="basics-toggle__track" aria-hidden="true">
-              <span className="basics-toggle__thumb" />
-            </span>
-          </label>
-          <p className="basics-toggle__hint">
-            Soft inhale and exhale sounds as you breathe.
           </p>
         </div>
       </div>

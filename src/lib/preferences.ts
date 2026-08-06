@@ -12,12 +12,18 @@ import {
   MIN_BREATH_SECONDS,
   MAX_BREATH_SECONDS,
 } from './timing';
+import {
+  type GuidanceLevel,
+  clampGuidanceLevel,
+  deriveGuidanceLevel,
+} from './guidance';
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
 const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
 const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
 const BREATH_CUES_ENABLED_KEY = 'ashtanga30.breathCuesEnabled';
+const GUIDANCE_LEVEL_KEY = 'ashtanga30.guidanceLevel';
 const BASICS_ONLY_KEY = 'ashtanga30.basicsOnly';
 const FULL_SERIES_KEY = 'ashtanga30.fullSeries';
 const VINYASAS_KEY = 'ashtanga30.vinyasas';
@@ -133,6 +139,53 @@ export function saveBreathCuesEnabled(enabled: boolean): void {
     window.localStorage.setItem(BREATH_CUES_ENABLED_KEY, enabled ? '1' : '0');
   } catch {
     /* storage unavailable — ignore */
+  }
+}
+
+/**
+ * Load the stepped guidance level (0..3). See guidance.ts for the level ->
+ * layers table.
+ *
+ * When an explicit level has been stored it is read back (clamped defensively
+ * via clampGuidanceLevel). When NO level has been stored yet - the first run
+ * after this feature landed - the level is DERIVED from the pre-existing
+ * per-toggle preferences (soundEnabled / voiceEnabled / breathCuesEnabled) via
+ * deriveGuidanceLevel, so returning users are not reset. The derived value is
+ * NOT written back here; guidanceLevel is only persisted when the user moves
+ * the slider (saveGuidanceLevel). The legacy keys are intentionally left in
+ * place and readable so this migration stays stable.
+ *
+ * Safe on storage failure (falls back to the derived value, which for the
+ * defaults of a brand-new user is 3 = full guidance).
+ */
+export function loadGuidanceLevel(): GuidanceLevel {
+  try {
+    const raw = window.localStorage.getItem(GUIDANCE_LEVEL_KEY);
+    if (raw !== null) {
+      return clampGuidanceLevel(Number.parseInt(raw, 10));
+    }
+  } catch {
+    /* storage unavailable - fall through to derivation from legacy prefs */
+  }
+  return deriveGuidanceLevel({
+    soundEnabled: loadSoundEnabled(),
+    voiceEnabled: loadVoiceEnabled(),
+    breathCuesEnabled: loadBreathCuesEnabled(),
+  });
+}
+
+/**
+ * Persist the guidance level. The value is clamped to 0..3 before storage and
+ * written as its string digit. Silently no-ops if storage is unavailable.
+ */
+export function saveGuidanceLevel(level: GuidanceLevel): void {
+  try {
+    window.localStorage.setItem(
+      GUIDANCE_LEVEL_KEY,
+      String(clampGuidanceLevel(level)),
+    );
+  } catch {
+    /* storage unavailable - ignore */
   }
 }
 
