@@ -44,6 +44,7 @@ import {
 } from '../lib/timing';
 import PoseGraphic from '../components/PoseGraphic';
 import { BackArrow } from '../components/icons/NavArrow';
+import { COUNTER_POSE_ID } from '../lib/counterPose';
 
 /** The full catalog in canonical order — the grid renders every pose. */
 const CATALOG_IN_ORDER = catalog.slice().sort((a, b) => a.order - b.order);
@@ -100,6 +101,13 @@ interface PoseMapProps {
   vinyasas: boolean;
   /** Toggle "Vinyasas" mode (parent persists + regenerates for the new budget). */
   onToggleVinyasas: (next: boolean) => void;
+  /**
+   * True when a backbend (Bridge / Wheel) is currently selected, so the closing
+   * Paschimottanasana counter is force-included and its checkbox is locked
+   * (checked + disabled), mirroring the fixed-frame lock. False (or absent) when
+   * no backbend is selected, leaving the counter a normal toggleable checkbox.
+   */
+  counterPoseLocked?: boolean;
 }
 
 /** A pose paired with its absolute index in the full catalog. */
@@ -152,6 +160,7 @@ function PoseMap({
   onToggleFullSeries,
   vinyasas,
   onToggleVinyasas,
+  counterPoseLocked = false,
 }: PoseMapProps) {
   // The grand total comes from the DERIVED practice (selected poses only), so it
   // is honest even past 30:00 — no cap, no warning.
@@ -279,6 +288,14 @@ function PoseMap({
                   // Fixed-frame poses are always included and can never be
                   // unchecked: checked + disabled (locked).
                   const isFixed = pose.alwaysInclude;
+                  // The closing Paschimottanasana counter is locked (checked +
+                  // disabled) whenever a backbend (Bridge / Wheel) is selected,
+                  // because it is that backbend's mandatory safety counter-pose.
+                  const isCounterLocked =
+                    counterPoseLocked === true && pose.id === COUNTER_POSE_ID;
+                  // Either lock disables the checkbox; the visual dimming reuses
+                  // the shared `.pose-map__select-input:disabled` styling.
+                  const isLocked = isFixed || isCounterLocked;
                   const checkboxId = `pose-select-${pose.id}`;
                   return (
                     <li
@@ -319,21 +336,25 @@ function PoseMap({
                         htmlFor={checkboxId}
                         title={
                           isFixed
-                            ? 'Always included — cannot be removed'
-                            : undefined
+                            ? 'Always included - cannot be removed'
+                            : isCounterLocked
+                              ? 'Counter-pose to Bridge / Wheel - always included with them'
+                              : undefined
                         }
                       >
                         <input
                           type="checkbox"
                           id={checkboxId}
                           className="pose-map__select-input"
-                          checked={isSelected}
-                          disabled={isFixed}
+                          checked={isSelected || isCounterLocked}
+                          disabled={isLocked}
                           onChange={() => onToggleSelected(pose.id)}
                           aria-label={
                             isFixed
                               ? `${pose.sanskrit} (always included)`
-                              : `Include ${pose.sanskrit}`
+                              : isCounterLocked
+                                ? `${pose.sanskrit} (counter-pose, always included with Bridge or Wheel)`
+                                : `Include ${pose.sanskrit}`
                           }
                         />
                         <span

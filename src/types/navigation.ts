@@ -82,6 +82,12 @@ export interface OverviewScreenProps {
    * generated set with the new flag so the pose count reflects the new budget.
    */
   onToggleVinyasas: (next: boolean) => void;
+  /**
+   * Whether the closing counter-pose is currently rule-locked (a backbend is
+   * selected, so the counter is forced in and its checkbox must not be toggled
+   * off). Task 4 consumes this in PoseMap to lock the counter's checkbox.
+   */
+  counterPoseLocked?: boolean;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */

@@ -44,6 +44,11 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import type { Screen } from './types/navigation';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
+import {
+  applyCounterPoseRule,
+  COUNTER_POSE_ID,
+  isCounterPoseLocked,
+} from './lib/counterPose';
 import { ROOT_SCREEN } from './lib/navHistory';
 import { buildSelectedPractice } from './lib/selectedPractice';
 import { seedFakePractice } from './lib/practiceLog';
@@ -131,6 +136,12 @@ function App() {
     [selectedIds, breathSeconds, vinyasas],
   );
 
+  // Whether the closing counter-pose is currently rule-locked: true when a
+  // backbend is in the selection, in which case the counter is forced in and its
+  // checkbox must not be toggled off. Passed to the Overview so Task 4 can lock
+  // the counter's checkbox in PoseMap.
+  const counterPoseLocked = isCounterPoseLocked(selectedIds ?? new Set());
+
   // Browser-history <-> screen-state sync (see the module doc for the model).
   // A single mount-time popstate listener is the ONLY navigation-driven caller
   // of setScreen. Every FORWARD navigation pushes a history entry carrying its
@@ -210,7 +221,11 @@ function App() {
       basicsOnly: basics,
       vinyasas: vin,
     });
-    setSelectedIds(new Set(generated.poses.map((p) => p.id)));
+    // Normalize through the counter-pose rule (belt-and-suspenders): the
+    // generator already includes the closing counter when a backbend is present
+    // (Task 2), but running the same normalizer here keeps App the single source
+    // of truth for the rule.
+    setSelectedIds(applyCounterPoseRule(generated.poses.map((p) => p.id)));
     setFullSeries(false);
     saveFullSeriesEnabled(false);
   };
@@ -244,13 +259,22 @@ function App() {
   const handleToggleSelected = (poseId: string) => {
     if (fixedFrameIds.has(poseId)) return;
     const base = selectedIds ?? new Set<string>();
-    const next = new Set(base);
-    if (next.has(poseId)) next.delete(poseId);
-    else next.add(poseId);
+    // Rule guard: while a backbend is selected the closing counter is locked in
+    // and MUST NOT be toggled off (mirrors the fixed-frame early-return above).
+    // The checkbox lock is Task 4's UI, but a stray toggle is refused here too.
+    if (poseId === COUNTER_POSE_ID && isCounterPoseLocked(base)) return;
+    const toggled = new Set(base);
+    if (toggled.has(poseId)) toggled.delete(poseId);
+    else toggled.add(poseId);
+    // Normalize AFTER the user's add/remove so the counter's presence follows
+    // the backbends: checking a backbend auto-adds the counter, and unchecking
+    // the last backbend auto-removes it. Idempotent for non-backbend toggles.
+    const next = applyCounterPoseRule(toggled);
     setSelectedIds(next);
     // Keep the "Full series" toggle honest: it is on exactly when every catalog
     // pose is selected. Unchecking any pose turns it off; checking the final
-    // remaining pose turns it on.
+    // remaining pose turns it on. Recompute against the NORMALIZED set so the
+    // auto-added/removed counter is reflected.
     const allSelected = poses.every((p) => next.has(p.id));
     if (allSelected !== fullSeries) {
       setFullSeries(allSelected);
@@ -279,7 +303,10 @@ function App() {
     if (next) {
       setBasicsOnly(false);
       saveBasicsOnly(false);
-      setSelectedIds(new Set(poses.map((p) => p.id)));
+      // Every catalog pose includes both backbends, so the counter is already
+      // in; normalize anyway to keep the rule applied consistently at every
+      // selection write site (a no-op here).
+      setSelectedIds(applyCounterPoseRule(poses.map((p) => p.id)));
     } else {
       // Regenerate a fresh <=30-min set. seedFromGenerated also clears Full
       // series (already false here) - harmless and keeps the invariant.
@@ -430,6 +457,7 @@ function App() {
               onToggleFullSeries={handleToggleFullSeries}
               vinyasas={vinyasas}
               onToggleVinyasas={handleToggleVinyasas}
+              counterPoseLocked={counterPoseLocked}
             />
           </Suspense>
         )}

@@ -15,6 +15,7 @@
  */
 
 import type { Pose, PoseCategory } from '../types/pose';
+import { COUNTER_POSE_ID, applyCounterPoseRule, hasBackbend } from './counterPose';
 import {
   DEFAULT_BREATH_SECONDS,
   TARGET_SECONDS,
@@ -340,6 +341,30 @@ export function generatePractice(
     }
   }
 
+  // --- F (part 3). Force-include the mandatory backbend counter-pose ---
+  // If the selection contains a deep backbend (Bridge/Wheel), the closing
+  // forward-fold counter `paschimottanasana_closing` MUST also be present (the
+  // shared safety rule in counterPose.ts). The backbends are only ever added by
+  // the fill (they are fillable, not fixed frame), so in generation the rule can
+  // only ever ADD the counter here; we never force-REMOVE it. If the closing
+  // fill happened to pick the counter WITHOUT a backbend, that is fine: it stays
+  // as a normal chosen closing pose and is left untouched.
+  //
+  // We consult `applyCounterPoseRule` on the selected id set as the single source
+  // of truth for "should the counter be present", then push the real catalog Pose
+  // object when the rule requires it and it is not already selected. The counter
+  // is a `closing` pose (canonical order 450), so `assemble`'s order sort lands it
+  // after the backbends (430/440) automatically.
+  const selectedIds = new Set(selected.map((p) => p.id));
+  const ruledIds = applyCounterPoseRule(selectedIds);
+  if (ruledIds.has(COUNTER_POSE_ID) && !selectedIds.has(COUNTER_POSE_ID)) {
+    const counter = all.find((p) => p.id === COUNTER_POSE_ID);
+    if (counter) {
+      selected.push(counter);
+      sectionOfSelected.set(counter.id, CLOSING_SECTION);
+    }
+  }
+
   // --- E. Assemble, sort by canonical order, enforce the hard ceiling ---
   const assemble = (sel: Pose[]): Pose[] =>
     [...fixed, ...sel].sort((a, b) => a.order - b.order);
@@ -365,8 +390,27 @@ export function generatePractice(
       // `removable.length === 0` guard below still lets the trim bottom out
       // rather than loop forever in the extreme case where protecting the
       // finisher would otherwise make it impossible to get under the ceiling.
+      //
+      // BUDGETING THE COUNTER: while a deep backbend remains in `working`, the
+      // safety rule requires the counter, so it is ALSO non-removable. This makes
+      // the trim drop OTHER fillers instead, guaranteeing both that the counter
+      // survives whenever a backbend is present in the final result AND that the
+      // hard ceiling is still reached (some other removable pose is dropped each
+      // iteration; the counter is only 5 breaths). "Backbend present" is
+      // recomputed against the CURRENT `working` set each iteration: if the trim
+      // removes the last backbend (a backbend is a normal filler and MAY be
+      // trimmed), the counter becomes removable again from that point on. Keeping
+      // it would be harmless (it is just a normal closing forward fold), but
+      // letting it become removable keeps the ceiling logic maximally simple and
+      // avoids protecting a pose the rule no longer requires. We never force-remove
+      // the counter mid-trim; it is only ever made eligible for the normal
+      // section-based trim once no backbend remains.
+      const backbendInWorking = hasBackbend(working.map((p) => p.id));
       const removable = working.filter(
-        (p) => !FIXED_FRAME_IDS.has(p.id) && p.id !== protectedFinisherId,
+        (p) =>
+          !FIXED_FRAME_IDS.has(p.id) &&
+          p.id !== protectedFinisherId &&
+          !(backbendInWorking && p.id === COUNTER_POSE_ID),
       );
       if (removable.length === 0) break; // can't trim further (should not happen)
 

@@ -11,6 +11,7 @@
 
 import type { Pose } from '../types/pose';
 import { poses } from '../data/poses';
+import { BACKBEND_IDS, COUNTER_POSE_ID } from './counterPose';
 import { generatePractice } from './generatePractice';
 import {
   MAX_BREATH_SECONDS,
@@ -138,6 +139,21 @@ function runInvariants(seq: Pose[], totalSeconds: number, ctx: string): void {
     `${ctx}: at least one closing pose must be present (protected finisher)`,
   );
 
+  // 8c. mandatory backbend counter-pose: if the practice contains a deep
+  // backbend (Bridge/Wheel), it MUST also contain the closing forward-fold
+  // counter `paschimottanasana_closing`. Enforced across the whole seed sweep
+  // (this invariant runs in default, basicsOnly, and vinyasas modes).
+  const hasAnyBackbend = ids.some((id) =>
+    (BACKBEND_IDS as readonly string[]).includes(id),
+  );
+  if (hasAnyBackbend) {
+    check(
+      ids.includes(COUNTER_POSE_ID),
+      `${ctx}: a backbend is present so the counter (${COUNTER_POSE_ID}) ` +
+        `must also be present (ids: ${ids.join(', ')})`,
+    );
+  }
+
   // 9. reported totalSeconds matches recomputation
   // (uses the same breathSeconds embedded in ctx via closure below)
 }
@@ -200,17 +216,27 @@ for (const breathSeconds of BREATHS) {
     // ceiling, protected finisher, etc.).
     runInvariants(result.poses, result.totalSeconds, ctx);
 
-    // (i) only basic-set poses appear.
-    const nonBasic = result.poses.filter((p) => !basicIds.has(p.id));
+    // (i) only basic-set poses appear, with ONE permitted exception: the
+    // mandatory backbend counter `paschimottanasana_closing`. It is not itself a
+    // basic pose (isBasic === false), but the safety rule force-includes it
+    // whenever a backbend is generated (and the basic pool reliably contains the
+    // basic backbends Bridge/Wheel), so a basics-only practice may legitimately
+    // carry the counter as a safety-mandated addition. Everything ELSE must be
+    // basic.
+    const nonBasic = result.poses.filter(
+      (p) => !basicIds.has(p.id) && p.id !== COUNTER_POSE_ID,
+    );
     check(
       nonBasic.length === 0,
-      `${ctx}: only basic-set poses may appear ` +
+      `${ctx}: only basic-set poses (plus the mandatory counter) may appear ` +
         `(offenders: ${nonBasic.map((p) => p.id).join(', ')})`,
     );
-    // Every appearing pose is also flagged isBasic in the catalog.
+    // Every appearing pose is flagged isBasic in the catalog, except the
+    // safety-mandated counter which is deliberately not basic.
     check(
-      result.poses.every((p) => p.isBasic),
-      `${ctx}: every pose in a basics-only practice must have isBasic === true`,
+      result.poses.every((p) => p.isBasic || p.id === COUNTER_POSE_ID),
+      `${ctx}: every pose in a basics-only practice must have isBasic === true ` +
+        `(except the mandatory counter ${COUNTER_POSE_ID})`,
     );
   }
 }
@@ -291,6 +317,57 @@ check(
   `vinyasas: aggregate seated-pose count with vinyasas on ` +
     `(${totalSeatedVin}) must be fewer than off (${totalSeatedNoVin}) across ` +
     `the whole seed/pace matrix`,
+);
+
+// ---------------------------------------------------------------------------
+// Backbend counter-pose (Task 2): targeted coverage.
+//   (i)  Across the full seed/pace matrix (default + basicsOnly modes), at least
+//        ONE generated practice actually contains a backbend, proving the
+//        force-include + budgeting path is genuinely exercised (not vacuously
+//        satisfied by never generating a backbend).
+//   (ii) For every such practice the counter is present AND the hard ceiling
+//        still holds WITH the counter force-included. (The per-practice presence
+//        + ceiling checks already run inside runInvariants above; this block
+//        additionally asserts the path is reached and re-checks the ceiling for
+//        the backbend subset explicitly.)
+// ---------------------------------------------------------------------------
+let backbendPracticeCount = 0;
+for (const basicsOnly of [false, true]) {
+  for (const breathSeconds of BREATHS) {
+    for (const seed of SEEDS) {
+      const ctx =
+        `counter basicsOnly=${basicsOnly} seed=${seed} ` +
+        `breathSeconds=${breathSeconds}`;
+      const result = generatePractice(poses, {
+        breathSeconds,
+        basicsOnly,
+        rng: mulberry32(seed),
+      });
+      const rIds = result.poses.map((p) => p.id);
+      const hasBb = rIds.some((id) =>
+        (BACKBEND_IDS as readonly string[]).includes(id),
+      );
+      if (!hasBb) continue;
+      backbendPracticeCount++;
+      // Counter present whenever a backbend is present.
+      check(
+        rIds.includes(COUNTER_POSE_ID),
+        `${ctx}: backbend present, counter (${COUNTER_POSE_ID}) must be present`,
+      );
+      // Ceiling still respected with the counter force-included.
+      check(
+        result.totalSeconds <= TARGET_SECONDS,
+        `${ctx}: total (${result.totalSeconds}) must be <= target ` +
+          `(${TARGET_SECONDS}) with the counter included`,
+      );
+    }
+  }
+}
+check(
+  backbendPracticeCount > 0,
+  'counter: at least one generated practice across the matrix must contain a ' +
+    'backbend, so the force-include + budgeting path is actually exercised ' +
+    `(saw ${backbendPracticeCount})`,
 );
 
 // --- report ---

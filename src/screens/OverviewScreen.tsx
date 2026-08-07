@@ -57,6 +57,7 @@ function OverviewScreen({
   onToggleFullSeries,
   vinyasas,
   onToggleVinyasas,
+  counterPoseLocked,
 }: OverviewScreenProps) {
   // The detail carousel now pages the FULL catalog (every pose, selected or
   // not), so tapping ANY map card — including a dimmed, unselected one — opens
@@ -120,6 +121,7 @@ function OverviewScreen({
       onToggleFullSeries={onToggleFullSeries}
       vinyasas={vinyasas}
       onToggleVinyasas={onToggleVinyasas}
+      counterPoseLocked={counterPoseLocked}
     />
   );
 }
