@@ -75,10 +75,10 @@ const basicIds = new Set(
 
 const SEEDS = Array.from({ length: 20 }, (_, i) => i + 1);
 const BREATHS = [
-  MIN_BREATH_SECONDS, // 4
-  5,
-  6,
-  MAX_BREATH_SECONDS, // 7
+  MIN_BREATH_SECONDS, // 6
+  7,
+  8,
+  MAX_BREATH_SECONDS, // 10
 ];
 
 function runInvariants(seq: Pose[], totalSeconds: number, ctx: string): void {

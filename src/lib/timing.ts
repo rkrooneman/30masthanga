@@ -82,14 +82,18 @@ export const TRANSITION_SECONDS = TRANSITION_SIMILAR_SECONDS;
  */
 export const OPENING_COUNTDOWN_SECONDS = 5;
 
-/** Default seconds-per-breath used when the caller doesn't specify one. */
-export const DEFAULT_BREATH_SECONDS = 5;
+/**
+ * Default seconds-per-breath used when the caller doesn't specify one. This is
+ * the duration of a WHOLE breath (inhale + exhale), so 8 = a 4s inhale + 4s
+ * exhale, a calm Ashtanga pace.
+ */
+export const DEFAULT_BREATH_SECONDS = 8;
 
-/** Lower bound for the seconds-per-breath slider (used later in the UI). */
-export const MIN_BREATH_SECONDS = 4;
+/** Lower bound for the seconds-per-breath slider (whole breath: 6 = 3s each way). */
+export const MIN_BREATH_SECONDS = 6;
 
-/** Upper bound for the seconds-per-breath slider (used later in the UI). */
-export const MAX_BREATH_SECONDS = 7;
+/** Upper bound for the seconds-per-breath slider (whole breath: 10 = 5s each way). */
+export const MAX_BREATH_SECONDS = 10;
 
 /** Target practice length in minutes. */
 export const TARGET_MINUTES = 30;
