@@ -158,6 +158,12 @@ export interface Pose {
   drishti: string;
   isBasic: boolean;
   /**
+   * true = an advanced pose (arm balance, deep bind, leg-behind-head, lotus
+   * bind) that the random generator never selects; still available in Full
+   * series and manual/custom selection. Undefined is treated as false.
+   */
+  isAdvanced?: boolean;
+  /**
    * Optional vinyasa breakdown (see FlowStep). Present on the two Sun
    * Salutations. When set, the flow's total half-breaths (movements count 1,
    * holds count breaths*2) === breaths * 2 (validated in validate-poses.ts).

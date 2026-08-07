@@ -53,6 +53,19 @@ const FIXED_IDS = [
 
 const catalogIds = new Set(poses.map((p) => p.id));
 
+// The 7 advanced poses that the random generator must NEVER select (issue #11).
+// They stay in the catalog and remain selectable for Full series + custom.
+const ADVANCED_IDS = [
+  'marichyasana_d',
+  'bhujapidasana',
+  'kurmasana',
+  'supta_kurmasana',
+  'garbha_pindasana',
+  'kukkutasana',
+  'baddha_padmasana',
+];
+const advancedIdSet = new Set(ADVANCED_IDS);
+
 // Ids allowed in "Basics only" mode: any curated basic pose (isBasic) plus the
 // always-present fixed frame (which is itself marked isBasic, but list the
 // frame explicitly for clarity).
@@ -153,6 +166,17 @@ function runInvariants(seq: Pose[], totalSeconds: number, ctx: string): void {
         `must also be present (ids: ${ids.join(', ')})`,
     );
   }
+
+  // 12. no advanced pose may ever appear in a generated practice (issue #11).
+  // The random generator excludes isAdvanced poses from its fill pools in ALL
+  // modes, so none of the 7 may ever be selected. Runs across the full
+  // seed/pace sweep in default, basicsOnly, and vinyasas modes.
+  const advancedPresent = ids.filter((id) => advancedIdSet.has(id));
+  check(
+    advancedPresent.length === 0,
+    `${ctx}: no advanced pose may be generated ` +
+      `(found: ${advancedPresent.join(', ')})`,
+  );
 
   // 9. reported totalSeconds matches recomputation
   // (uses the same breathSeconds embedded in ctx via closure below)
@@ -368,6 +392,43 @@ check(
   'counter: at least one generated practice across the matrix must contain a ' +
     'backbend, so the force-include + budgeting path is actually exercised ' +
     `(saw ${backbendPracticeCount})`,
+);
+
+// ---------------------------------------------------------------------------
+// Catalog guards (issue #11): the advanced exclusion is generator-only.
+//   (i)   all 7 advanced poses still EXIST in the catalog.
+//   (ii)  each is still `selectable` (so custom/manual selection can include it)
+//         and correctly flagged isAdvanced === true.
+//   (iii) Marichyasana C stays isBasic === true and is NOT flagged advanced
+//         (guard against an accidental edit to the wrong Marichyasana).
+// ---------------------------------------------------------------------------
+for (const id of ADVANCED_IDS) {
+  const pose = poses.find((p) => p.id === id);
+  check(pose !== undefined, `catalog: advanced pose "${id}" must still exist`);
+  if (pose) {
+    check(
+      pose.selectable === true,
+      `catalog: advanced pose "${id}" must stay selectable for custom selection`,
+    );
+    check(
+      pose.isAdvanced === true,
+      `catalog: advanced pose "${id}" must be flagged isAdvanced === true`,
+    );
+  }
+}
+
+const marichyasanaC = poses.find((p) => p.id === 'marichyasana_c');
+check(
+  marichyasanaC !== undefined,
+  'catalog: marichyasana_c must exist',
+);
+check(
+  marichyasanaC !== undefined && marichyasanaC.isBasic === true,
+  'catalog: marichyasana_c must stay isBasic === true (not accidentally changed)',
+);
+check(
+  marichyasanaC !== undefined && marichyasanaC.isAdvanced !== true,
+  'catalog: marichyasana_c must NOT be flagged advanced',
 );
 
 // --- report ---

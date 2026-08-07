@@ -673,6 +673,7 @@ export const poses: Pose[] = [
     selectable: true,
     drishti: 'Parsva (far to the side)',
     isBasic: false,
+    isAdvanced: true,
   },
   {
     id: 'navasana',
@@ -706,6 +707,7 @@ export const poses: Pose[] = [
     selectable: true,
     drishti: 'Nasagrai (tip of the nose)',
     isBasic: false,
+    isAdvanced: true,
   },
   {
     id: 'kurmasana',
@@ -722,6 +724,7 @@ export const poses: Pose[] = [
     selectable: true,
     drishti: 'Broomadhya / Nasagrai (third eye / tip of the nose)',
     isBasic: false,
+    isAdvanced: true,
   },
   {
     id: 'supta_kurmasana',
@@ -738,6 +741,7 @@ export const poses: Pose[] = [
     selectable: true,
     drishti: 'Broomadhya / Nasagrai (third eye / tip of the nose)',
     isBasic: false,
+    isAdvanced: true,
   },
   {
     id: 'garbha_pindasana',
@@ -754,6 +758,7 @@ export const poses: Pose[] = [
     selectable: true,
     drishti: 'Nasagrai (tip of the nose)',
     isBasic: false,
+    isAdvanced: true,
   },
   {
     id: 'kukkutasana',
@@ -770,6 +775,7 @@ export const poses: Pose[] = [
     selectable: true,
     drishti: 'Nasagrai (tip of the nose)',
     isBasic: false,
+    isAdvanced: true,
   },
   {
     id: 'baddha_konasana',
@@ -1061,6 +1067,7 @@ export const poses: Pose[] = [
     selectable: true,
     drishti: 'Nasagrai (tip of the nose)',
     isBasic: false,
+    isAdvanced: true,
   },
   {
     id: 'yoga_mudra',

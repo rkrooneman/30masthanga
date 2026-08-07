@@ -245,10 +245,18 @@ export function generatePractice(
   // --- C. Candidate pools (selectable only; excludes the fixed frame) ---
   // In "Basics only" mode the pool is additionally restricted to curated
   // root/basic poses (isBasic === true).
+  //
+  // Advanced poses (isAdvanced === true) are ALWAYS excluded from the fill
+  // pools, in BOTH modes, so the random generator can never select them. They
+  // remain in the catalog and stay available in the Full series and in manual/
+  // custom selection (only generation is filtered). None of them is a
+  // fixed-frame pose or the Bridge/Wheel counter, so the frame and counter-pose
+  // logic are unaffected.
   const selectable = all.filter(
     (p) =>
       p.selectable &&
       !p.alwaysInclude &&
+      p.isAdvanced !== true &&
       sectionOf(p) !== null &&
       (!basicsOnly || p.isBasic),
   );
