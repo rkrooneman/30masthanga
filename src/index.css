@@ -211,6 +211,14 @@ body {
   transform: translateY(1px);
 }
 
+/* Disabled buttons read as clearly inactive (muted + no press nudge). Applies
+   to any .button variant, e.g. New sequence while Basics only is on. */
+.button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+}
+
 .button:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;

@@ -360,7 +360,17 @@ function PoseMap({
           type="button"
           className="button button--outline pose-map__regenerate"
           onClick={onRegenerate}
-          aria-label="Generate a different practice"
+          disabled={basicsOnly}
+          aria-label={
+            basicsOnly
+              ? 'New sequence is unavailable in Basics only, which always uses the same essential poses'
+              : 'Generate a different practice'
+          }
+          title={
+            basicsOnly
+              ? 'Basics only always uses the same essential poses'
+              : undefined
+          }
         >
           <span aria-hidden="true">&#8635;</span> New sequence
         </button>
