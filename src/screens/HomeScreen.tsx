@@ -59,6 +59,26 @@ const POSE_CUE_LABELS: Record<PoseCue, string> = {
   voice: 'Voice',
 };
 
+/**
+ * Compact, live summary of only the ACTIVE sound choices, shown right-aligned on
+ * the collapsed "Sound" disclosure row. Order is fixed (pose, breath, ambient);
+ * an item appears only when it is on: pose cue when Bell or Voice (Silent is
+ * omitted), breath cues when on (the literal word "breath"), ambient when it is
+ * Forest/Rain/Ocean (Off is omitted). Labels are lowercased and joined with
+ * " - ". When nothing is on, falls back to the single word "silent".
+ */
+function soundSummary(
+  poseCue: PoseCue,
+  breathCuesOn: boolean,
+  ambient: AmbientChoice,
+): string {
+  const parts: string[] = [];
+  if (poseCue !== 'silent') parts.push(POSE_CUE_LABELS[poseCue].toLowerCase());
+  if (breathCuesOn) parts.push('breath');
+  if (ambient !== 'off') parts.push(AMBIENT_LABELS[ambient].toLowerCase());
+  return parts.length > 0 ? parts.join(' - ') : 'silent';
+}
+
 function HomeScreen({
   breathSeconds,
   onBreathSecondsChange,
@@ -69,6 +89,11 @@ function HomeScreen({
   // Local UI state only: whether the "About this app" dialog is open. Kept here
   // (not in the shell) since it's purely presentational and Home-only.
   const [aboutOpen, setAboutOpen] = useState(false);
+
+  // Whether the inline "Sound" section is expanded. Collapsed by default every
+  // load (sound is set-once; the collapsed row summarises the config), so this
+  // deliberately has NO persistence. Kept as local UI state only.
+  const [soundOpen, setSoundOpen] = useState(false);
 
   // Pose cue (silent | bell | voice). How a pose change is announced: a 3-stop
   // slider whose values are alternatives, not layers. The guided player and
@@ -93,6 +118,15 @@ function HomeScreen({
   const handleBreathCuesToggle = (next: boolean) => {
     setBreathCuesOn(next);
     saveBreathCuesOn(next);
+  };
+
+  // The breath-cues control is a 2-stop stepped slider (0 = Off, 1 = On),
+  // consistent with the Pose cues and Ambient sliders. Map the raw index back to
+  // the boolean the same storage key already holds; any non-zero value is "on".
+  const handleBreathCuesSliderChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    handleBreathCuesToggle(Number(event.target.value) === 1);
   };
 
   // Ambient-sound choice (off | forest | rain | ocean). A 4-stop slider picking
@@ -219,82 +253,135 @@ function HomeScreen({
           />
         </div>
 
+        {/* Sound section: the three audio choices (pose cues, breath cues,
+            ambient) grouped behind a single collapsible disclosure. Collapsed by
+            default; the row shows a live summary of only the active choices. The
+            controls stay mounted in THIS component (just hidden), so the Ambient
+            input's onChange keeps its direct, synchronous setAmbient() call
+            inside the user gesture - required for audio to start (see below). */}
+        <div className="home__sound">
+          <button
+            type="button"
+            className="home__sound-toggle"
+            aria-expanded={soundOpen}
+            aria-controls="sound-panel"
+            onClick={() => setSoundOpen((open) => !open)}
+          >
+            <span className="home__sound-title">Sound</span>
+            <span className="field__value home__sound-summary">
+              {soundSummary(poseCue, breathCuesOn, ambient)}
+            </span>
+            <svg
+              className="home__sound-chevron"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {soundOpen && (
+            <div id="sound-panel" className="home__sound-panel">
+              <div className="field home__pose-cues">
+                <div className="field__label-row">
+                  <label className="field__label" htmlFor="pose-cues">
+                    Pose cues
+                  </label>
+                  <span className="field__value">
+                    {POSE_CUE_LABELS[poseCue]}
+                  </span>
+                </div>
+                <input
+                  id="pose-cues"
+                  className="slider"
+                  type="range"
+                  min={0}
+                  max={2}
+                  step={1}
+                  value={poseCueToIndex(poseCue)}
+                  onChange={handlePoseCueChange}
+                  aria-valuetext={POSE_CUE_LABELS[poseCue]}
+                />
+                <div className="home__pose-cues-stops" aria-hidden="true">
+                  <span>Silent</span>
+                  <span>Bell</span>
+                  <span>Voice</span>
+                </div>
+              </div>
+
+              <div className="field home__breath-cues">
+                <div className="field__label-row">
+                  <label className="field__label" htmlFor="breath-cues">
+                    Breath cues
+                  </label>
+                  <span className="field__value">
+                    {breathCuesOn ? 'On' : 'Off'}
+                  </span>
+                </div>
+                <input
+                  id="breath-cues"
+                  className="slider"
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={1}
+                  value={breathCuesOn ? 1 : 0}
+                  onChange={handleBreathCuesSliderChange}
+                  aria-valuetext={breathCuesOn ? 'On' : 'Off'}
+                />
+                <div className="home__breath-cues-stops" aria-hidden="true">
+                  <span>Off</span>
+                  <span>On</span>
+                </div>
+                <p className="basics-toggle__hint">
+                  Soft inhale and exhale tones to pace your breath.
+                </p>
+              </div>
+
+              <div className="field home__ambient">
+                <div className="field__label-row">
+                  <label className="field__label" htmlFor="ambient">
+                    Ambient
+                  </label>
+                  <span className="field__value">{AMBIENT_LABELS[ambient]}</span>
+                </div>
+                <input
+                  id="ambient"
+                  className="slider"
+                  type="range"
+                  min={0}
+                  max={3}
+                  step={1}
+                  value={ambientToIndex(ambient)}
+                  onChange={handleAmbientChange}
+                  aria-valuetext={AMBIENT_LABELS[ambient]}
+                />
+                <div className="home__ambient-stops" aria-hidden="true">
+                  <span>Off</span>
+                  <span>Forest</span>
+                  <span>Rain</span>
+                  <span>Ocean</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* The estimate is the RESULT of the practice choices above, so it sits
+            last in the controls block, directly above the Generate button:
+            "here is what you will get -> Generate". It stays immediately above
+            the button whether the Sound section is collapsed or expanded. */}
         <p className="home__estimate">
           <span className="home__estimate-label">Estimated practice</span>
           <span className="home__estimate-value">
             &asymp; {estimate.duration} &middot; {estimate.count} poses
           </span>
         </p>
-
-        <div className="field home__pose-cues">
-          <div className="field__label-row">
-            <label className="field__label" htmlFor="pose-cues">
-              Pose cues
-            </label>
-            <span className="field__value">{POSE_CUE_LABELS[poseCue]}</span>
-          </div>
-          <input
-            id="pose-cues"
-            className="slider"
-            type="range"
-            min={0}
-            max={2}
-            step={1}
-            value={poseCueToIndex(poseCue)}
-            onChange={handlePoseCueChange}
-            aria-valuetext={POSE_CUE_LABELS[poseCue]}
-          />
-          <div className="home__pose-cues-stops" aria-hidden="true">
-            <span>Silent</span>
-            <span>Bell</span>
-            <span>Voice</span>
-          </div>
-        </div>
-
-        <div className="basics-toggle home__breath-toggle">
-          <label className="basics-toggle__label" htmlFor="breath-cues-switch">
-            <span className="basics-toggle__text">Breath cues</span>
-            <input
-              type="checkbox"
-              id="breath-cues-switch"
-              className="basics-toggle__input"
-              checked={breathCuesOn}
-              onChange={(e) => handleBreathCuesToggle(e.target.checked)}
-            />
-            <span className="basics-toggle__track" aria-hidden="true">
-              <span className="basics-toggle__thumb" />
-            </span>
-          </label>
-          <p className="basics-toggle__hint">
-            Soft inhale and exhale tones to pace your breath.
-          </p>
-        </div>
-
-        <div className="field home__ambient">
-          <div className="field__label-row">
-            <label className="field__label" htmlFor="ambient">
-              Ambient
-            </label>
-            <span className="field__value">{AMBIENT_LABELS[ambient]}</span>
-          </div>
-          <input
-            id="ambient"
-            className="slider"
-            type="range"
-            min={0}
-            max={3}
-            step={1}
-            value={ambientToIndex(ambient)}
-            onChange={handleAmbientChange}
-            aria-valuetext={AMBIENT_LABELS[ambient]}
-          />
-          <div className="home__ambient-stops" aria-hidden="true">
-            <span>Off</span>
-            <span>Forest</span>
-            <span>Rain</span>
-            <span>Ocean</span>
-          </div>
-        </div>
       </div>
 
       <button
