@@ -22,6 +22,10 @@
  * between every pair of consecutive seated poses (via the vinyasa-flagged
  * `sequenceDurationSeconds`), so the Overview total the practitioner sees matches
  * what the guided run will actually play.
+ *
+ * When `savasanaSeconds` is supplied, the closing Savasana's hold is the
+ * practitioner's chosen length (2..10 min) rather than its catalog `breaths *
+ * breathSeconds`, so the Overview total matches the guided run's actual Savasana.
  */
 
 import type { Pose } from '../types/pose';
@@ -32,13 +36,14 @@ import { sequenceDurationSeconds } from './timing';
  * Build the derived practice from a selected-id set. `selectedIds` may be a Set
  * or any iterable-membership container; ids not present in `catalog` are simply
  * ignored. The result is always in canonical order. `vinyasas` (default false)
- * makes the total include the seated→seated half-vinyasas.
+ * makes the total include the seated→seated half-vinyasas; `savasanaSeconds`
+ * (when supplied) sets the closing Savasana's hold to the chosen length.
  */
 export function buildSelectedPractice(
   catalog: Pose[],
   selectedIds: ReadonlySet<string>,
   breathSeconds: number,
-  options?: { vinyasas?: boolean },
+  options?: { vinyasas?: boolean; savasanaSeconds?: number },
 ): GeneratedPractice {
   const poses = catalog
     .filter((p) => selectedIds.has(p.id))
@@ -47,6 +52,7 @@ export function buildSelectedPractice(
     poses,
     totalSeconds: sequenceDurationSeconds(poses, breathSeconds, {
       vinyasas: options?.vinyasas ?? false,
+      savasanaSeconds: options?.savasanaSeconds,
     }),
     breathSeconds,
   };

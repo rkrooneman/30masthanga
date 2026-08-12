@@ -14,9 +14,14 @@ import { poses } from '../data/poses';
 import { BACKBEND_IDS, COUNTER_POSE_ID } from './counterPose';
 import { generatePractice } from './generatePractice';
 import {
+  DEFAULT_SAVASANA_MINUTES,
   MAX_BREATH_SECONDS,
+  MAX_SAVASANA_MINUTES,
   MIN_BREATH_SECONDS,
   TARGET_SECONDS,
+  poseHoldSeconds,
+  savasanaBreaths,
+  savasanaSecondsFromMinutes,
   sequenceDurationSeconds,
 } from './timing';
 
@@ -430,6 +435,183 @@ check(
   marichyasanaC !== undefined && marichyasanaC.isAdvanced !== true,
   'catalog: marichyasana_c must NOT be flagged advanced',
 );
+
+// ---------------------------------------------------------------------------
+// Savasana-length slider (savasanaSeconds): Savasana lives INSIDE the ~30-min
+// budget (Model A), so a longer rest trades asana time, and the chosen length
+// drives Savasana's hold in the budget (and, reconciled, the guided plan).
+//
+//   (a) DEFAULT (5-min) Savasana: all standard invariants hold, the frame is
+//       intact, and Savasana's hold in the budget equals the chosen length
+//       quantized to whole paced breaths.
+//   (b) MAX (10-min) Savasana FRAME PROTECTION: the full Sun Salutations (A + B),
+//       the Shoulderstand, and Savasana all survive, AND a REAL asana portion
+//       remains — at least MIN_ASANA_POSES (3) non-frame asana poses — so a long
+//       rest can NEVER starve the sequence down to just the frame. The hard
+//       30-min ceiling still holds with the longer Savasana.
+//   (c) Savasana's hold duration in the generated result matches the chosen
+//       minutes (quantized): poseHoldSeconds(savasana, bs, chosen) ===
+//       savasanaBreaths(chosen, bs) * bs, across the whole 2..10 range.
+// ---------------------------------------------------------------------------
+const MIN_ASANA_FLOOR = 3; // mirrors MIN_ASANA_POSES in generatePractice.ts
+const isFrameId = (id: string): boolean => FIXED_IDS.includes(id);
+
+// (a) DEFAULT 5-min Savasana across the seed/pace matrix.
+for (const breathSeconds of BREATHS) {
+  for (const seed of SEEDS) {
+    const savasanaSeconds = savasanaSecondsFromMinutes(DEFAULT_SAVASANA_MINUTES);
+    const ctx = `savasana=default(5min) seed=${seed} breathSeconds=${breathSeconds}`;
+    const result = generatePractice(poses, {
+      breathSeconds,
+      savasanaSeconds,
+      rng: mulberry32(seed),
+    });
+
+    // All standard invariants still hold with the chosen Savasana length.
+    runInvariants(result.poses, result.totalSeconds, ctx);
+
+    // The reported total is internally consistent with the SAVASANA-flagged
+    // duration (the single source of truth the generator budgets against).
+    const recomputed = sequenceDurationSeconds(result.poses, breathSeconds, {
+      savasanaSeconds,
+    });
+    check(
+      recomputed === result.totalSeconds,
+      `${ctx}: reported total (${result.totalSeconds}) must equal the ` +
+        `savasana-flagged sequenceDurationSeconds (${recomputed})`,
+    );
+
+    // (c) Savasana's hold equals the chosen length quantized to whole breaths.
+    const savasana = result.poses.find((p) => p.id === 'savasana');
+    const expectedSavasanaHold =
+      savasanaBreaths(savasanaSeconds, breathSeconds) * breathSeconds;
+    check(
+      savasana !== undefined &&
+        poseHoldSeconds(savasana, breathSeconds, savasanaSeconds) ===
+          expectedSavasanaHold,
+      `${ctx}: Savasana hold must equal the chosen length quantized to whole ` +
+        `paced breaths (${expectedSavasanaHold}s)`,
+    );
+  }
+}
+
+// (b) MAX 10-min Savasana frame protection across the seed/pace matrix, in
+// default + basicsOnly + vinyasas modes (each stresses the budget differently).
+{
+  const savasanaSeconds = savasanaSecondsFromMinutes(MAX_SAVASANA_MINUTES);
+  const modes: Array<{ basicsOnly?: boolean; vinyasas?: boolean; tag: string }> =
+    [
+      { tag: 'default' },
+      { basicsOnly: true, tag: 'basicsOnly' },
+      { vinyasas: true, tag: 'vinyasas' },
+    ];
+  let minAsanaSeen = Infinity;
+  for (const mode of modes) {
+    for (const breathSeconds of BREATHS) {
+      for (const seed of SEEDS) {
+        const ctx =
+          `savasana=max(10min) mode=${mode.tag} seed=${seed} ` +
+          `breathSeconds=${breathSeconds}`;
+        const result = generatePractice(poses, {
+          breathSeconds,
+          basicsOnly: mode.basicsOnly,
+          vinyasas: mode.vinyasas,
+          savasanaSeconds,
+          rng: mulberry32(seed),
+        });
+
+        // Standard invariants (frame present, order, ceiling, finisher...).
+        runInvariants(result.poses, result.totalSeconds, ctx);
+
+        const ids = result.poses.map((p) => p.id);
+        // The FULL Sun Salutations (A + B), Shoulderstand and Savasana all
+        // survive a 10-min Savasana — the sacred closing frame is intact.
+        check(
+          ids.includes('surya_namaskara_a') &&
+            ids.includes('surya_namaskara_b') &&
+            ids.includes('salamba_sarvangasana') &&
+            ids.includes('savasana'),
+          `${ctx}: the full frame (Surya A + Surya B + Shoulderstand + Savasana) ` +
+            `must survive a 10-min Savasana`,
+        );
+
+        // FRAME PROTECTION: a REAL asana portion remains — the sequence is NEVER
+        // starved down to just the frame. At least MIN_ASANA_FLOOR non-frame
+        // asana poses survive.
+        const asanaCount = result.poses.filter(
+          (p) => !isFrameId(p.id),
+        ).length;
+        check(
+          asanaCount >= MIN_ASANA_FLOOR,
+          `${ctx}: at least ${MIN_ASANA_FLOOR} non-frame asana poses must ` +
+            `survive a 10-min Savasana (got ${asanaCount}) — a long rest must ` +
+            `never reduce the practice to just the frame`,
+        );
+        minAsanaSeen = Math.min(minAsanaSeen, asanaCount);
+
+        // The hard 30-min ceiling still holds with the 10-min Savasana inside it.
+        check(
+          result.totalSeconds <= TARGET_SECONDS,
+          `${ctx}: total (${result.totalSeconds}) must be <= target ` +
+            `(${TARGET_SECONDS}) with a 10-min Savasana`,
+        );
+
+        // (c) Savasana's hold matches the chosen 10-min length (quantized).
+        const savasana = result.poses.find((p) => p.id === 'savasana');
+        const expectedSavasanaHold =
+          savasanaBreaths(savasanaSeconds, breathSeconds) * breathSeconds;
+        check(
+          savasana !== undefined &&
+            poseHoldSeconds(savasana, breathSeconds, savasanaSeconds) ===
+              expectedSavasanaHold,
+          `${ctx}: Savasana hold must equal the chosen 10-min length quantized ` +
+            `to whole paced breaths (${expectedSavasanaHold}s)`,
+        );
+      }
+    }
+  }
+  // The floor is a genuine, reachable guarantee (not vacuous): somewhere in the
+  // matrix a 10-min Savasana squeezes the asana portion down to exactly the
+  // floor, proving the protection is what keeps a real practice alive.
+  check(
+    minAsanaSeen === MIN_ASANA_FLOOR,
+    `savasana=max(10min): the asana floor must be genuinely reached somewhere ` +
+      `in the matrix (min asana seen ${minAsanaSeen}, expected ${MIN_ASANA_FLOOR})`,
+  );
+}
+
+// A longer Savasana (inside the budget) fits FEWER asana poses IN AGGREGATE than
+// a shorter one — proving Savasana genuinely trades asana time (Model A), not
+// that the total drifts. Aggregate (not per-seed) for the same reason vinyasas
+// is aggregate: the greedy variety shuffle is not strictly monotonic per seed.
+{
+  const countAsana = (ids: string[]): number =>
+    ids.filter((id) => !isFrameId(id)).length;
+  let asanaShortRest = 0;
+  let asanaLongRest = 0;
+  for (const breathSeconds of BREATHS) {
+    for (const seed of SEEDS) {
+      const short = generatePractice(poses, {
+        breathSeconds,
+        savasanaSeconds: savasanaSecondsFromMinutes(2),
+        rng: mulberry32(seed),
+      });
+      const long = generatePractice(poses, {
+        breathSeconds,
+        savasanaSeconds: savasanaSecondsFromMinutes(MAX_SAVASANA_MINUTES),
+        rng: mulberry32(seed),
+      });
+      asanaShortRest += countAsana(short.poses.map((p) => p.id));
+      asanaLongRest += countAsana(long.poses.map((p) => p.id));
+    }
+  }
+  check(
+    asanaLongRest < asanaShortRest,
+    `savasana budget: a 10-min rest must fit FEWER asana poses in aggregate ` +
+      `(${asanaLongRest}) than a 2-min rest (${asanaShortRest}) — Savasana is ` +
+      `inside the ~30-min budget`,
+  );
+}
 
 // --- report ---
 if (failures.length > 0) {

@@ -102,6 +102,60 @@ export const TARGET_MINUTES = 30;
 export const TARGET_SECONDS = TARGET_MINUTES * 60; // 1800
 
 /**
+ * === Savasana length (the final-rest slider) ===
+ *
+ * The closing Savasana's duration is a practitioner CHOICE (2..10 min, default
+ * 5), independent of the breath pace. It is expressed in whole MINUTES on the
+ * slider and converted to seconds here. Unlike every other pose, Savasana's hold
+ * is therefore NOT `breaths * breathSeconds`; it is this fixed second count,
+ * supplied as an override to `poseHoldSeconds` / `sequenceDurationSeconds` (and
+ * emitted verbatim by the guided plan). Savasana lives INSIDE the ~30-minute
+ * budget (Model A): a longer rest leaves less time for asana, so the generator
+ * includes slightly less asana and the total stays at the ~30-minute target.
+ */
+export const MIN_SAVASANA_MINUTES = 2;
+export const MAX_SAVASANA_MINUTES = 10;
+export const DEFAULT_SAVASANA_MINUTES = 5;
+
+/**
+ * The catalog id of the closing Savasana. The one pose whose hold duration is
+ * driven by the practitioner's chosen minutes rather than `breaths *
+ * breathSeconds`. Single-sourced here so the timing model, the generator budget,
+ * and the guided plan all identify it the same way.
+ */
+export const SAVASANA_POSE_ID = 'savasana';
+
+/**
+ * Convert a whole-minute Savasana length to seconds, clamped to the valid slider
+ * range so nothing can round Savasana below its 2-minute floor (or above 10).
+ * This is the CHOSEN target in seconds; the actual guided rest is quantized to a
+ * whole number of breaths at the current pace (see `savasanaBreaths`), so the
+ * budget and the guided timeline agree exactly.
+ */
+export function savasanaSecondsFromMinutes(minutes: number): number {
+  const clamped = Math.max(
+    MIN_SAVASANA_MINUTES,
+    Math.min(MAX_SAVASANA_MINUTES, Math.round(minutes)),
+  );
+  return clamped * 60;
+}
+
+/**
+ * The number of WHOLE paced breaths the closing Savasana runs for, given the
+ * chosen Savasana length (seconds) and the breath pace. Savasana is a calm, fully
+ * breath-paced rest (the guided player walks it as N full breaths on the
+ * breathing circle), so its duration must be a whole number of breaths. This is
+ * the SINGLE source of truth for that count, used by BOTH `poseHoldSeconds` (the
+ * budget) and the guided plan, so the two can never disagree. At least 1 breath.
+ */
+export function savasanaBreaths(
+  savasanaSeconds: number,
+  breathSeconds: number,
+): number {
+  return Math.max(1, Math.round(savasanaSeconds / breathSeconds));
+}
+
+/**
  * The DISPLAY section a pose belongs to, mirroring the Overview PoseMap grouping
  * (Sun Salutations / Standing / Seated / Closing / Rest). Both salutation
  * categories collapse to a single 'sun' section, so Sun A → Sun B is an
@@ -218,8 +272,26 @@ export function transitionSecondsBetween(
  * is NOT included here —
  * `sequenceDurationSeconds` adds the (n-1) between-card gaps separately (via
  * `transitionSecondsBetween`), so there is no double counting.
+ *
+ * === Savasana override ===
+ * Savasana's hold is a practitioner CHOICE (2..10 min), not `breaths *
+ * breathSeconds`. When `savasanaSeconds` is supplied and this pose is the closing
+ * Savasana (`id === SAVASANA_POSE_ID`), its hold becomes the chosen length
+ * quantized to a whole number of paced breaths — `savasanaBreaths(...) *
+ * breathSeconds` — so it matches EXACTLY what the guided plan plays (N full
+ * breaths on the breathing circle). Savasana has no `flow`, `sides === 1` and
+ * `repeat === 1`, so there are no internal transitions to add. When
+ * `savasanaSeconds` is omitted, Savasana falls back to its catalog `breaths *
+ * breathSeconds` exactly as before (existing callers/tests unchanged).
  */
-export function poseHoldSeconds(pose: Pose, breathSeconds: number): number {
+export function poseHoldSeconds(
+  pose: Pose,
+  breathSeconds: number,
+  savasanaSeconds?: number,
+): number {
+  if (savasanaSeconds !== undefined && pose.id === SAVASANA_POSE_ID) {
+    return savasanaBreaths(savasanaSeconds, breathSeconds) * breathSeconds;
+  }
   const hold = pose.breaths * pose.sides * pose.repeat * breathSeconds;
   const isSalutationFlow = Boolean(pose.flow && pose.flow.length > 0);
   const perRoundGap = isSalutationFlow
@@ -252,17 +324,24 @@ export function poseHoldSeconds(pose: Pose, breathSeconds: number): number {
  * before.
  *
  * An empty sequence is 0s; a single-pose sequence is just its hold time.
+ *
+ * === Savasana override ===
+ * When `options.savasanaSeconds` is supplied, the closing Savasana's hold is that
+ * fixed second count (the practitioner's chosen 2..10 min) rather than its
+ * catalog `breaths * breathSeconds` (see `poseHoldSeconds`). Omitting it keeps
+ * the prior breath-derived Savasana exactly, so existing callers are unchanged.
  */
 export function sequenceDurationSeconds(
   seq: Pose[],
   breathSeconds: number,
-  options?: { vinyasas?: boolean },
+  options?: { vinyasas?: boolean; savasanaSeconds?: number },
 ): number {
   if (seq.length === 0) return 0;
   const vinyasas = options?.vinyasas ?? false;
+  const savasanaSeconds = options?.savasanaSeconds;
   let total = 0;
   for (const pose of seq) {
-    total += poseHoldSeconds(pose, breathSeconds);
+    total += poseHoldSeconds(pose, breathSeconds, savasanaSeconds);
   }
   for (let i = 1; i < seq.length; i++) {
     const prev = seq[i - 1];

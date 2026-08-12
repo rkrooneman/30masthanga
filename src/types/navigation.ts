@@ -18,6 +18,14 @@ export interface HomeScreenProps {
   breathSeconds: number;
   /** Update the shared breath pace (drives the live estimate). */
   onBreathSecondsChange: (seconds: number) => void;
+  /**
+   * Current closing-Savasana length in whole minutes (2..10), owned by the
+   * shell. A sibling of the breath pace: it drives the live estimate (Savasana
+   * is inside the ~30-min budget) and the guided closing rest.
+   */
+  savasanaMinutes: number;
+  /** Update the shared Savasana length (drives the live estimate). */
+  onSavasanaMinutesChange: (minutes: number) => void;
   /** Generate a real (randomised) practice at the given pace and advance. */
   onGenerate: (breathSeconds: number) => void;
 }
@@ -31,6 +39,13 @@ export interface OverviewScreenProps {
   practice: GeneratedPractice;
   /** The breath pace this practice was generated at. */
   breathSeconds: number;
+  /**
+   * The chosen closing-Savasana length in SECONDS (2..10 min). Keeps the
+   * Overview's per-section "Rest" time honest (Savasana's hold matches the
+   * grand total, which already carries this override). Omitted = Savasana's
+   * catalog breaths.
+   */
+  savasanaSeconds?: number;
   /**
    * The set of currently-selected pose ids. The Overview renders the WHOLE
    * catalog; poses whose id is in this set are "in" the practice (checked +
@@ -102,6 +117,12 @@ export interface GuidedScreenProps {
    * the shell does not pass it (existing behaviour preserved).
    */
   vinyasas?: boolean;
+  /**
+   * The chosen closing-Savasana length in SECONDS (2..10 min) — build the guided
+   * plan so the closing Savasana runs for that duration. Omitted = Savasana plays
+   * its catalog `breaths` (existing behaviour preserved).
+   */
+  savasanaSeconds?: number;
   /**
    * Exit the guided run mid-practice — returns to the Overview so the
    * practitioner can review the sequence again (wired to the Exit control).

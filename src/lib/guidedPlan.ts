@@ -91,7 +91,12 @@
  */
 
 import type { FlowStep, Pose } from '../types/pose';
-import { isSeatedToSeated, transitionSecondsBetween } from './timing';
+import {
+  SAVASANA_POSE_ID,
+  isSeatedToSeated,
+  savasanaBreaths,
+  transitionSecondsBetween,
+} from './timing';
 
 /** Which half of a single breath a `BreathStep` phase refers to. */
 export type GuidedPhase = 'inhale' | 'exhale';
@@ -134,6 +139,15 @@ export interface BuildGuidedPlanOptions {
    * they opt in.
    */
   vinyasas?: boolean;
+  /**
+   * The practitioner's chosen closing-Savasana length in SECONDS (2..10 min).
+   * When supplied, the closing Savasana runs for a whole number of paced breaths
+   * quantized from this length (`savasanaBreaths(...)` in timing.ts) instead of
+   * its catalog `breaths`, so the guided rest matches the chosen duration AND the
+   * generator/Overview budget exactly. When omitted, Savasana plays its catalog
+   * `breaths` unchanged (existing callers/tests are unaffected).
+   */
+  savasanaSeconds?: number;
 }
 
 /** One breath (inhale + exhale) within a segment of a pose. */
@@ -331,6 +345,7 @@ function emitSegmentBreaths(
   segmentCount: number,
   segmentLabel: string | null,
   halfMs: number,
+  breathsOverride?: number,
 ): number {
   let addedMs = 0;
 
@@ -429,9 +444,12 @@ function emitSegmentBreaths(
     return addedMs;
   }
 
-  // Legacy expansion: flat, whole-segment counts.
-  for (let breath = 1; breath <= pose.breaths; breath++) {
-    pushFullBreath(breath, pose.breaths, {});
+  // Legacy expansion: flat, whole-segment counts. `breathsOverride` (used for the
+  // closing Savasana's chosen length) replaces `pose.breaths` when supplied, so
+  // the counter reads "N of <override>" and the segment runs that many breaths.
+  const breathCount = breathsOverride ?? pose.breaths;
+  for (let breath = 1; breath <= breathCount; breath++) {
+    pushFullBreath(breath, breathCount, {});
   }
   return addedMs;
 }
@@ -509,9 +527,17 @@ function emitVinyasaMovements(
 export function buildGuidedPlan(
   poses: Pose[],
   breathSeconds: number,
-  { vinyasas = false }: BuildGuidedPlanOptions = {},
+  { vinyasas = false, savasanaSeconds }: BuildGuidedPlanOptions = {},
 ): GuidedPlan {
   const halfMs = (breathSeconds / 2) * 1000;
+  // The closing Savasana runs for a whole number of paced breaths quantized from
+  // the chosen length (single-sourced via `savasanaBreaths`, so the guided rest
+  // matches the generator/Overview budget exactly). Undefined = play Savasana's
+  // catalog `breaths` unchanged.
+  const savasanaBreathCount =
+    savasanaSeconds !== undefined
+      ? savasanaBreaths(savasanaSeconds, breathSeconds)
+      : undefined;
 
   const steps: GuidedStep[] = [];
   let totalMs = 0;
@@ -583,6 +609,11 @@ export function buildGuidedPlan(
 
       const segmentLabel = segmentLabelFor(pose, segmentIndex);
 
+      // The closing Savasana (no flow, single segment) uses the chosen-length
+      // breath count when supplied; every other pose keeps its catalog `breaths`.
+      const breathsOverride =
+        pose.id === SAVASANA_POSE_ID ? savasanaBreathCount : undefined;
+
       totalMs += emitSegmentBreaths(
         steps,
         pose,
@@ -591,6 +622,7 @@ export function buildGuidedPlan(
         segmentCount,
         segmentLabel,
         halfMs,
+        breathsOverride,
       );
     }
   }

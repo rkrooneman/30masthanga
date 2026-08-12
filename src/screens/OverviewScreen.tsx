@@ -46,6 +46,7 @@ type OverviewView = 'map' | 'detail';
 function OverviewScreen({
   practice,
   breathSeconds,
+  savasanaSeconds,
   selectedIds,
   onToggleSelected,
   onBack,
@@ -108,6 +109,7 @@ function OverviewScreen({
       key={regenCount}
       practice={practice}
       breathSeconds={breathSeconds}
+      savasanaSeconds={savasanaSeconds}
       selectedIds={selectedIds}
       onToggleSelected={onToggleSelected}
       onOpenPose={openPose}

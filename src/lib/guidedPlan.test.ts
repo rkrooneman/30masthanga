@@ -18,6 +18,8 @@ import type { BreathStep, TransitionStep } from './guidedPlan';
 import {
   DEFAULT_BREATH_SECONDS,
   TRANSITION_SAME_POSE_SECONDS,
+  savasanaBreaths,
+  savasanaSecondsFromMinutes,
   sequenceDurationSeconds,
   vinyasaSeconds,
 } from './timing';
@@ -1275,6 +1277,84 @@ const isTransition = (s: { kind: string }): s is TransitionStep =>
       `vinyasa delta: turning vinyasas on must add ` +
         `${expectedDelta}s (2 seated adjacencies * (vinyasa - 3s)); got ` +
         `${on - off}s`,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 10. Savasana length (savasanaSeconds): the closing Savasana runs for the
+//     chosen length quantized to whole paced breaths, and NOTHING else changes.
+//     Verifies, across the 2..10-min range at several breath paces:
+//       (a) the number of Savasana breath steps equals savasanaBreaths(...);
+//       (b) each Savasana breath is a full paced breath and its counter reads
+//           "N of <savasanaBreaths>";
+//       (c) the plan's Savasana time equals savasanaBreaths * breathSeconds and
+//           reconciles with sequenceDurationSeconds carrying the same override;
+//       (d) omitting savasanaSeconds keeps Savasana's catalog breaths unchanged.
+// ---------------------------------------------------------------------------
+{
+  const savasana = poses.find((p) => p.id === 'savasana');
+  check(savasana !== undefined, `savasana: the catalog must contain savasana`);
+  const catalogSavasanaBreaths = savasana?.breaths ?? -1;
+
+  for (const bs of [6, 8, 10]) {
+    for (const minutes of [2, 5, 10]) {
+      const savasanaSeconds = savasanaSecondsFromMinutes(minutes);
+      const expectedBreaths = savasanaBreaths(savasanaSeconds, bs);
+      const ctx = `savasana=${minutes}min bs=${bs}`;
+
+      // Build a plan for just Savasana so the assertions are unambiguous. It has
+      // no flow, sides 1, repeat 1, so it expands to `expectedBreaths` full
+      // paced breaths.
+      const plan = buildGuidedPlan([savasana as Pose], bs, { savasanaSeconds });
+      const breaths = plan.steps.filter(isBreath);
+
+      // (a) breath-step count matches the quantized chosen length.
+      check(
+        breaths.length === expectedBreaths,
+        `${ctx}: Savasana must expand to ${expectedBreaths} paced breaths ` +
+          `(got ${breaths.length})`,
+      );
+      // (b) each is a full breath counted "N of expectedBreaths".
+      check(
+        breaths.every(
+          (b) =>
+            b.singlePhase === undefined &&
+            b.breathCount === expectedBreaths &&
+            b.inhaleMs === (bs / 2) * 1000 &&
+            b.exhaleMs === (bs / 2) * 1000,
+        ),
+        `${ctx}: every Savasana breath must be a full paced breath reading ` +
+          `"of ${expectedBreaths}"`,
+      );
+      check(
+        breaths[0]?.breathNumber === 1 &&
+          breaths[breaths.length - 1]?.breathNumber === expectedBreaths,
+        `${ctx}: Savasana breath counter must run 1..${expectedBreaths}`,
+      );
+      // (c) the plan's Savasana time is exactly the chosen (quantized) length and
+      // reconciles with the timing budget carrying the same override.
+      const expectedMs = expectedBreaths * bs * 1000;
+      check(
+        plan.totalMs === expectedMs,
+        `${ctx}: Savasana plan totalMs (${plan.totalMs}) must equal ` +
+          `savasanaBreaths * breathSeconds (${expectedMs})`,
+      );
+      check(
+        plan.totalMs / 1000 ===
+          sequenceDurationSeconds([savasana as Pose], bs, { savasanaSeconds }),
+        `${ctx}: guided Savasana time must reconcile with ` +
+          `sequenceDurationSeconds carrying the same savasanaSeconds override`,
+      );
+    }
+
+    // (d) omitting savasanaSeconds leaves Savasana's catalog breaths untouched.
+    const plainPlan = buildGuidedPlan([savasana as Pose], bs);
+    const plainBreaths = plainPlan.steps.filter(isBreath);
+    check(
+      plainBreaths.length === catalogSavasanaBreaths,
+      `savasana (no override) bs=${bs}: Savasana must keep its catalog ` +
+        `${catalogSavasanaBreaths} breaths (got ${plainBreaths.length})`,
     );
   }
 }
