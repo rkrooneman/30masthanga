@@ -69,6 +69,12 @@ interface PoseMapProps {
   practice: GeneratedPractice;
   /** The breath pace this practice was generated at (drives section times). */
   breathSeconds: number;
+  /**
+   * The chosen closing-Savasana length in SECONDS (2..10 min). Keeps the Rest
+   * section's per-section time honest with the grand total. Omitted = Savasana's
+   * catalog breaths.
+   */
+  savasanaSeconds?: number;
   /** The set of currently-selected pose ids (drives checked/dimmed state). */
   selectedIds: ReadonlySet<string>;
   /** Toggle a pose in/out of the selection (parent guards the fixed frame). */
@@ -125,12 +131,16 @@ function sectionSeconds(
   items: IndexedPose[],
   selectedIds: ReadonlySet<string>,
   breathSeconds: number,
+  savasanaSeconds?: number,
 ): number {
   const selected = items.filter(({ pose }) => selectedIds.has(pose.id));
   if (selected.length === 0) return 0;
   let total = 0;
   for (const { pose } of selected) {
-    total += poseHoldSeconds(pose, breathSeconds);
+    // The Rest section's Savasana uses the chosen length (when supplied), so its
+    // per-section time matches the honest grand total; every other pose keeps its
+    // breath-derived hold.
+    total += poseHoldSeconds(pose, breathSeconds, savasanaSeconds);
   }
   total += (selected.length - 1) * TRANSITION_SIMILAR_SECONDS;
   return total;
@@ -147,6 +157,7 @@ function badgeFor(pose: Pose): string | null {
 function PoseMap({
   practice,
   breathSeconds,
+  savasanaSeconds,
   selectedIds,
   onToggleSelected,
   onOpenPose,
@@ -269,7 +280,12 @@ function PoseMap({
           );
           if (items.length === 0) return null;
 
-          const seconds = sectionSeconds(items, selectedIds, breathSeconds);
+          const seconds = sectionSeconds(
+            items,
+            selectedIds,
+            breathSeconds,
+            savasanaSeconds,
+          );
           const sectionSelected = items.filter(({ pose }) =>
             selectedIds.has(pose.id),
           ).length;

@@ -11,6 +11,9 @@ import {
   DEFAULT_BREATH_SECONDS,
   MIN_BREATH_SECONDS,
   MAX_BREATH_SECONDS,
+  DEFAULT_SAVASANA_MINUTES,
+  MIN_SAVASANA_MINUTES,
+  MAX_SAVASANA_MINUTES,
 } from './timing';
 import {
   type GuidanceLevel,
@@ -28,6 +31,7 @@ import {
 } from './ambient';
 
 const BREATH_SECONDS_KEY = 'ashtanga30.breathSeconds';
+const SAVASANA_MINUTES_KEY = 'ashtanga30.savasanaMinutes';
 const SOUND_ENABLED_KEY = 'ashtanga30.soundEnabled';
 const VOICE_ENABLED_KEY = 'ashtanga30.voiceEnabled';
 const AMBIENT_ENABLED_KEY = 'ashtanga30.ambientEnabled';
@@ -60,6 +64,34 @@ export function loadBreathSeconds(): number {
 export function saveBreathSeconds(value: number): void {
   try {
     window.localStorage.setItem(BREATH_SECONDS_KEY, String(value));
+  } catch {
+    /* storage unavailable — ignore, preference simply won't persist */
+  }
+}
+
+/**
+ * Load the saved closing-Savasana length in whole minutes, clamped to the valid
+ * slider range (2..10). Returns the default (5) when nothing is stored or the
+ * stored value is unusable. Mirrors loadBreathSeconds so the two Home sliders
+ * persist identically. Uses its OWN storage key — the breath preference is never
+ * overloaded.
+ */
+export function loadSavasanaMinutes(): number {
+  try {
+    const raw = window.localStorage.getItem(SAVASANA_MINUTES_KEY);
+    if (raw === null) return DEFAULT_SAVASANA_MINUTES;
+    const value = Number.parseInt(raw, 10);
+    if (Number.isNaN(value)) return DEFAULT_SAVASANA_MINUTES;
+    return Math.max(MIN_SAVASANA_MINUTES, Math.min(MAX_SAVASANA_MINUTES, value));
+  } catch {
+    return DEFAULT_SAVASANA_MINUTES;
+  }
+}
+
+/** Persist the Savasana length. Silently no-ops if storage is unavailable. */
+export function saveSavasanaMinutes(value: number): void {
+  try {
+    window.localStorage.setItem(SAVASANA_MINUTES_KEY, String(value));
   } catch {
     /* storage unavailable — ignore, preference simply won't persist */
   }

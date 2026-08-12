@@ -191,15 +191,22 @@ function GuidedScreen({
   practice,
   breathSeconds,
   vinyasas = false,
+  savasanaSeconds,
   onExit,
   onComplete,
   startComplete = false,
 }: GuidedScreenProps) {
   // The plan is pure and deterministic for a given practice + pace + vinyasas
-  // flag, so memoise it once. Rebuild only if any of those identities change.
+  // flag + Savasana length, so memoise it once. Rebuild only if any of those
+  // identities change. `savasanaSeconds` makes the closing Savasana run for the
+  // chosen length (quantized to whole paced breaths in the plan).
   const plan = useMemo(
-    () => buildGuidedPlan(practice.poses, breathSeconds, { vinyasas }),
-    [practice, breathSeconds, vinyasas],
+    () =>
+      buildGuidedPlan(practice.poses, breathSeconds, {
+        vinyasas,
+        savasanaSeconds,
+      }),
+    [practice, breathSeconds, vinyasas, savasanaSeconds],
   );
   const steps = plan.steps;
   const stepCount = steps.length;

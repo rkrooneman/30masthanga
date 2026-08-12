@@ -10,7 +10,14 @@ import { useEffect, useMemo, useState } from 'react';
 import type { HomeScreenProps } from '../types/navigation';
 import { poses } from '../data/poses';
 import { generatePractice } from '../lib/generatePractice';
-import { formatDuration, MIN_BREATH_SECONDS, MAX_BREATH_SECONDS } from '../lib/timing';
+import {
+  formatDuration,
+  MIN_BREATH_SECONDS,
+  MAX_BREATH_SECONDS,
+  MIN_SAVASANA_MINUTES,
+  MAX_SAVASANA_MINUTES,
+  savasanaSecondsFromMinutes,
+} from '../lib/timing';
 import { mulberry32 } from '../lib/mulberry32';
 import {
   loadPoseCue,
@@ -55,6 +62,8 @@ const POSE_CUE_LABELS: Record<PoseCue, string> = {
 function HomeScreen({
   breathSeconds,
   onBreathSecondsChange,
+  savasanaMinutes,
+  onSavasanaMinutesChange,
   onGenerate,
 }: HomeScreenProps) {
   // Local UI state only: whether the "About this app" dialog is open. Kept here
@@ -113,21 +122,29 @@ function HomeScreen({
     return () => window.removeEventListener('keydown', onKey);
   }, [aboutOpen]);
 
-  // Stable estimate: recomputed only when the breath pace changes, and always
-  // with the SAME seeded rng, so a given pace always shows the same numbers.
+  // Stable estimate: recomputed only when the breath pace or the Savasana length
+  // changes, and always with the SAME seeded rng, so a given pace + rest always
+  // shows the same numbers. Savasana is INSIDE the ~30-min budget, so a longer
+  // rest trades asana for rest and the estimated total stays near the target
+  // (the pose count drops slightly rather than the total drifting up).
   const estimate = useMemo(() => {
     const practice = generatePractice(poses, {
       breathSeconds,
+      savasanaSeconds: savasanaSecondsFromMinutes(savasanaMinutes),
       rng: mulberry32(ESTIMATE_SEED),
     });
     return {
       duration: formatDuration(practice.totalSeconds),
       count: practice.poses.length,
     };
-  }, [breathSeconds]);
+  }, [breathSeconds, savasanaMinutes]);
 
   const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onBreathSecondsChange(Number(event.target.value));
+  };
+
+  const handleSavasanaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onSavasanaMinutesChange(Number(event.target.value));
   };
 
   return (
@@ -180,6 +197,25 @@ function HomeScreen({
             step={1}
             value={breathSeconds}
             onChange={handleSliderChange}
+          />
+        </div>
+
+        <div className="field">
+          <div className="field__label-row">
+            <label className="field__label" htmlFor="savasana-length">
+              Savasana
+            </label>
+            <span className="field__value">{savasanaMinutes} min rest</span>
+          </div>
+          <input
+            id="savasana-length"
+            className="slider"
+            type="range"
+            min={MIN_SAVASANA_MINUTES}
+            max={MAX_SAVASANA_MINUTES}
+            step={1}
+            value={savasanaMinutes}
+            onChange={handleSavasanaChange}
           />
         </div>
 

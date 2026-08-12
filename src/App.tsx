@@ -56,6 +56,8 @@ import { requestAmbientPlay } from './lib/ambientPref';
 import {
   loadBreathSeconds,
   saveBreathSeconds,
+  loadSavasanaMinutes,
+  saveSavasanaMinutes,
   loadBasicsOnly,
   saveBasicsOnly,
   loadFullSeriesEnabled,
@@ -63,6 +65,7 @@ import {
   loadVinyasasEnabled,
   saveVinyasasEnabled,
 } from './lib/preferences';
+import { savasanaSecondsFromMinutes } from './lib/timing';
 import HomeScreen from './screens/HomeScreen';
 import MusicPanel from './components/MusicPanel';
 
@@ -106,6 +109,15 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string> | null>(null);
   // Breath pace is remembered across visits (persisted to localStorage).
   const [breathSeconds, setBreathSeconds] = useState<number>(loadBreathSeconds);
+  // Closing-Savasana length in whole minutes (2..10), remembered across visits.
+  // A sibling of the breath pace: it feeds BOTH the generator's ~30-min budget
+  // (Savasana is inside the budget — Model A) and the guided closing rest.
+  const [savasanaMinutes, setSavasanaMinutes] =
+    useState<number>(loadSavasanaMinutes);
+  // The chosen Savasana length in seconds, quantized-and-clamped in timing.ts.
+  // Threaded into generation, the selected-practice total, and the guided plan so
+  // all three agree on the same Savasana duration.
+  const savasanaSeconds = savasanaSecondsFromMinutes(savasanaMinutes);
   // "Basics only" (Smart Start) mode, also remembered across visits.
   const [basicsOnly, setBasicsOnly] = useState<boolean>(loadBasicsOnly);
   // "Full series" mode (every catalog pose selected), remembered across visits.
@@ -131,9 +143,12 @@ function App() {
   const practice = useMemo(
     () =>
       selectedIds
-        ? buildSelectedPractice(poses, selectedIds, breathSeconds, { vinyasas })
+        ? buildSelectedPractice(poses, selectedIds, breathSeconds, {
+            vinyasas,
+            savasanaSeconds,
+          })
         : null,
-    [selectedIds, breathSeconds, vinyasas],
+    [selectedIds, breathSeconds, vinyasas, savasanaSeconds],
   );
 
   // Whether the closing counter-pose is currently rule-locked: true when a
@@ -202,13 +217,27 @@ function App() {
   // Generate the throwaway practice for the `?complete` hatch once (only when the
   // hatch is active). Not stateful - this render path never re-renders normally.
   const devPractice = devComplete
-    ? generatePractice(poses, { breathSeconds, basicsOnly, vinyasas })
+    ? generatePractice(poses, {
+        breathSeconds,
+        basicsOnly,
+        vinyasas,
+        savasanaSeconds,
+      })
     : null;
 
   // Persist the breath pace whenever it changes (from the Home slider).
   const handleBreathSecondsChange = (pace: number) => {
     setBreathSeconds(pace);
     saveBreathSeconds(pace);
+  };
+
+  // Persist the Savasana length whenever it changes (from the Home slider).
+  // Mirrors handleBreathSecondsChange: it updates the shared state (driving the
+  // Home estimate) and persists on-device. The next Generate re-prices the
+  // ~30-min budget with the new rest; the derived total re-computes via the memo.
+  const handleSavasanaMinutesChange = (minutes: number) => {
+    setSavasanaMinutes(minutes);
+    saveSavasanaMinutes(minutes);
   };
 
   // Seed the selection from a freshly generated <=30-min practice: the
@@ -220,6 +249,10 @@ function App() {
       breathSeconds: pace,
       basicsOnly: basics,
       vinyasas: vin,
+      // Savasana is inside the ~30-min budget, so the chosen rest length is part
+      // of every generation. Read from the derived state (a longer rest → the
+      // generator fits slightly less asana).
+      savasanaSeconds,
     });
     // Normalize through the counter-pose rule (belt-and-suspenders): the
     // generator already includes the closing counter when a backbend is present
@@ -395,6 +428,7 @@ function App() {
               practice={devPractice}
               breathSeconds={breathSeconds}
               vinyasas={vinyasas}
+              savasanaSeconds={savasanaSeconds}
               // DEV-ONLY hatch: the app mounted straight into completion with NO
               // forward history entries, so the normal history-driven back paths
               // do not apply here. Preserve the prior behaviour (return to the
@@ -425,6 +459,8 @@ function App() {
           <HomeScreen
             breathSeconds={breathSeconds}
             onBreathSecondsChange={handleBreathSecondsChange}
+            savasanaMinutes={savasanaMinutes}
+            onSavasanaMinutesChange={handleSavasanaMinutesChange}
             onGenerate={handleGenerate}
           />
         )}
@@ -446,6 +482,7 @@ function App() {
             <OverviewScreen
               practice={practice}
               breathSeconds={breathSeconds}
+              savasanaSeconds={savasanaSeconds}
               selectedIds={selectedIds}
               onToggleSelected={handleToggleSelected}
               onBack={handleBackHome}
@@ -479,6 +516,7 @@ function App() {
               practice={practice}
               breathSeconds={breathSeconds}
               vinyasas={vinyasas}
+              savasanaSeconds={savasanaSeconds}
               // Exit (mid-practice) is a single back: guided->overview, so it
               // funnels through history.back(). Complete is a full reset to the
               // base home entry (see handleComplete) so back after finishing

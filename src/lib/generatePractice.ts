@@ -48,6 +48,16 @@ export interface GenerateOptions {
    * seated poses. Default false (duration math exactly as before).
    */
   vinyasas?: boolean;
+  /**
+   * The practitioner's chosen closing-Savasana length, in SECONDS (2..10 min).
+   * Savasana lives INSIDE the ~30-minute budget (Model A): this cost enters the
+   * fixed-frame duration, so a LONGER Savasana shrinks the free budget and the
+   * generator includes slightly LESS asana — the total stays at the ~30-minute
+   * target. When omitted, Savasana falls back to its catalog `breaths *
+   * breathSeconds` (existing callers/tests unchanged). See timing.ts
+   * (`savasanaSecondsFromMinutes`) for the minutes→seconds conversion + clamp.
+   */
+  savasanaSeconds?: number;
 }
 
 export interface GeneratedPractice {
@@ -81,6 +91,25 @@ const FIXED_FRAME_IDS = new Set<string>([
   'salamba_sarvangasana',
   'savasana',
 ]);
+
+/**
+ * === frame protection / graceful degradation ===
+ *
+ * The minimum number of REAL asana poses (selectable standing/seated/closing
+ * poses, i.e. anything that is NOT part of the fixed frame) that must survive the
+ * ceiling trim, so a long Savasana can never starve the sequence down to just the
+ * frame (Sun Salutations + Shoulderstand + Savasana with no other asana). At the
+ * maximum 10-minute Savasana the free budget still comfortably affords several
+ * such poses (≥ ~5 minutes of asana budget even at the slowest breath pace), so
+ * this floor is a defensive guarantee rather than a value the trim normally
+ * reaches — but it makes the invariant explicit and unbreakable: the trim treats
+ * the earliest-order asana poses as non-removable once removing more would drop
+ * the surviving asana count below this floor. The FULL Sun Salutations (A + B),
+ * the Shoulderstand, and Savasana are separately non-removable (they are frame),
+ * so a genuine, if reduced, practice always remains. Chosen small (3) so it never
+ * forces the total OVER the 30-min ceiling in any supported configuration.
+ */
+const MIN_ASANA_POSES = 3;
 
 /**
  * In-place Fisher–Yates shuffle of a COPY of `items`, driven by the given RNG.
@@ -230,15 +259,20 @@ export function generatePractice(
   const rng = options?.rng ?? Math.random;
   const basicsOnly = options?.basicsOnly ?? false;
   const vinyasas = options?.vinyasas ?? false;
+  const savasanaSeconds = options?.savasanaSeconds;
 
   // --- A. Fixed frame (always include, in whatever order they appear) ---
   const fixed = all.filter((p) => p.alwaysInclude);
 
   // --- B. Free budget = target - duration of the fixed frame alone ---
   // The fixed frame has no two consecutive seated poses, so the vinyasas flag
-  // does not change its duration; passed for consistency.
+  // does not change its duration; passed for consistency. The chosen Savasana
+  // length (Model A) enters HERE as part of the fixed-frame cost: a longer
+  // Savasana grows `fixedDuration`, shrinking `freeBudget`, so the fill/ceiling
+  // below select LESS asana and the total stays at the ~30-min target.
   const fixedDuration = sequenceDurationSeconds(fixed, breathSeconds, {
     vinyasas,
+    savasanaSeconds,
   });
   const freeBudget = Math.max(0, targetSeconds - fixedDuration);
 
@@ -378,7 +412,10 @@ export function generatePractice(
     [...fixed, ...sel].sort((a, b) => a.order - b.order);
 
   let sequence = assemble(selected);
-  let total = sequenceDurationSeconds(sequence, breathSeconds, { vinyasas });
+  let total = sequenceDurationSeconds(sequence, breathSeconds, {
+    vinyasas,
+    savasanaSeconds,
+  });
 
   if (total > targetSeconds) {
     // Track current per-section actual cost so we can remove from the section
@@ -414,13 +451,28 @@ export function generatePractice(
       // the counter mid-trim; it is only ever made eligible for the normal
       // section-based trim once no backbend remains.
       const backbendInWorking = hasBackbend(working.map((p) => p.id));
+      // FRAME PROTECTION: count the REAL asana poses currently surviving (any
+      // non-fixed-frame pose is a selectable standing/seated/closing asana). Once
+      // this count is at or below the floor, ALL remaining asana poses become
+      // non-removable, so the trim can never strip the sequence below a genuine
+      // (if reduced) asana portion — a long Savasana cannot starve it down to
+      // just the frame. The frame, the protected finisher, and (while a backbend
+      // remains) the counter are non-removable regardless. If the floor makes it
+      // impossible to reach the ceiling, the `removable.length === 0` guard below
+      // lets the trim bottom out rather than loop forever (Savasana is inside the
+      // budget, so the total stays honest and near target either way).
+      const asanaSurviving = working.filter(
+        (p) => !FIXED_FRAME_IDS.has(p.id),
+      ).length;
+      const asanaFloorReached = asanaSurviving <= MIN_ASANA_POSES;
       const removable = working.filter(
         (p) =>
           !FIXED_FRAME_IDS.has(p.id) &&
           p.id !== protectedFinisherId &&
-          !(backbendInWorking && p.id === COUNTER_POSE_ID),
+          !(backbendInWorking && p.id === COUNTER_POSE_ID) &&
+          !asanaFloorReached,
       );
-      if (removable.length === 0) break; // can't trim further (should not happen)
+      if (removable.length === 0) break; // can't trim further (frame floor / all protected)
 
       // Current actual cost per section (hold + one transition per pose).
       const actual: Record<Section, number> = {
@@ -461,14 +513,20 @@ export function generatePractice(
       if (idx >= 0) working.splice(idx, 1);
 
       sequence = assemble(working);
-      total = sequenceDurationSeconds(sequence, breathSeconds, { vinyasas });
+      total = sequenceDurationSeconds(sequence, breathSeconds, {
+        vinyasas,
+        savasanaSeconds,
+      });
     }
 
     // Reflect the trimmed selection.
     selected.length = 0;
     selected.push(...working);
     sequence = assemble(working);
-    total = sequenceDurationSeconds(sequence, breathSeconds, { vinyasas });
+    total = sequenceDurationSeconds(sequence, breathSeconds, {
+      vinyasas,
+      savasanaSeconds,
+    });
   }
 
   // --- G. Return canonical-ordered result ---
