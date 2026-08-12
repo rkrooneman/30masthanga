@@ -924,15 +924,16 @@ body {
   border-top: 1px solid var(--color-border);
 }
 
-/* Pose-cues slider: sits under the breath-pace slider so the two "how you
-   practice" dials read as a pair. Reuses the .field / .slider styles; spacing
-   comes from the .home__controls flex gap (no extra margin), so it sits evenly
-   with the other controls. Only the little stop labels need their own rule. */
+/* The three sound sliders (pose-cues, breath-cues, ambient) live inside the
+   Sound panel and reuse the .field / .slider styles; spacing comes from the
+   .home__sound-panel flex gap (no extra margin). Only the little stop labels
+   need their own rule. */
 
-/* Calm, muted stop labels under a Home slider (pose-cues, ambient), spread
-   across its width so each roughly aligns with a step. Purely decorative
+/* Calm, muted stop labels under a Home slider (pose-cues, breath-cues, ambient),
+   spread across its width so each roughly aligns with a step. Purely decorative
    (aria-hidden); the value line + aria-valuetext carry the accessible name. */
 .home__pose-cues-stops,
+.home__breath-cues-stops,
 .home__ambient-stops {
   display: flex;
   justify-content: space-between;
@@ -940,14 +941,80 @@ body {
   color: var(--color-text-muted);
 }
 
-/* Home-specific placement: the reused .basics-toggle switch (Breath cues) sits
-   in the Home controls column; spacing comes from the .home__controls flex gap
-   (no extra margin) so it lines up evenly with the sliders above. Its label is
-   bolded to match the .field__label weight of the Breath pace / Pose cues /
-   Ambient labels (Home only - the shared .basics-toggle__text stays regular on
-   other screens). */
-.home__breath-toggle .basics-toggle__text {
-  font-weight: 500;
+/* --------------------------------------------------------------------------
+   Sound section - the three audio choices (Pose cues, Breath cues, Ambient)
+   grouped behind a single inline collapsible disclosure that sits between the
+   estimate and the Generate button. Collapsed by default; the disclosure row
+   carries a live summary of only the active choices. Reuses the .field /
+   .slider language for the controls inside the panel.
+   -------------------------------------------------------------------------- */
+.home__sound {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The disclosure row: a full-width, quiet button reading "Sound", its live
+   summary, and a chevron. Ghost-flat by design so it sits calmly among the
+   sliders; only the focus ring borrows the app's accent treatment. */
+.home__sound-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  cursor: pointer;
+  text-align: left;
+  color: var(--color-text);
+}
+
+.home__sound-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.home__sound-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+/* Summary text trails to the right, sharing the muted .field__value look. */
+.home__sound-summary {
+  margin-left: auto;
+}
+
+/* Chevron rotates to point up when the panel is open. */
+.home__sound-chevron {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--color-text-muted);
+  transition: transform 160ms ease;
+}
+
+.home__sound-toggle[aria-expanded='true'] .home__sound-chevron {
+  transform: rotate(180deg);
+}
+
+/* The expanded panel stacks the three slider rows with the same rhythm as the
+   controls column. Conditionally rendered (not just hidden), so when collapsed
+   the controls are absent from the layout and the tab order entirely. */
+.home__sound-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Respect reduced-motion: drop the chevron rotation transition (the panel
+   itself uses an instant conditional render, so nothing else to gate). */
+@media (prefers-reduced-motion: reduce) {
+  .home__sound-chevron {
+    transition: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
