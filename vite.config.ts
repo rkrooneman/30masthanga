@@ -51,33 +51,16 @@ export default defineConfig({
         // bell (.mp3), and the soft inhale/exhale breath-cue tones (.wav) under
         // public/audio/**, so guided-practice audio works fully offline. The
         // nature-ambience tracks (public/ambient/**: forest, rain, ocean, each
-        // ~0.5-1.4 MB) live under a DIFFERENT top-level dir and are NOT matched
-        // by the audio/** glob, so they are deliberately EXCLUDED from precache
-        // to keep first load light; they are runtime-cached on first play
-        // instead (see runtimeCaching below).
+        // ~0.9-1.4 MB, all under the 2 MiB default) are ALSO precached via their
+        // own glob so all three play offline even if never played while online;
+        // a plain fetch(/ambient/<name>.mp3) in MusicPanel is then served from
+        // the precache. Because every /ambient/ file is precached, the old
+        // CacheFirst runtimeCaching rule for /ambient/ was redundant and has
+        // been removed.
         globPatterns: [
           '**/*.{js,css,html,svg,png,ico,woff2}',
           'audio/**/*.mp3',
-        ],
-        runtimeCaching: [
-          {
-            // Nature ambience: cache-first, populated the first time a track is
-            // played, so it is available offline thereafter without forcing the
-            // audio download on every visitor up front.
-            urlPattern: ({ url }) => url.pathname.startsWith('/ambient/'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'ambient-audio',
-              expiration: {
-                maxEntries: 5,
-                maxAgeSeconds: 60 * 60 * 24 * 60, // 60 days
-              },
-              cacheableResponse: {
-                // 200 (full) and 206 (partial/range) responses are both cacheable.
-                statuses: [200, 206],
-              },
-            },
-          },
+          'ambient/**/*.mp3',
         ],
       },
     }),
