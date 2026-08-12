@@ -960,6 +960,38 @@ function GuidedScreen({
     };
   }, [shouldHoldLock]);
 
+  // --- pause on interruption (backgrounding) ----------------------------------
+  // When the page is BACKGROUNDED mid-practice (app switch, incoming call, screen
+  // lock - all surface as visibilitychange -> hidden), pause the practice through
+  // the EXISTING pause machinery rather than trying to keep audio alive. Fighting
+  // the mobile audio lifecycle to resume seamlessly proved fragile (voice/bell
+  // cues came back broken while ambient kept playing); pausing halts the stepping
+  // effect's timers, and stopVoice/stopBreathCues teardown flows through the same
+  // paths the leave dialog uses, so the practice returns to a clean, known state.
+  // On return the user simply sees the paused practice and taps Resume - we do
+  // NOT auto-resume. This is a SEPARATE, dedicated listener (keyed on inProgress)
+  // from the wake-lock one above: pausing flips shouldHoldLock false, so the wake
+  // lock releases here and is re-acquired only when the user manually resumes -
+  // the wake-lock effect's own `visible` re-acquire stays guarded by shouldHoldLock
+  // (false while paused), so it correctly will NOT re-acquire until then.
+  useEffect(() => {
+    if (!inProgress) return; // nothing to pause when not actively practising
+    const onHidden = () => {
+      if (document.visibilityState !== 'hidden') return;
+      // Idempotent pause (same form as the leave-practice interceptor): only
+      // transitions running -> paused, never toggles a resume.
+      setPaused((p) => (p ? p : true));
+      // Silence any in-flight cue and release any duck it holds, exactly as the
+      // leave interceptor does, so no voice/tone is left sounding or ducked while
+      // backgrounded. Ambient music is intentionally NOT touched (it persists by
+      // design, owned by MusicPanel/ambientPref) - matching a normal tap-Pause.
+      stopVoice();
+      stopBreathCues();
+    };
+    document.addEventListener('visibilitychange', onHidden);
+    return () => document.removeEventListener('visibilitychange', onHidden);
+  }, [inProgress]);
+
   // --- exit: stop everything, then hand back to the shell ---------------------
   // The in-app Exit control funnels through the SAME browser back path as the
   // system gesture, so both routes hit the leave-practice interceptor uniformly.
