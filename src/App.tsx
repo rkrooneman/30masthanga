@@ -66,6 +66,8 @@ import {
   saveVinyasasEnabled,
 } from './lib/preferences';
 import { savasanaSecondsFromMinutes } from './lib/timing';
+import { loadEntitlement, saveEntitlement } from './lib/entitlement';
+import { restoreEntitlement } from './lib/billing';
 import HomeScreen from './screens/HomeScreen';
 import MusicPanel from './components/MusicPanel';
 
@@ -98,6 +100,39 @@ const PosePilot = lazy(() => import('./components/poses/PosePilot'));
 // would need a mounted component). Stripped from production with the DEV branch.
 let seedWeekApplied = false;
 
+// DEV-ONLY entitlement guard: ensures the `?unlock` / `?lock` hatches write the
+// entitlement at most once per page load (same module-scope pattern as the seed
+// guard above). Stripped from production with the DEV branch.
+let unlockHatchApplied = false;
+
+/**
+ * DEV-ONLY entitlement escape hatch, resolved ONCE at state-init time: visiting
+ * `/?unlock` sets the on-device entitlement (saveEntitlement(true)) and `/?lock`
+ * clears it (saveEntitlement(false)), so BOTH the locked and unlocked UIs can be
+ * previewed in a plain browser / Vercel preview WITHOUT Play. Returns the
+ * entitlement to seed the `unlocked` state with: the hatched value when a hatch
+ * is active, otherwise the stored entitlement. `import.meta.env.DEV` is
+ * statically false in production, so the whole hatch branch (and its
+ * saveEntitlement call) is stripped from the prod bundle, leaving just
+ * loadEntitlement(). Runs the write at most once per page load via the
+ * module-scope guard, mirroring the `?seedweek` hatch. Done in the state
+ * initializer (not during render) so it never calls setState during render.
+ */
+function initialEntitlement(): boolean {
+  if (import.meta.env.DEV && !unlockHatchApplied) {
+    const search = window.location.search;
+    // `?unlock` takes precedence; `?lock` (without `unlock`) clears. Checked in
+    // this order because the substring 'lock' is contained in 'unlock'.
+    if (search.includes('unlock') || search.includes('lock')) {
+      unlockHatchApplied = true;
+      const next = search.includes('unlock');
+      saveEntitlement(next);
+      return next;
+    }
+  }
+  return loadEntitlement();
+}
+
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
   // The practice is a user-editable SELECTION over the full catalog: a Set of
@@ -127,6 +162,15 @@ function App() {
   // across visits, DEFAULT ON. Orthogonal to Basics/Full series - it can combine
   // with either. Threads into both generation (budget) and the guided plan.
   const [vinyasas, setVinyasas] = useState<boolean>(loadVinyasasEnabled);
+  // Whether the one-time "steer" unlock has been purchased on this device. Gates
+  // the Basics-only / Full-series toggles and the per-pose selection checkboxes
+  // (the PAYWALL GATES CONTROL, not the practice - the auto-generated 30-min
+  // practice and everything else stay free). Initialized from on-device
+  // entitlement (entitlement.ts), with the DEV-only `?unlock` / `?lock` hatch
+  // applied once at init (see initialEntitlement); a mount effect below also
+  // attempts a silent Play restore so a reinstall / new device re-grants a prior
+  // purchase.
+  const [unlocked, setUnlocked] = useState<boolean>(initialEntitlement);
 
   // The fixed frame - poses that must always be included and are NOT toggleable
   // (Sun Salutations A/B, Shoulderstand, Savasana). Derived once from the
@@ -177,6 +221,27 @@ function App() {
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // Once on mount, silently attempt a Play "restore": if the unlock product is
+  // already owned on this Google account (e.g. after a reinstall or on a new
+  // device), re-grant the entitlement and flip the UI to unlocked. Fully guarded
+  // in billing.ts - outside the TWA (plain browser / PWA with no Digital Goods
+  // API) restoreEntitlement resolves false and NEVER throws, so this is a quiet
+  // no-op there. An `active` flag drops the result if the component unmounted
+  // first. Empty deps: run exactly once.
+  useEffect(() => {
+    let active = true;
+    restoreEntitlement()
+      .then((owned) => {
+        if (active && owned) setUnlocked(true);
+      })
+      .catch(() => {
+        /* billing unavailable - stay locked, surface nothing */
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // DEV-ONLY pilot escape hatch: visiting `/?pilot` renders the pose-icon
@@ -360,6 +425,11 @@ function App() {
     seedFromGenerated(breathSeconds, basicsOnly, next);
   };
 
+  // Flip to the unlocked state after a successful purchase or restore (driven by
+  // the UnlockSheet via OverviewScreen). billing.ts has already persisted the
+  // entitlement on success; this only syncs the live UI state. Idempotent.
+  const handleUnlock = () => setUnlocked(true);
+
   // In-app back controls funnel through history.back() rather than setScreen, so
   // the history stack and the visible screen stay aligned (the single popstate
   // handler does the actual setScreen). This is what makes one back gesture --
@@ -495,6 +565,8 @@ function App() {
               vinyasas={vinyasas}
               onToggleVinyasas={handleToggleVinyasas}
               counterPoseLocked={counterPoseLocked}
+              unlocked={unlocked}
+              onUnlock={handleUnlock}
             />
           </Suspense>
         )}

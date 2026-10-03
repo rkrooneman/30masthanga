@@ -44,6 +44,7 @@ import {
 } from '../lib/timing';
 import PoseGraphic from '../components/PoseGraphic';
 import { BackArrow } from '../components/icons/NavArrow';
+import { LockGlyph } from '../components/icons/LockGlyph';
 import { COUNTER_POSE_ID } from '../lib/counterPose';
 
 /** The full catalog in canonical order — the grid renders every pose. */
@@ -114,6 +115,20 @@ interface PoseMapProps {
    * no backbend is selected, leaving the counter a normal toggleable checkbox.
    */
   counterPoseLocked?: boolean;
+  /**
+   * Whether the one-time "steer" unlock has been purchased. When false, the
+   * three steer controls (Basics only, Full series, and the per-pose selection
+   * checkboxes) render gently locked (a small lock glyph, dimmed) and interacting
+   * with any of them calls onRequestUnlock INSTEAD of toggling. The Vinyasas
+   * toggle, Start / New sequence / Back, and opening pose detail cards are NEVER
+   * gated. When true, every control behaves exactly as before.
+   */
+  unlocked: boolean;
+  /**
+   * Open the shared unlock sheet. Called when a free (locked) user taps any of
+   * the three gated steer controls. Never called when unlocked is true.
+   */
+  onRequestUnlock: () => void;
 }
 
 /** A pose paired with its absolute index in the full catalog. */
@@ -172,6 +187,8 @@ function PoseMap({
   vinyasas,
   onToggleVinyasas,
   counterPoseLocked = false,
+  unlocked,
+  onRequestUnlock,
 }: PoseMapProps) {
   // The grand total comes from the DERIVED practice (selected poses only), so it
   // is honest even past 30:00 — no cap, no warning.
@@ -201,15 +218,29 @@ function PoseMap({
         </p>
       </header>
 
-      <div className="basics-toggle">
+      <div
+        className={
+          unlocked ? 'basics-toggle' : 'basics-toggle basics-toggle--locked'
+        }
+      >
         <label className="basics-toggle__label" htmlFor="basics-only-switch">
-          <span className="basics-toggle__text">Basics only</span>
+          <span className="basics-toggle__text">
+            Basics only
+            {!unlocked && (
+              <LockGlyph className="basics-toggle__lock" />
+            )}
+          </span>
           <input
             type="checkbox"
             id="basics-only-switch"
             className="basics-toggle__input"
             checked={basicsOnly}
-            onChange={(e) => onToggleBasics(e.target.checked)}
+            // When locked, a tap opens the unlock sheet INSTEAD of toggling: we
+            // do not call onToggleBasics, so the controlled `checked` stays put
+            // and nothing changes until the user unlocks.
+            onChange={(e) =>
+              unlocked ? onToggleBasics(e.target.checked) : onRequestUnlock()
+            }
           />
           <span className="basics-toggle__track" aria-hidden="true">
             <span className="basics-toggle__thumb" />
@@ -220,15 +251,31 @@ function PoseMap({
         </p>
       </div>
 
-      <div className="basics-toggle pose-map__full-series-toggle">
+      <div
+        className={
+          unlocked
+            ? 'basics-toggle pose-map__full-series-toggle'
+            : 'basics-toggle pose-map__full-series-toggle basics-toggle--locked'
+        }
+      >
         <label className="basics-toggle__label" htmlFor="full-series-switch">
-          <span className="basics-toggle__text">Full series</span>
+          <span className="basics-toggle__text">
+            Full series
+            {!unlocked && (
+              <LockGlyph className="basics-toggle__lock" />
+            )}
+          </span>
           <input
             type="checkbox"
             id="full-series-switch"
             className="basics-toggle__input"
             checked={fullSeries}
-            onChange={(e) => onToggleFullSeries(e.target.checked)}
+            // Locked: open the sheet instead of toggling (see Basics above).
+            onChange={(e) =>
+              unlocked
+                ? onToggleFullSeries(e.target.checked)
+                : onRequestUnlock()
+            }
           />
           <span className="basics-toggle__track" aria-hidden="true">
             <span className="basics-toggle__thumb" />
@@ -309,9 +356,18 @@ function PoseMap({
                   // because it is that backbend's mandatory safety counter-pose.
                   const isCounterLocked =
                     counterPoseLocked === true && pose.id === COUNTER_POSE_ID;
-                  // Either lock disables the checkbox; the visual dimming reuses
-                  // the shared `.pose-map__select-input:disabled` styling.
+                  // Either safety lock disables the checkbox; the visual dimming
+                  // reuses the shared `.pose-map__select-input:disabled` styling.
                   const isLocked = isFixed || isCounterLocked;
+                  // Paywall lock: a free (not-unlocked) user cannot change the
+                  // per-pose selection. This is SEPARATE from the safety locks
+                  // above - a fixed / counter pose is already disabled, so the
+                  // paywall only gently locks the remaining, normally-toggleable
+                  // poses. Unlike the safety lock it keeps the checkbox ENABLED
+                  // (a disabled input fires no event) and instead routes the tap
+                  // to the unlock sheet, so nothing toggles until the user
+                  // unlocks.
+                  const isPaywallLocked = !unlocked && !isLocked;
                   const checkboxId = `pose-select-${pose.id}`;
                   return (
                     <li
@@ -348,14 +404,20 @@ function PoseMap({
                         distinct tap targets. Fixed-frame poses are locked.
                       */}
                       <label
-                        className="pose-map__select"
+                        className={
+                          isPaywallLocked
+                            ? 'pose-map__select pose-map__select--locked'
+                            : 'pose-map__select'
+                        }
                         htmlFor={checkboxId}
                         title={
                           isFixed
                             ? 'Always included - cannot be removed'
                             : isCounterLocked
                               ? 'Counter-pose to Bridge / Wheel - always included with them'
-                              : undefined
+                              : isPaywallLocked
+                                ? 'Unlock to choose your own poses'
+                                : undefined
                         }
                       >
                         <input
@@ -364,19 +426,34 @@ function PoseMap({
                           className="pose-map__select-input"
                           checked={isSelected || isCounterLocked}
                           disabled={isLocked}
-                          onChange={() => onToggleSelected(pose.id)}
+                          // Paywall-locked (free user, toggleable pose): open the
+                          // unlock sheet instead of toggling, so the selection
+                          // never changes until unlocked. The safety-locked case
+                          // is already handled by `disabled` above (fires no
+                          // event). Unlocked: the normal toggle.
+                          onChange={() =>
+                            isPaywallLocked
+                              ? onRequestUnlock()
+                              : onToggleSelected(pose.id)
+                          }
                           aria-label={
                             isFixed
                               ? `${pose.sanskrit} (always included)`
                               : isCounterLocked
                                 ? `${pose.sanskrit} (counter-pose, always included with Bridge or Wheel)`
-                                : `Include ${pose.sanskrit}`
+                                : isPaywallLocked
+                                  ? `Unlock to include ${pose.sanskrit}`
+                                  : `Include ${pose.sanskrit}`
                           }
                         />
                         <span
                           className="pose-map__select-box"
                           aria-hidden="true"
-                        />
+                        >
+                          {isPaywallLocked && (
+                            <LockGlyph className="pose-map__select-lock" />
+                          )}
+                        </span>
                       </label>
                     </li>
                   );

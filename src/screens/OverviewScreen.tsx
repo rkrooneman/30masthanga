@@ -32,6 +32,7 @@ import type { OverviewScreenProps } from '../types/navigation';
 import { poses as catalog } from '../data/poses';
 import PoseMap from './PoseMap';
 import PoseCarousel from './PoseCarousel';
+import UnlockSheet from '../components/UnlockSheet';
 
 /**
  * The full catalog in canonical order — what the MAP now renders (every pose,
@@ -59,6 +60,8 @@ function OverviewScreen({
   vinyasas,
   onToggleVinyasas,
   counterPoseLocked,
+  unlocked,
+  onUnlock,
 }: OverviewScreenProps) {
   // The detail carousel now pages the FULL catalog (every pose, selected or
   // not), so tapping ANY map card — including a dimmed, unselected one — opens
@@ -67,6 +70,11 @@ function OverviewScreen({
 
   const [view, setView] = useState<OverviewView>('map');
   const [detailIndex, setDetailIndex] = useState(0);
+  // Whether the single, shared unlock sheet is open. Opened when a free (locked)
+  // user taps one of the gated steer controls in PoseMap (Basics / Full series /
+  // a per-pose checkbox). A single instance lives here, above PoseMap, so there
+  // is one sheet for all locked controls rather than one per control.
+  const [unlockOpen, setUnlockOpen] = useState(false);
   // Bumped on each regenerate. Used as PoseMap's key so the map remounts and its
   // sections grid replays the cross-fade; also gates the fade so the initial
   // landing (count 0) stays still.
@@ -105,26 +113,41 @@ function OverviewScreen({
   }
 
   return (
-    <PoseMap
-      key={regenCount}
-      practice={practice}
-      breathSeconds={breathSeconds}
-      savasanaSeconds={savasanaSeconds}
-      selectedIds={selectedIds}
-      onToggleSelected={onToggleSelected}
-      onOpenPose={openPose}
-      onBack={onBack}
-      onStartGuided={onStartGuided}
-      onRegenerate={regenerate}
-      animateRefresh={regenCount > 0}
-      basicsOnly={basicsOnly}
-      onToggleBasics={onToggleBasics}
-      fullSeries={fullSeries}
-      onToggleFullSeries={onToggleFullSeries}
-      vinyasas={vinyasas}
-      onToggleVinyasas={onToggleVinyasas}
-      counterPoseLocked={counterPoseLocked}
-    />
+    <>
+      <PoseMap
+        key={regenCount}
+        practice={practice}
+        breathSeconds={breathSeconds}
+        savasanaSeconds={savasanaSeconds}
+        selectedIds={selectedIds}
+        onToggleSelected={onToggleSelected}
+        onOpenPose={openPose}
+        onBack={onBack}
+        onStartGuided={onStartGuided}
+        onRegenerate={regenerate}
+        animateRefresh={regenCount > 0}
+        basicsOnly={basicsOnly}
+        onToggleBasics={onToggleBasics}
+        fullSeries={fullSeries}
+        onToggleFullSeries={onToggleFullSeries}
+        vinyasas={vinyasas}
+        onToggleVinyasas={onToggleVinyasas}
+        counterPoseLocked={counterPoseLocked}
+        unlocked={unlocked}
+        onRequestUnlock={() => setUnlockOpen(true)}
+      />
+      {/*
+        The single, shared unlock sheet. It is a no-op (renders null) until a
+        locked steer control opens it, so it is harmless to mount here on the map
+        view regardless of unlocked state. On success it flips the app to
+        unlocked (onUnlock) and closes.
+      */}
+      <UnlockSheet
+        open={unlockOpen}
+        onClose={() => setUnlockOpen(false)}
+        onUnlocked={onUnlock}
+      />
+    </>
   );
 }
 
