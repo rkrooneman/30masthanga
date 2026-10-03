@@ -900,6 +900,31 @@ body {
   color: var(--color-text-muted);
 }
 
+/* --------------------------------------------------------------------------
+   Gently-locked steer toggle (free tier, unlock not yet purchased). The paywall
+   gates CONTROL, not the practice: the "Basics only" and "Full series" switches
+   stay visible but dimmed, with a small lock glyph beside the label, so it reads
+   calmly as "locked" rather than broken. Tapping opens the unlock sheet (wired
+   in PoseMap) instead of toggling; the switch never moves. Vinyasas is NOT
+   locked and keeps the normal styling.
+   -------------------------------------------------------------------------- */
+.basics-toggle--locked .basics-toggle__label,
+.basics-toggle--locked .basics-toggle__hint {
+  /* Dim the whole control (label, switch, hint) to signal the locked state. The
+     label stays clickable so the tap can open the unlock sheet. */
+  opacity: 0.6;
+}
+
+/* The small padlock beside a locked toggle's label. Muted, sized to the label's
+   cap-height so it sits inline with the text. */
+.basics-toggle__lock {
+  width: 0.85em;
+  height: 0.85em;
+  margin-left: 0.4rem;
+  color: var(--color-text-muted);
+  vertical-align: -0.1em;
+}
+
 /* The "Full series" switch sits directly below the "Basics only" toggle on the
    Overview, reusing the same switch styling with matching spacing so the two
    (mutually-exclusive) modes read as a pair. */
@@ -1182,6 +1207,27 @@ body {
 .pose-map__select-input:focus-visible + .pose-map__select-box {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* Paywall-locked per-pose checkbox (free tier, unlock not yet purchased). The
+   box stays visible but dimmed and carries a small lock glyph; the checkbox is
+   kept enabled so a tap can open the unlock sheet (wired in PoseMap) rather than
+   toggling the selection. Distinct from the safety-locked fixed-frame poses
+   above, which stay `disabled`. */
+.pose-map__select--locked .pose-map__select-box {
+  opacity: 0.6;
+}
+
+/* The tiny padlock centred inside a paywall-locked select box. Muted, sized to
+   sit inside the 1.15rem box. */
+.pose-map__select-lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  transform: translate(-50%, -50%);
+  color: var(--color-text-muted);
 }
 
 /* The whole cell is a button. Equal-height calm surface cards. */
@@ -2079,6 +2125,118 @@ body {
    rule above; this covers the leave-dialog card itself). */
 @media (prefers-reduced-motion: reduce) {
   .leave-dialog {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Unlock sheet (free + one-time unlock paywall) - the single calm sheet that
+   offers the one-time "steer" unlock, shown once when a free user taps a locked
+   steer control. Reuses the app's modal language: the shared .about-backdrop dim
+   overlay plus a calm surface card (same look as the About / leave dialogs), and
+   the shared .button / .button--primary / .button--outline action classes. No
+   new design system is introduced.
+   -------------------------------------------------------------------------- */
+.unlock-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 24rem;
+  max-height: 100%;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg);
+  animation: about-rise 0.18s ease;
+}
+
+/* Shell + ghost look come from .button--icon .button--icon-ghost; only the
+   corner positioning and the larger glyph stay here (mirrors .about__close). */
+.unlock-sheet__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: var(--text-xl);
+  line-height: 1;
+}
+
+.unlock-sheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: left;
+}
+
+.unlock-sheet__heading {
+  margin: 0;
+  padding-right: 2rem;
+  font-size: var(--text-title);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+}
+
+.unlock-sheet__text {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+/* The lead-in line above the three steer benefits ("Unlock to steer it
+   yourself:"). A touch of top space sets it apart from the opening line. */
+.unlock-sheet__lead {
+  margin-top: var(--space-1);
+}
+
+/* The three steer benefits. A calm bulleted list in the muted body colour. */
+.unlock-sheet__list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+}
+
+/* The one-time price line - a quiet, slightly emphasized line. */
+.unlock-sheet__price {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* The two stacked full-width actions (Unlock primary over Restore outline),
+   matching the Overview / leave-dialog action stacks. */
+.unlock-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+/* A single, gentle inline note shown after a cancelled / failed action. Calm and
+   muted - never a modal error, never repeated. */
+.unlock-sheet__note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* The quiet closing footnote (restore-on-same-account). */
+.unlock-sheet__footnote {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Respect reduced-motion: drop the card entrance animation (the shared
+   .about-backdrop is already covered by the About dialog's reduced-motion rule
+   above; this covers the unlock-sheet card itself). */
+@media (prefers-reduced-motion: reduce) {
+  .unlock-sheet {
     animation: none;
   }
 }

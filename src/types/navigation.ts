@@ -103,6 +103,21 @@ export interface OverviewScreenProps {
    * off). Task 4 consumes this in PoseMap to lock the counter's checkbox.
    */
   counterPoseLocked?: boolean;
+  /**
+   * Whether the one-time "steer" unlock has been purchased. When false, the
+   * Basics-only / Full-series toggles and the per-pose selection checkboxes
+   * render gently locked and tapping any of them opens the unlock sheet instead
+   * of toggling. Everything else (the free auto-generated practice, Vinyasas,
+   * Start / New sequence / Back, opening pose detail cards) stays fully
+   * functional. When true, those controls behave exactly as before.
+   */
+  unlocked: boolean;
+  /**
+   * Flip the app to the unlocked state after a successful purchase or restore.
+   * The entitlement is persisted by billing.ts on success; this only syncs the
+   * live UI. Wired from the UnlockSheet.
+   */
+  onUnlock: () => void;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */
