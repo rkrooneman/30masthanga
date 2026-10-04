@@ -19,6 +19,7 @@ The full Ashtanga Primary Series takes well over an hour, which makes a daily pr
 - **A gentle record of your week.** Home shows the last seven days as small leaves that fill in sage on the days you practice: a quiet, pressure-free nudge rather than a streak counter. Everything stays on-device.
 - **Back where you expect.** The system Back gesture (and the browser Back button) steps back one screen, Guided to Overview to Home, rather than exiting. Backing out of a practice in progress asks for confirmation first.
 - **Made to keep.** Sanskrit-first pose names with English, drishti, and a tap-to-hear pronunciation button, original hand-drawn pose art, and an installable, offline-capable PWA.
+- **Free to practice, one-time upgrade to steer.** The app is free, and every free user gets a complete, faithful, guided 30-minute practice: the auto-generated sequence from the full pose pool, vinyasas, all sound, and all Home settings. A single one-time in-app unlock ("Steer your practice") adds the ability to steer the sequence yourself: "Basics only" mode, "Full series" mode, and per-pose selection. The paywall gates control, never the practice. The unlock is purchased through Google Play Billing (via the Digital Goods API inside the TWA) and the entitlement is stored on-device, with a "Restore purchase" option for the same Google account. Outside a supporting browser the purchase is simply not offered and the app stays the complete free tier.
 
 ## Tech stack
 
@@ -46,7 +47,7 @@ npx tsx src/lib/guidedPlan.test.ts            # guided-practice plan tests
 npx tsx src/components/poses/verify-coverage.ts  # confirm every pose has an icon
 ```
 
-Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to render the guided completion screen directly (Namaste mark + summary, including its bell and Namaste sounds) without playing through a whole practice, or `/?seedweek` to seed a few days into the last-7-days practice log so the filled leaves can be previewed. All three hatches are DEV-only and stripped from production builds.
+Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to render the guided completion screen directly (Namaste mark + summary, including its bell and Namaste sounds) without playing through a whole practice, `/?seedweek` to seed a few days into the last-7-days practice log so the filled leaves can be previewed, or `/?unlock` and `/?lock` to preview the unlocked and gated (free) states without a real purchase. All of these hatches are DEV-only and stripped from production builds (the Digital Goods API only exists inside the TWA anyway, so the real purchase cannot run in a plain browser).
 
 ## Project structure
 
@@ -65,6 +66,9 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to rende
 - `src/lib/ambientPref.ts`: the ambient-choice preference, a tiny pub/sub shared between the Home slider and the shell-level `MusicPanel`.
 - `src/lib/navHistory.ts`: the pure reducer backing browser-history and Back-gesture navigation between the three screens.
 - `src/lib/practiceLog.ts`: the on-device log of days a practice was completed, powering the last-7-days row on Home.
+- `src/lib/entitlement.ts`: the on-device "steer" unlock entitlement (a tiny, try/catch-wrapped localStorage flag), decoupled from any billing code so the gating logic is unit-testable without Play.
+- `src/lib/billing.ts`: the only Play-touching code. Wraps the Digital Goods API and a Play Billing `PaymentRequest` for the one-time `steer_unlock` product: `isBillingAvailable()`, `isProductAvailable()` (a `getDetails` precheck before launching the flow), `purchaseUnlock()`, and `restoreEntitlement()`. Every function is feature-detected and degrades gracefully (resolves false, never throws) outside a supporting TWA browser.
+- `src/components/UnlockSheet.tsx`: the single calm unlock sheet, shown only when a free user taps a locked steer control. Shows the purchase (Unlock / Restore) when billing is available, or a gentle "needs Chrome" explanation when it is not (never a launch-time popup or a nag).
 - `src/components/PracticeWeek.tsx` / `src/components/PetalMark.tsx`: the last-7-days leaf row and the single leaf marker (empty outline or filled sage).
 - `public/audio/voice/`: prerecorded pose-name clips plus `namaste.mp3`, `switch_sides.mp3`, and the salutation cues `last_breath.mp3`, `step_jump_forward.mp3`, and `samasthiti.mp3`; `public/audio/effects/` holds `bell.mp3` (the completion bell) and the breath-cue tones `inhale.mp3` and `exhale.mp3`.
 - `src/screens/`: Home, Overview (map + carousel), and the Guided player.
@@ -72,6 +76,7 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to rende
 - `src/components/FlowMark.tsx`: the abstract flow glyph shown in place of a pose icon during a half-vinyasa.
 - `src/components/FlowStrip.tsx`: the live salutation/UHP flow strip shown in place of a pose icon, with the current position centered and highlighted.
 - `src/components/icons/NavArrow.tsx`: the small centered chevron/back-arrow SVGs used by the navigation controls.
+- `src/components/icons/LockGlyph.tsx`: the small padlock glyph shown on the gated steer controls (Basics only, Full series, per-pose selection) for a free user.
 - `src/components/poses/`: the 68 pose icons and their registry.
 - `src/components/poses/flowIcons.ts`: maps each salutation/UHP flow-position label to its icon.
 
@@ -79,7 +84,9 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to rende
 
 Drishti values follow standard Ashtanga (KPJAYI / David Swenson) convention and have been reviewed against it. They remain a study reference, not authoritative instruction. Pose icons are original schematic line drawings intended as clear references, not anatomical illustrations.
 
-ashtanga30 ships as a Trusted Web Activity (TWA) in Google Play closed testing, so the installed Android app is the same site running full-screen. `public/.well-known/assetlinks.json`, served at `https://ashtanga30.com/.well-known/assetlinks.json`, holds the real SHA-256 signing-key fingerprints (the Play App Signing keys, the upload key, and the closed-testing key) that verify domain ownership. With the file in place the app is domain-verified and launches full-screen with no browser chrome.
+ashtanga30 ships as a Trusted Web Activity (TWA) on Google Play, so the installed Android app is the same site running full-screen. `public/.well-known/assetlinks.json`, served at `https://ashtanga30.com/.well-known/assetlinks.json`, holds the real SHA-256 signing-key fingerprints (the Play App Signing key, the upload key, and the testing-track keys) that verify domain ownership. With the file in place the app is domain-verified and launches full-screen with no browser chrome.
+
+One TWA caveat worth knowing: Play Billing (the in-app unlock) works only when the TWA is backed by a browser that provides the Digital Goods API, which in practice means Chrome. A device whose default browser is a non-supporting one (for example Brave) will verify and run the TWA full-screen but cannot complete the purchase; `UnlockSheet` detects this and shows the calm "needs Chrome" explanation instead of a dead Unlock button. The free practice is unaffected.
 
 ## Disclaimer
 
