@@ -118,6 +118,15 @@ export interface OverviewScreenProps {
    * live UI. Wired from the UnlockSheet.
    */
   onUnlock: () => void;
+  /**
+   * Whether Play Billing can actually run on this device (resolved once on mount
+   * in the shell). `null` means "not yet determined" and is treated the same as
+   * available. Passed straight through to the UnlockSheet so that, when billing
+   * is unavailable (a plain browser or a TWA backed by a non-supporting browser
+   * such as Brave / Firefox), the sheet shows a calm "needs Chrome" explanation
+   * instead of a dead Unlock button. It does NOT gate the locks themselves.
+   */
+  billingAvailable: boolean | null;
 }
 
 /** Props for the Guided screen (Slice 5b — the interactive player). */

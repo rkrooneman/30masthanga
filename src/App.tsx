@@ -67,7 +67,7 @@ import {
 } from './lib/preferences';
 import { savasanaSecondsFromMinutes } from './lib/timing';
 import { loadEntitlement, saveEntitlement } from './lib/entitlement';
-import { restoreEntitlement } from './lib/billing';
+import { isBillingAvailable, restoreEntitlement } from './lib/billing';
 import HomeScreen from './screens/HomeScreen';
 import MusicPanel from './components/MusicPanel';
 
@@ -171,6 +171,16 @@ function App() {
   // attempts a silent Play restore so a reinstall / new device re-grants a prior
   // purchase.
   const [unlocked, setUnlocked] = useState<boolean>(initialEntitlement);
+  // Whether Play Billing can actually run on this device. Only inside a TWA
+  // whose Digital Goods service resolves (AND where PaymentRequest exists) can a
+  // user complete the purchase; in a plain browser or a TWA backed by a
+  // non-supporting browser (e.g. Brave / Firefox) the Digital Goods API is not
+  // injected, so the unlock can never go through. `null` means "not yet
+  // determined" (resolved within a tick of mount by the effect below). This is
+  // threaded down to the UnlockSheet so, when billing is unavailable, the sheet
+  // shows a calm "needs Chrome" explanation instead of a dead Unlock button. It
+  // does NOT gate the locks themselves (see the gating note in OverviewScreen).
+  const [billingAvailable, setBillingAvailable] = useState<boolean | null>(null);
 
   // The fixed frame - poses that must always be included and are NOT toggleable
   // (Sun Salutations A/B, Shoulderstand, Savasana). Derived once from the
@@ -238,6 +248,19 @@ function App() {
       })
       .catch(() => {
         /* billing unavailable - stay locked, surface nothing */
+      });
+    // Also once on mount, feature-detect whether Play Billing can run here, so
+    // the UnlockSheet can degrade gracefully when it cannot (showing a calm
+    // "needs Chrome" explanation rather than a dead Unlock button). Fully
+    // guarded in billing.ts - it resolves false and NEVER throws outside a
+    // supporting TWA. Same `active` unmount guard as the restore above.
+    isBillingAvailable()
+      .then((available) => {
+        if (active) setBillingAvailable(available);
+      })
+      .catch(() => {
+        /* never throws; treat an unexpected error as "unavailable" */
+        if (active) setBillingAvailable(false);
       });
     return () => {
       active = false;
@@ -567,6 +590,7 @@ function App() {
               counterPoseLocked={counterPoseLocked}
               unlocked={unlocked}
               onUnlock={handleUnlock}
+              billingAvailable={billingAvailable}
             />
           </Suspense>
         )}

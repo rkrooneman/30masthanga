@@ -20,6 +20,22 @@
  * closes without error. (In practice a free user in a plain browser never sees a
  * locked control open this sheet when billing is unavailable - the parent can
  * choose not to offer it - but the sheet is safe either way.)
+ *
+ * === graceful "needs Chrome" variant ===
+ * Play Billing in a TWA runs through the Digital Goods API, which is ONLY
+ * injected by a Chrome-backed TWA provider. A user whose TWA is backed by a
+ * non-supporting browser (e.g. Brave / Firefox) cannot purchase at all, and the
+ * Unlock button would silently fail. So the parent resolves `isBillingAvailable()`
+ * once and passes it down as `billingAvailable`:
+ *   - true / null (undetermined): render the normal purchase sheet unchanged.
+ *   - false: render a calm, honest variant that keeps the "Steer your practice"
+ *     framing and the three benefits, but REPLACES the price + Unlock / Restore
+ *     actions with a short explanation that the upgrade is purchased through
+ *     Google Play (which needs Chrome on this device) plus a brief how-to, and a
+ *     single "Got it" close. No Unlock button (it cannot work), no Restore
+ *     (restore needs the same service). This doubles as a gentle, non-naggy nudge
+ *     toward Chrome; it only ever appears when the user actively taps a locked
+ *     control, never at launch.
  */
 
 import { useEffect, useState } from 'react';
@@ -32,9 +48,23 @@ interface UnlockSheetProps {
   onClose: () => void;
   /** Called when a purchase or restore succeeds, so the parent can unlock the UI. */
   onUnlocked: () => void;
+  /**
+   * Whether Play Billing can actually run on this device, resolved once on mount
+   * in the shell. When false the purchase cannot complete (the TWA is backed by a
+   * browser that does not inject the Digital Goods API, e.g. Brave / Firefox, or
+   * it is a plain browser), so the sheet shows the calm "needs Chrome" variant
+   * with no Unlock button. `null` (undetermined) and true both render the normal
+   * purchase sheet.
+   */
+  billingAvailable: boolean | null;
 }
 
-function UnlockSheet({ open, onClose, onUnlocked }: UnlockSheetProps) {
+function UnlockSheet({
+  open,
+  onClose,
+  onUnlocked,
+  billingAvailable,
+}: UnlockSheetProps) {
   // Which action is in flight (if any), to disable the buttons while Play's UI
   // is up. 'idle' when nothing is running.
   const [busy, setBusy] = useState<'idle' | 'purchase' | 'restore'>('idle');
@@ -91,6 +121,13 @@ function UnlockSheet({ open, onClose, onUnlocked }: UnlockSheetProps) {
       'No previous purchase found on this account.',
     );
 
+  // Billing cannot run here (a TWA backed by a non-supporting browser, or a plain
+  // browser): the purchase can never complete, so swap in the calm "needs Chrome"
+  // explanation instead of a dead Unlock button. `null` (undetermined) and true
+  // both keep the normal purchase sheet. Resolves within a tick of mount, so this
+  // only ever reflects a settled value by the time a user taps a locked control.
+  const billingUnavailable = billingAvailable === false;
+
   return (
     <div className="about-backdrop" onClick={onClose}>
       <div
@@ -134,32 +171,73 @@ function UnlockSheet({ open, onClose, onUnlocked }: UnlockSheetProps) {
             </li>
           </ul>
 
-          <p className="unlock-sheet__price">EUR 5.99, one-time. Yours to keep.</p>
+          {billingUnavailable ? (
+            <>
+              {/*
+                Billing cannot run in this TWA (its browser does not inject the
+                Digital Goods API), so there is no working Unlock. Explain the
+                how-to calmly instead - a gentle nudge toward Chrome, never a nag
+                or an error. No Unlock / Restore buttons (both need the service);
+                a single "Got it" closes the sheet.
+              */}
+              <p className="unlock-sheet__text unlock-sheet__lead">
+                The one-time upgrade is purchased through Google Play, which needs
+                Chrome to complete the purchase on this device.
+              </p>
+              <p className="unlock-sheet__text">To upgrade:</p>
+              <ul className="unlock-sheet__list">
+                <li>
+                  Set Chrome as your default browser (Settings &gt; Apps &gt;
+                  Default apps &gt; Browser app), or install Chrome
+                </li>
+                <li>Then reopen ashtanga30</li>
+              </ul>
+              <p className="unlock-sheet__footnote">
+                Your free practice stays complete either way.
+              </p>
 
-          <div className="unlock-sheet__actions">
-            <button
-              type="button"
-              className="button button--primary"
-              onClick={handleUnlock}
-              disabled={busy !== 'idle'}
-            >
-              Unlock
-            </button>
-            <button
-              type="button"
-              className="button button--outline"
-              onClick={handleRestore}
-              disabled={busy !== 'idle'}
-            >
-              Restore purchase
-            </button>
-          </div>
+              <div className="unlock-sheet__actions">
+                <button
+                  type="button"
+                  className="button button--primary"
+                  onClick={onClose}
+                >
+                  Got it
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="unlock-sheet__price">
+                EUR 5.99, one-time. Yours to keep.
+              </p>
 
-          {note && <p className="unlock-sheet__note">{note}</p>}
+              <div className="unlock-sheet__actions">
+                <button
+                  type="button"
+                  className="button button--primary"
+                  onClick={handleUnlock}
+                  disabled={busy !== 'idle'}
+                >
+                  Unlock
+                </button>
+                <button
+                  type="button"
+                  className="button button--outline"
+                  onClick={handleRestore}
+                  disabled={busy !== 'idle'}
+                >
+                  Restore purchase
+                </button>
+              </div>
 
-          <p className="unlock-sheet__footnote">
-            Your unlock restores on the same Google account.
-          </p>
+              {note && <p className="unlock-sheet__note">{note}</p>}
+
+              <p className="unlock-sheet__footnote">
+                Your unlock restores on the same Google account.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
