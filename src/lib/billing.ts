@@ -44,9 +44,18 @@ interface DigitalGoodsPurchase {
   purchaseToken: string;
 }
 
+/**
+ * A single item-detail record as returned by DigitalGoodsService.getDetails().
+ * The real API returns many fields (title, price, etc.); we only need the
+ * `itemId` to confirm a product is visible to the Play Billing bridge.
+ */
+interface DigitalGoodsItemDetails {
+  itemId: string;
+}
+
 /** The subset of the Digital Goods service we rely on. */
 interface DigitalGoodsService {
-  getDetails(itemIds: string[]): Promise<unknown>;
+  getDetails(itemIds: string[]): Promise<DigitalGoodsItemDetails[]>;
   listPurchases(): Promise<DigitalGoodsPurchase[]>;
   consume?(purchaseToken: string): Promise<void>;
 }
@@ -90,6 +99,33 @@ async function getService(): Promise<DigitalGoodsService | null> {
 }
 
 /**
+ * Precheck that the one-time unlock product is actually visible to the Play
+ * Billing bridge, by asking the Digital Goods service for its details. Returns
+ * true only when getDetails() resolves an item whose id matches the unlock
+ * product. An EMPTY getDetails result is the classic reason PaymentRequest.show()
+ * rejects instantly with no sheet (the product is not authored / not visible on
+ * the Play side), so callers use this to bail with a clear signal instead of a
+ * silent instant-reject. Fully try/catch wrapped: on any absence or error it
+ * resolves false and never throws.
+ */
+export async function isProductAvailable(): Promise<boolean> {
+  try {
+    const service = await getService();
+    if (service === null) return false;
+    const details = await service.getDetails([UNLOCK_PRODUCT_ID]);
+    if (import.meta.env?.DEV) {
+      console.info('[billing] getDetails result', details);
+    }
+    return (
+      Array.isArray(details) &&
+      details.some((item) => item.itemId === UNLOCK_PRODUCT_ID)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Feature-detect whether Play Billing is available on this device. True only
  * inside a TWA whose Digital Goods service resolves AND where PaymentRequest
  * exists; false in every plain browser / PWA. Never throws.
@@ -117,8 +153,39 @@ export async function isBillingAvailable(): Promise<boolean> {
 export async function purchaseUnlock(): Promise<boolean> {
   try {
     const service = await getService();
+    if (import.meta.env?.DEV) {
+      console.info(
+        '[billing] purchaseUnlock: digital goods service resolved =',
+        service !== null,
+      );
+    }
     if (service === null) return false;
     if (typeof window.PaymentRequest !== 'function') return false;
+
+    // getDetails() precheck: if the product is not visible to the Play Billing
+    // bridge (empty / non-matching result), PaymentRequest.show() would reject
+    // instantly with no sheet. Bail here instead so the failure is explicit.
+    // This gate runs in BOTH dev and production; only the logging is dev-gated.
+    const itemDetails = await service.getDetails([UNLOCK_PRODUCT_ID]);
+    const available =
+      Array.isArray(itemDetails) &&
+      itemDetails.some((item) => item.itemId === UNLOCK_PRODUCT_ID);
+    if (import.meta.env?.DEV) {
+      console.info('[billing] purchaseUnlock: getDetails result', itemDetails);
+    }
+    if (!available) {
+      if (import.meta.env?.DEV) {
+        console.warn(
+          `[billing] purchaseUnlock: product "${UNLOCK_PRODUCT_ID}" not visible to the Play Billing bridge (getDetails empty / no match); skipping show()`,
+        );
+      }
+      return false;
+    }
+    if (import.meta.env?.DEV) {
+      console.info(
+        '[billing] purchaseUnlock: product available, calling show()',
+      );
+    }
 
     const methodData: PlayBillingPaymentMethodData[] = [
       {
@@ -167,6 +234,14 @@ export async function restoreEntitlement(): Promise<boolean> {
     const owned = purchases.some(
       (purchase) => purchase.itemId === UNLOCK_PRODUCT_ID,
     );
+    if (import.meta.env?.DEV) {
+      console.info(
+        '[billing] restoreEntitlement: listPurchases result',
+        purchases,
+        'owned =',
+        owned,
+      );
+    }
     if (!owned) return false;
     saveEntitlement(true);
     return true;
