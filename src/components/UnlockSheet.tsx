@@ -23,7 +23,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { purchaseUnlock, restoreEntitlement } from '../lib/billing';
+// TEMP DEBUG: diagnoseUnlock import for on-screen Play Billing diagnostics.
+import {
+  diagnoseUnlock,
+  purchaseUnlock,
+  restoreEntitlement,
+} from '../lib/billing';
 
 interface UnlockSheetProps {
   /** Whether the sheet is open. */
@@ -41,6 +46,8 @@ function UnlockSheet({ open, onClose, onUnlocked }: UnlockSheetProps) {
   // A single, gentle inline note shown after a cancelled/failed action - never a
   // modal error, never repeated. Cleared whenever the sheet (re)opens.
   const [note, setNote] = useState<string | null>(null);
+  // TEMP DEBUG: on-screen Play Billing diagnostics output.
+  const [debug, setDebug] = useState<string | null>(null);
 
   // Close on Escape while open (mirrors the About dialog). Clear any stale note
   // each time the sheet opens so it never carries over between openings.
@@ -82,7 +89,32 @@ function UnlockSheet({ open, onClose, onUnlocked }: UnlockSheetProps) {
   };
 
   const handleUnlock = () =>
-    run('purchase', purchaseUnlock, 'Not completed. You can try again anytime.');
+    run(
+      'purchase',
+      // TEMP DEBUG: wrap purchaseUnlock so a non-success ALSO surfaces the
+      // diagnostics on screen (in addition to the normal note below).
+      async () => {
+        const ok = await purchaseUnlock();
+        if (!ok) {
+          try {
+            setDebug(await diagnoseUnlock());
+          } catch {
+            setDebug('diagnoseUnlock failed');
+          }
+        }
+        return ok;
+      },
+      'Not completed. You can try again anytime.',
+    );
+
+  // TEMP DEBUG: explicit "Run diagnostics" handler.
+  const handleDiagnose = async () => {
+    try {
+      setDebug(await diagnoseUnlock());
+    } catch {
+      setDebug('diagnoseUnlock failed');
+    }
+  };
 
   const handleRestore = () =>
     run(
@@ -153,9 +185,32 @@ function UnlockSheet({ open, onClose, onUnlocked }: UnlockSheetProps) {
             >
               Restore purchase
             </button>
+            {/* TEMP DEBUG: run Play Billing diagnostics on screen. */}
+            <button
+              type="button"
+              className="button button--outline"
+              onClick={handleDiagnose}
+            >
+              Run diagnostics
+            </button>
           </div>
 
           {note && <p className="unlock-sheet__note">{note}</p>}
+
+          {/* TEMP DEBUG: on-screen diagnostics readout. */}
+          {debug && (
+            <pre
+              style={{
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontSize: '11px',
+                textAlign: 'left',
+                opacity: 0.8,
+              }}
+            >
+              {debug}
+            </pre>
+          )}
 
           <p className="unlock-sheet__footnote">
             Your unlock restores on the same Google account.
