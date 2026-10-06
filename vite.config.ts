@@ -13,7 +13,7 @@ export default defineConfig({
         name: 'ashtanga30',
         short_name: 'ashtanga30',
         description:
-          'A calm 30-minute Ashtanga companion that generates and guides your practice, breath by breath.',
+          'A calm, guided yoga app for a daily Ashtanga Primary Series practice in about 30 minutes.',
         start_url: '/',
         display: 'standalone',
         orientation: 'portrait',
@@ -42,6 +42,22 @@ export default defineConfig({
             src: 'lotus.svg',
             sizes: 'any',
             type: 'image/svg+xml',
+          },
+        ],
+        shortcuts: [
+          {
+            name: 'Start practice',
+            short_name: 'Practice',
+            description: 'Generate and start a 30-minute Ashtanga practice',
+            url: '/?action=start',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
+          },
+          {
+            name: 'Overview',
+            short_name: 'Overview',
+            description: 'Browse the full pose sequence',
+            url: '/?action=overview',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
           },
         ],
       },
