@@ -41,6 +41,7 @@
  */
 
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import type { Screen } from './types/navigation';
 import { poses } from './data/poses';
 import { generatePractice } from './lib/generatePractice';
@@ -626,6 +627,7 @@ function App() {
           </Suspense>
         )}
       </div>
+      <Analytics />
     </main>
   );
 }
