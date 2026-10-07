@@ -4,7 +4,7 @@
 
 A calm, mobile-first **30-minute Ashtanga companion** that generates a varied Primary Series practice and guides you through it, breath by breath, including the Sun Salutations move by move.
 
-**Live app: [ashtanga30.com](https://ashtanga30.com/)**
+**Live app: [ashtanga30.com](https://ashtanga30.com/)** · **[Google Play](https://play.google.com/store/apps/details?id=com.ashtanga30.twa)**
 
 The full Ashtanga Primary Series takes well over an hour, which makes a daily practice hard to sustain. ashtanga30 builds a fresh ~30-minute sequence each time (always faithful to Ashtanga's structure and order) so you get a complete, varied practice that fits into your day.
 
@@ -45,6 +45,9 @@ npx tsx src/data/validate-poses.ts            # validate the pose catalog
 npx tsx src/lib/generatePractice.test.ts      # generation engine tests
 npx tsx src/lib/guidedPlan.test.ts            # guided-practice plan tests
 npx tsx src/components/poses/verify-coverage.ts  # confirm every pose has an icon
+npx tsx src/lib/entitlement.test.ts           # entitlement persistence tests
+npx tsx src/lib/billing.test.ts               # billing gate logic tests
+npx tsx src/lib/reviewPrompt.test.ts          # in-app review eligibility tests
 ```
 
 Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to render the guided completion screen directly (Namaste mark + summary, including its bell and Namaste sounds) without playing through a whole practice, `/?seedweek` to seed a few days into the last-7-days practice log so the filled leaves can be previewed, or `/?unlock` and `/?lock` to preview the unlocked and gated (free) states without a real purchase. All of these hatches are DEV-only and stripped from production builds (the Digital Goods API only exists inside the TWA anyway, so the real purchase cannot run in a plain browser).
@@ -68,7 +71,9 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to rende
 - `src/lib/practiceLog.ts`: the on-device log of days a practice was completed, powering the last-7-days row on Home.
 - `src/lib/entitlement.ts`: the on-device "steer" unlock entitlement (a tiny, try/catch-wrapped localStorage flag), decoupled from any billing code so the gating logic is unit-testable without Play.
 - `src/lib/billing.ts`: the only Play-touching code. Wraps the Digital Goods API and a Play Billing `PaymentRequest` for the one-time `steer_unlock` product: `isBillingAvailable()`, `isProductAvailable()` (a `getDetails` precheck before launching the flow), `purchaseUnlock()`, and `restoreEntitlement()`. Every function is feature-detected and degrades gracefully (resolves false, never throws) outside a supporting TWA browser.
+- `src/lib/reviewPrompt.ts`: the on-device in-app review prompt. After a user completes their 5th practice, calls `window.requestReview` (injected by android-browser-helper inside the TWA) to trigger Google Play's native rating sheet. Shown at most once; the flag is written before calling the API so a throw cannot allow a retry. Silent no-op outside the TWA.
 - `src/components/UnlockSheet.tsx`: the single calm unlock sheet, shown only when a free user taps a locked steer control. Shows the purchase (Unlock / Restore) when billing is available, or a gentle "needs Chrome" explanation when it is not (never a launch-time popup or a nag).
+- `src/lib/entitlement.test.ts`, `src/lib/billing.test.ts`, `src/lib/reviewPrompt.test.ts`: dependency-free standalone test scripts (run via `npx tsx <file>`, no test framework) covering the on-device persistence, billing gate logic, and review eligibility respectively.
 - `src/components/PracticeWeek.tsx` / `src/components/PetalMark.tsx`: the last-7-days leaf row and the single leaf marker (empty outline or filled sage).
 - `public/audio/voice/`: prerecorded pose-name clips plus `namaste.mp3`, `switch_sides.mp3`, and the salutation cues `last_breath.mp3`, `step_jump_forward.mp3`, and `samasthiti.mp3`; `public/audio/effects/` holds `bell.mp3` (the completion bell) and the breath-cue tones `inhale.mp3` and `exhale.mp3`.
 - `src/screens/`: Home, Overview (map + carousel), and the Guided player.
