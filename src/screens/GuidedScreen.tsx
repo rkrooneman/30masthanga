@@ -151,7 +151,8 @@ import {
 } from '../lib/breathCues';
 import { loadPoseCue } from '../lib/preferences';
 import { poseCueRingsBell, poseCueAnnounces } from '../lib/guidance';
-import { recordPractice } from '../lib/practiceLog';
+import { recordPractice, loadPracticedDays } from '../lib/practiceLog';
+import { requestReviewIfEligible } from '../lib/reviewPrompt';
 import { OPENING_COUNTDOWN_SECONDS, formatDuration } from '../lib/timing';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
@@ -866,6 +867,8 @@ function GuidedScreen({
     if (complete && !startComplete && !practiceRecordedRef.current) {
       practiceRecordedRef.current = true;
       recordPractice();
+      const days = loadPracticedDays();
+      void requestReviewIfEligible(days.size);
     }
   }, [complete, startComplete]);
 
