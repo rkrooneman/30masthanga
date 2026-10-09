@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Redirect to the app when opened as a standalone PWA or TWA.
+         Web visitors in a browser see this landing page normally. -->
+    <script>
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        window.location.replace('/app');
+      }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ashtanga30 - Free 30-Minute Ashtanga Yoga App</title>
