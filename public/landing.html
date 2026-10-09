@@ -964,6 +964,65 @@
           display: none !important;
         }
       }
+
+      /* Bottom CTA */
+      .landing-bottom-cta {
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        padding: 3rem 0;
+        text-align: center;
+      }
+
+      .landing-bottom-cta h2 {
+        font-family: var(--font-serif);
+        font-weight: 300;
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        margin: 0 0 0.6rem;
+        color: var(--text);
+      }
+
+      .landing-bottom-cta p {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin: 0 auto 1.75rem;
+        max-width: 40ch;
+        line-height: 1.7;
+      }
+
+      .landing-bottom-cta-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .bottom-badge-link {
+        display: inline-flex;
+        transition: opacity 0.15s ease;
+      }
+
+      .bottom-badge-link:hover { opacity: 0.85; }
+
+      .landing-bottom-ghost {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        font-family: var(--font-sans);
+        font-weight: 500;
+        text-decoration: none;
+        background: transparent;
+        color: var(--accent-deep);
+        border: 1.5px solid var(--border);
+        transition: border-color 0.15s ease, color 0.15s ease;
+        line-height: 1.4;
+      }
+
+      .landing-bottom-ghost:hover {
+        border-color: var(--accent);
+        color: var(--accent-deep);
+      }
     </style>
   </head>
 
@@ -1323,6 +1382,22 @@
             </div>
           </details>
 
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         BOTTOM CTA
+    ============================================= -->
+    <section class="landing-bottom-cta">
+      <div class="container">
+        <h2>Ready to practise?</h2>
+        <p>A fresh, guided 30-minute Ashtanga practice, free.</p>
+        <div class="landing-bottom-cta-buttons">
+          <a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa" target="_blank" rel="noopener noreferrer" class="bottom-badge-link" aria-label="Get it on Google Play">
+            <img src="/google-play-badge.png" alt="Get it on Google Play" height="52" style="display:block;">
+          </a>
+          <a href="/app" class="landing-bottom-ghost">Try it in your browser &rarr;</a>
         </div>
       </div>
     </section>
