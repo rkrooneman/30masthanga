@@ -596,13 +596,36 @@
         cursor: pointer;
         user-select: none;
         display: grid;
-        grid-template-columns: 80px 1fr;
+        grid-template-columns: 80px 1fr auto;
         grid-template-rows: auto auto;
-        gap: 0 1rem;
+        gap: 0 0.75rem;
         align-items: start;
       }
 
       .pose-summary::-webkit-details-marker { display: none; }
+
+      /* Toggle indicator: shows + when closed, - when open */
+      .pose-summary::after {
+        content: '+';
+        grid-column: 3;
+        grid-row: 1;
+        font-size: 1.1rem;
+        font-weight: 400;
+        color: var(--accent);
+        line-height: 1.4;
+        flex-shrink: 0;
+        transition: color 0.15s ease;
+        align-self: start;
+        padding-top: 0.15rem;
+      }
+
+      .pose-card[open] .pose-summary::after {
+        content: '-';
+      }
+
+      .pose-summary:hover::after {
+        color: var(--accent-deep);
+      }
 
       .pose-summary-main {
         display: flex;
