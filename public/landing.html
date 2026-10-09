@@ -132,7 +132,7 @@
         --border:       #e4e1d8;
         --font-serif:   'Cormorant Garamond', Georgia, serif;
         --font-sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --max-w:        800px;
+        --max-w:        860px;
         --section-pad:  5rem 0;
         color-scheme: light;
       }
@@ -702,7 +702,7 @@
       .site-nav {
         position: sticky;
         top: 0;
-        z-index: 100;
+        z-index: 300;
         background: rgba(245, 243, 238, 0.92);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
@@ -878,11 +878,15 @@
       .mobile-menu {
         display: none;
         position: fixed;
-        inset: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         z-index: 200;
         background: var(--bg);
         flex-direction: column;
         padding: 1.5rem;
+        padding-top: calc(3.25rem + 1.5rem);
       }
 
       .mobile-menu.open {
@@ -892,8 +896,8 @@
       .mobile-menu-header {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        margin-bottom: 2rem;
+        justify-content: flex-end;
+        margin-bottom: 1.5rem;
       }
 
       .mobile-menu-close {
@@ -991,10 +995,6 @@
 
     <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
       <div class="mobile-menu-header">
-        <a class="nav-logo" href="/">
-          <img src="/lotus.svg" alt="" width="24" height="24">
-          ashtanga30
-        </a>
         <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">&times;</button>
       </div>
       <ul class="mobile-menu-links">
