@@ -417,7 +417,6 @@ function HomeScreen({
               src="/google-play-badge.png"
               alt="Get it on Google Play"
               width="135"
-              height="40"
             />
           </a>
         )}
