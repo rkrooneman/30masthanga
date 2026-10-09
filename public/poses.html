@@ -309,6 +309,27 @@
         opacity: 0.85;
       }
 
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .nav-links a {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s ease;
+        letter-spacing: 0.01em;
+      }
+
+      .nav-links a:hover {
+        color: var(--accent-deep);
+      }
+
       .nav-cta {
         font-size: 0.82rem;
         color: var(--text-muted);
@@ -980,7 +1001,11 @@
           <img src="/lotus.svg" alt="" width="24" height="24" />
           ashtanga30
         </a>
-        <a class="nav-cta" href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Get the app</a>
+        <ul class="nav-links">
+          <li><a href="/poses">Pose Catalog</a></li>
+          <li><a href="/yoga-daily-practice">Daily Practice</a></li>
+          <li><a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Get the app</a></li>
+        </ul>
         <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
           &#9776;
         </button>
@@ -989,12 +1014,9 @@
 
     <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
       <ul class="mobile-menu-links">
-        <li><a href="/poses#sun-salutations" onclick="closeMobileMenu()">Sun Salutations</a></li>
-        <li><a href="/poses#standing" onclick="closeMobileMenu()">Standing</a></li>
-        <li><a href="/poses#seated" onclick="closeMobileMenu()">Seated</a></li>
-        <li><a href="/poses#closing" onclick="closeMobileMenu()">Closing</a></li>
-        <li><a href="/poses#rest" onclick="closeMobileMenu()">Rest</a></li>
-        <li><a href="/poses#pose-faq" onclick="closeMobileMenu()">FAQ</a></li>
+        <li><a href="/" onclick="closeMobileMenu()">Home</a></li>
+        <li><a href="/poses" onclick="closeMobileMenu()">Pose Catalog</a></li>
+        <li><a href="/yoga-daily-practice" onclick="closeMobileMenu()">Daily Practice</a></li>
         <li><a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa" target="_blank" rel="noopener noreferrer">Get the app</a></li>
       </ul>
     </div>
