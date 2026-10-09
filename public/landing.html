@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ashtanga30: Daily Yoga</title>
+    <meta
+      name="description"
+      content="ashtanga30 is a calm, guided yoga app for a daily Ashtanga Primary Series practice in about 30 minutes. Free on Android."
+    />
+    <link rel="canonical" href="https://ashtanga30.com/" />
+    <link rel="icon" type="image/svg+xml" href="/lotus.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ashtanga30: Daily Yoga" />
+    <meta
+      property="og:description"
+      content="A calm, guided yoga app for a daily Ashtanga Primary Series practice in about 30 minutes. Free on Android."
+    />
+    <meta property="og:url" content="https://ashtanga30.com/" />
+    <meta property="og:image" content="https://ashtanga30.com/ashtanga30_og.png" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ashtanga30: Daily Yoga" />
+    <meta
+      name="twitter:description"
+      content="A calm, guided yoga app for a daily Ashtanga Primary Series practice in about 30 minutes. Free on Android."
+    />
+    <meta name="twitter:image" content="https://ashtanga30.com/ashtanga30_og.png" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Ashtanga30: Daily Yoga",
+      "description": "A calm, guided yoga app for a daily Ashtanga Primary Series practice in about 30 minutes. Free on Android.",
+      "url": "https://ashtanga30.com",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Android, iOS",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "installUrl": "https://play.google.com/store/apps/details?id=com.ashtanga30.twa",
+      "screenshot": [
+        "https://ashtanga30.com/screenshot_home.jpg",
+        "https://ashtanga30.com/screenshot_generator.jpg",
+        "https://ashtanga30.com/screenshot_practice.jpg"
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts: Cormorant Garamond -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ---- Design tokens ---- */
+      :root {
+        --bg:           #f5f3ee;
+        --surface:      #fbfaf7;
+        --text:         #2f3330;
+        --text-muted:   #6b7169;
+        --accent:       #8a9a7b;
+        --accent-deep:  #7d8d6f;
+        --accent-soft:  #dfe4d7;
+        --border:       #e4e1d8;
+        --font-serif:   'Cormorant Garamond', Georgia, serif;
+        --font-sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --max-w:        800px;
+        --section-pad:  5rem 0;
+        color-scheme: light;
+      }
+
+      /* ---- Reset ---- */
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      img, video {
+        display: block;
+        max-width: 100%;
+      }
+
+      a {
+        color: var(--accent-deep);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--text);
+      }
+
+      /* ---- Layout shell ---- */
+      .container {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      /* ---- Section shared ---- */
+      section {
+        padding: var(--section-pad);
+      }
+
+      section + section {
+        border-top: 1px solid var(--border);
+      }
+
+      /* ---- Typography ---- */
+      .serif {
+        font-family: var(--font-serif);
+      }
+
+      h2 {
+        font-family: var(--font-serif);
+        font-size: 2rem;
+        font-weight: 300;
+        color: var(--text);
+        margin: 0 0 1.5rem;
+        line-height: 1.2;
+      }
+
+      p {
+        margin: 0 0 1rem;
+        color: var(--text);
+      }
+
+      /* ========================================
+         1. HERO
+      ======================================== */
+      .hero {
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        border-top: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .hero-lotus {
+        width: 128px;
+        height: 128px;
+        margin: 0 auto 1.75rem;
+        transform-origin: center;
+      }
+
+      /* ========================================
+         BREATH RINGS
+      ======================================== */
+      .breath-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 480px;
+        height: 480px;
+        border-radius: 50%;
+        border: 2px solid #8a9a7b;
+        opacity: 0.18;
+        pointer-events: none;
+        animation: breathRing 6s ease-in-out infinite;
+        z-index: 0;
+      }
+
+      .breath-ring-2 {
+        width: 640px;
+        height: 640px;
+        opacity: 0.09;
+        animation-delay: 3s;
+      }
+
+      @keyframes breathRing {
+        0%, 100% { transform: translate(-50%, -50%) scale(0.92); }
+        50%       { transform: translate(-50%, -50%) scale(1.08); }
+      }
+
+      /* ========================================
+         LOTUS ANIMATION
+      ======================================== */
+      .petal {
+        transform-origin: 32px 44px;
+        opacity: 0;
+        animation: petalOpen 1.0s ease-out forwards;
+      }
+
+      /* Hand-fan entrance: all petals start stacked at the leftmost position.
+         --petal-start is the clockwise sweep from the left-stack to each
+         petal's own resting place. Petal-3 is the leftmost spine and arrives
+         first with almost no travel; petal-4 sweeps furthest right and
+         arrives last. Animation plays once and stops at the final frame. */
+      .petal-3 { animation-delay: 0s;    --petal-start:  0deg; }
+      .petal-1 { animation-delay: 0.25s; --petal-start: 18deg; }
+      .petal-0 { animation-delay: 0.5s;  --petal-start: 32deg; }
+      .petal-2 { animation-delay: 0.75s; --petal-start: 46deg; }
+      .petal-4 { animation-delay: 1.0s;  --petal-start: 60deg; }
+
+      /* Each petal sweeps clockwise from the left-stack position to its
+         resting angle, fading in as it arrives. `forwards` keeps it there. */
+      @keyframes petalOpen {
+        0%   { opacity: 0; transform: rotate(calc(-1 * var(--petal-start, 0deg))); }
+        40%  { opacity: 1; }
+        100% { opacity: 0.92; transform: rotate(0deg); }
+      }
+
+      /* ========================================
+         SECTION BREATH ACCENT
+      ======================================== */
+      .section-breath {
+        display: block;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #8a9a7b;
+        margin: 0 auto 1.5rem;
+        animation: sectionBreath 5s ease-in-out infinite;
+      }
+
+      @keyframes sectionBreath {
+        0%, 100% { transform: scale(0.92); opacity: 0.18; }
+        50%       { transform: scale(1.08); opacity: 0.38; }
+      }
+
+      /* ========================================
+         REDUCE MOTION
+      ======================================== */
+      @media (prefers-reduced-motion: reduce) {
+        .petal, .breath-ring, .section-breath {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: rotate(0deg) !important;
+        }
+      }
+
+      .hero-name {
+        font-family: var(--font-serif);
+        font-size: clamp(2.8rem, 8vw, 4.5rem);
+        font-weight: 300;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+        margin: 0 0 0.75rem;
+        color: var(--text);
+      }
+
+      .hero-tagline {
+        font-family: var(--font-serif);
+        font-size: clamp(1.1rem, 3vw, 1.4rem);
+        font-style: italic;
+        font-weight: 300;
+        color: var(--text-muted);
+        margin: 0 0 2.75rem;
+        max-width: 42ch;
+        line-height: 1.5;
+      }
+
+      /* CTA groups */
+      #cta-browser {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      #cta-standalone {
+        display: none;
+      }
+
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.875rem;
+      }
+
+      .badge-link {
+        display: inline-flex;
+        transition: opacity 0.15s ease;
+      }
+
+      .badge-link:hover {
+        opacity: 0.8;
+      }
+
+      .play-badge {
+        height: 52px;
+        width: auto;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        font-family: var(--font-sans);
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        line-height: 1.4;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        border: 1.5px solid var(--accent);
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-deep);
+        border-color: var(--accent-deep);
+        color: #fff;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--accent-deep);
+        border: 1.5px solid var(--border);
+      }
+
+      .btn-ghost:hover {
+        border-color: var(--accent);
+        color: var(--accent-deep);
+      }
+
+      .hero-ios-note {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      /* ========================================
+         2. WHAT IT IS
+      ======================================== */
+      .what-it-is p {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        max-width: 62ch;
+        color: var(--text);
+      }
+
+      /* ========================================
+         2b. WHO IT'S FOR
+      ======================================== */
+      .who-for-list {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .who-for-item {
+        padding: 1.1rem 1.25rem;
+        border-left: 3px solid var(--accent-soft);
+        background: var(--surface);
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--text);
+        transition: border-color 0.15s ease;
+      }
+
+      .who-for-item:hover {
+        border-left-color: var(--accent);
+      }
+
+      .who-for-item strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      /* ========================================
+         3. FEATURES
+      ======================================== */
+      .features-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 0.5rem;
+      }
+
+      @media (min-width: 560px) {
+        .features-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (min-width: 800px) {
+        .features-grid {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+
+      .feature-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border-left: 3px solid var(--accent-soft);
+        transition: border-color 0.15s ease;
+      }
+
+      .feature-card:hover {
+        border-left-color: var(--accent);
+      }
+
+      .feature-card h3 {
+        font-family: var(--font-sans);
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--accent-deep);
+        margin: 0 0 0.5rem;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+      }
+
+      .feature-card p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      /* ========================================
+         4. VIDEO
+      ======================================== */
+      .video-section {
+        text-align: center;
+      }
+
+      .video-section h2 {
+        margin-bottom: 2rem;
+      }
+
+      .video-wrap {
+        display: flex;
+        justify-content: center;
+      }
+
+      .video-wrap video {
+        border-radius: 1.5rem;
+        max-width: 320px;
+        width: 100%;
+        box-shadow: 0 8px 40px rgba(47, 51, 48, 0.12);
+      }
+
+      /* ========================================
+         5. SCREENSHOTS
+      ======================================== */
+      .screenshots-section h2 {
+        margin-bottom: 2rem;
+      }
+
+      .screenshots-scroll {
+        display: flex;
+        gap: 1.25rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+
+      .screenshot-item {
+        flex: 0 0 auto;
+        text-align: center;
+      }
+
+      .screenshot-item img {
+        width: 180px;
+        height: 400px;
+        object-fit: cover;
+        object-position: top;
+        border-radius: 1.25rem;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 24px rgba(47, 51, 48, 0.1);
+        display: block;
+      }
+
+      .screenshot-caption {
+        margin-top: 0.6rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-family: var(--font-sans);
+      }
+
+      /* ========================================
+         6. FAQ
+      ======================================== */
+      .faq-list {
+        margin-top: 0.5rem;
+      }
+
+      details {
+        border-bottom: 1px solid var(--border);
+      }
+
+      details:first-child {
+        border-top: 1px solid var(--border);
+      }
+
+      summary {
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.125rem 0;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text);
+        user-select: none;
+        gap: 1rem;
+        transition: color 0.15s ease;
+      }
+
+      summary::-webkit-details-marker {
+        display: none;
+      }
+
+      summary:hover {
+        color: var(--accent-deep);
+      }
+
+      summary::after {
+        content: '+';
+        font-size: 1.1rem;
+        font-weight: 400;
+        color: var(--accent);
+        flex-shrink: 0;
+        transition: transform 0.15s ease;
+      }
+
+      details[open] summary::after {
+        content: '-';
+      }
+
+      details[open] summary {
+        color: var(--accent-deep);
+      }
+
+      .faq-answer {
+        padding: 0 0 1.25rem;
+        font-size: 0.92rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+        max-width: 62ch;
+      }
+
+      /* ========================================
+         7. FOOTER
+      ======================================== */
+      .site-footer {
+        border-top: 1px solid var(--border);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+      }
+
+      .site-footer .container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem 1rem;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .site-footer a {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        transition: color 0.15s ease;
+      }
+
+      .site-footer a:hover {
+        color: var(--accent-deep);
+      }
+
+      .footer-copy {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+
+      .footer-sep {
+        color: var(--border);
+        font-size: 0.85rem;
+      }
+
+      /* ---- Utility ---- */
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      /* ========================================
+         NAV
+      ======================================== */
+      .site-nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(245, 243, 238, 0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .site-nav .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        gap: 1rem;
+      }
+
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-serif);
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--text);
+        text-decoration: none;
+        flex-shrink: 0;
+      }
+
+      .nav-logo img {
+        display: block;
+        width: 24px;
+        height: 24px;
+        opacity: 0.85;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .nav-links a {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s ease;
+        letter-spacing: 0.01em;
+      }
+
+      .nav-links a:hover {
+        color: var(--accent-deep);
+      }
+
+      /* ========================================
+         SCROLL HINT
+      ======================================== */
+      .scroll-hint {
+        margin-top: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        opacity: 0.45;
+        animation: bounce 2s ease-in-out infinite;
+      }
+
+      .scroll-hint span {
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        font-family: var(--font-sans);
+      }
+
+      .scroll-hint svg {
+        display: block;
+      }
+
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(6px); }
+      }
+
+      /* ========================================
+         LIGHTBOX
+      ======================================== */
+      .screenshot-item {
+        cursor: zoom-in;
+      }
+
+      .lightbox-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(47, 51, 48, 0.82);
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .lightbox-overlay.open {
+        display: flex;
+      }
+
+      .lightbox-overlay img {
+        max-height: 90vh;
+        max-width: min(360px, 90vw);
+        border-radius: 1.5rem;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+      }
+
+      .lightbox-close {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 2rem;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0.8;
+        padding: 0.25rem 0.5rem;
+      }
+
+      .lightbox-close:hover {
+        opacity: 1;
+      }
+
+      .lightbox-prev,
+      .lightbox-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 3rem;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0.7;
+        padding: 0.5rem 1rem;
+        transition: opacity 0.15s ease;
+        user-select: none;
+      }
+
+      .lightbox-prev { left: 0.5rem; }
+      .lightbox-next { right: 0.5rem; }
+
+      .lightbox-prev:hover,
+      .lightbox-next:hover { opacity: 1; }
+
+      .lightbox-prev:disabled,
+      .lightbox-next:disabled { opacity: 0.2; cursor: default; }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- =============================================
+         NAV
+    ============================================= -->
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="container">
+        <a class="nav-logo" href="/">
+          <img src="/lotus.svg" alt="" width="24" height="24" />
+          ashtanga30
+        </a>
+        <ul class="nav-links">
+          <li><a href="#what">About</a></li>
+          <li><a href="#for">Who it's for</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#video">Video</a></li>
+          <li><a href="#screenshots">Screenshots</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- =============================================
+         1. HERO
+    ============================================= -->
+    <section class="hero">
+      <div class="breath-ring" aria-hidden="true"></div>
+      <div class="breath-ring breath-ring-2" aria-hidden="true"></div>
+
+      <div class="hero-inner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" role="img" aria-label="ashtanga30 lotus mark" class="hero-lotus">
+          <circle cx="32" cy="32" r="31" fill="#dfe4d7" />
+          <g fill="none" stroke="#8a9a7b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <path class="petal petal-0" d="M32 44 C27 36 27 26 32 19 C37 26 37 36 32 44 Z" />
+            <path class="petal petal-1" d="M32 44 C24 39 19 31 19 23 C27 25 32 33 32 44 Z" />
+            <path class="petal petal-2" d="M32 44 C40 39 45 31 45 23 C37 25 32 33 32 44 Z" />
+            <path class="petal petal-3" d="M32 44 C22 43 15 39 12 32 C19 30 27 35 32 44 Z" />
+            <path class="petal petal-4" d="M32 44 C42 43 49 39 52 32 C45 30 37 35 32 44 Z" />
+            <path d="M23 45 C27 47 37 47 41 45" />
+          </g>
+        </svg>
+
+        <h1 class="hero-name">ashtanga30</h1>
+
+        <p class="hero-tagline">
+          A fresh, faithful Primary Series practice, every day, in about 30 minutes.
+        </p>
+
+        <!-- Shown when NOT in standalone mode -->
+        <div id="cta-browser">
+          <div class="cta-row">
+            <a
+              class="badge-link"
+              href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa"
+              aria-label="Get ashtanga30 on Google Play"
+            >
+              <img
+                src="/google-play-badge.png"
+                alt="Get it on Google Play"
+                class="play-badge"
+              />
+            </a>
+            <a class="btn btn-ghost" href="/app">Try it in your browser &rarr;</a>
+          </div>
+          <p class="hero-ios-note">
+            Also works on iPhone: open in Safari and add to your home screen.
+          </p>
+        </div>
+
+        <!-- Shown only in standalone / installed mode -->
+        <div id="cta-standalone">
+          <a class="btn btn-primary" href="/app">Open the app &rarr;</a>
+        </div>
+
+        <div class="scroll-hint" aria-hidden="true">
+          <span>Scroll</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 4v12M10 16l-4-4M10 16l4-4" stroke="#6b7169" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         2. WHAT IT IS
+    ============================================= -->
+    <section class="what-it-is" id="what">
+      <div class="container">
+        <h2>What it is</h2>
+        <p>
+          The full Ashtanga Primary Series takes well over an hour, which makes a daily practice
+          hard to sustain. ashtanga30 builds a fresh ~30-minute sequence each time, always
+          faithful to the canonical order, and guides you through it breath by breath. Every
+          session opens with the Sun Salutations, moves through standing and seated poses, and
+          closes with shoulderstand and Savasana. No two practices are the same.
+        </p>
+      </div>
+    </section>
+
+    <!-- =============================================
+         2b. WHO IT'S FOR
+    ============================================= -->
+    <section id="for">
+      <div class="container">
+        <span class="section-breath" aria-hidden="true"></span>
+        <h2>Who it's for</h2>
+        <div class="who-for-list">
+          <p class="who-for-item">
+            <strong>People building a daily yoga habit.</strong>
+            A fresh practice every day, short enough to actually happen.
+          </p>
+          <p class="who-for-item">
+            <strong>Ashtanga beginners who need structure.</strong>
+            The canonical sequence, with spoken cues and breathing guidance to follow along.
+          </p>
+          <p class="who-for-item">
+            <strong>Practitioners who cannot always fit in a full Primary Series.</strong>
+            Thirty minutes instead of ninety. The right poses, the right order, the right breath.
+          </p>
+          <p class="who-for-item">
+            <strong>Students practising between studio classes.</strong>
+            Keep the method alive at home, between Mysore sessions or led classes.
+          </p>
+          <p class="who-for-item">
+            <strong>Anyone who prefers a quiet, simple app.</strong>
+            No subscription. No ads. No account. No notifications. Just practice.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         3. FEATURES
+    ============================================= -->
+    <section id="features">
+      <div class="container">
+        <h2>What it does</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>Generated fresh every time</h3>
+            <p>
+              A unique Primary Series sequence, in canonical order. No two practices are identical.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>Guided breath by breath</h3>
+            <p>
+              A breathing circle paces every inhale and exhale. The Sun Salutations are led
+              move by move; spoken cues carry you through hands-free.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>Faithful to the method</h3>
+            <p>
+              Always opens with Surya Namaskara A and B, closes with shoulderstand and Savasana.
+              Optional half-vinyasas between seated poses.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>Your sound, your way</h3>
+            <p>
+              Spoken pose names, soft breath tones, and a choice of ambient sound: forest,
+              rain, or ocean. Layers mix gracefully.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>A gentle record of your week</h3>
+            <p>
+              Seven small leaves on the home screen, one for each day you practise. A quiet
+              nudge, not a streak counter.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>Private by design</h3>
+            <p>
+              No accounts. No tracking. No ads. Everything stays on your device. Works offline.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>Original hand-drawn pose art</h3>
+            <p>
+              Sanskrit-first names, drishti references, tap-to-hear pronunciation for all
+              58 poses.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         4. VIDEO
+    ============================================= -->
+    <section class="video-section" id="video">
+      <div class="container">
+        <h2>See it in action</h2>
+        <div class="video-wrap">
+          <video
+            src="/Ashtanga30%20Features.mp4"
+            poster="/screenshot_1.png"
+            autoplay
+            muted
+            loop
+            playsinline
+            width="320"
+          >
+            Your browser does not support the video element.
+          </video>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         5. SCREENSHOTS
+    ============================================= -->
+    <section class="screenshots-section" id="screenshots">
+      <div class="container">
+        <h2>A closer look</h2>
+        <div class="screenshots-scroll">
+          <div class="screenshot-item" onclick="openLightbox(this)">
+            <img
+              src="/screenshot_1.png"
+              alt="Home screen with breath pace slider and practice leaves"
+              loading="lazy"
+            />
+            <p class="screenshot-caption">Home screen</p>
+          </div>
+          <div class="screenshot-item" onclick="openLightbox(this)">
+            <img
+              src="/screenshot_2.png"
+              alt="Practice overview showing the full pose sequence"
+              loading="lazy"
+            />
+            <p class="screenshot-caption">Practice overview</p>
+          </div>
+          <div class="screenshot-item" onclick="openLightbox(this)">
+            <img
+              src="/screenshot_3.png"
+              alt="Pose card with hand-drawn art and Sanskrit name"
+              loading="lazy"
+            />
+            <p class="screenshot-caption">Pose detail</p>
+          </div>
+          <div class="screenshot-item" onclick="openLightbox(this)">
+            <img
+              src="/screenshot_8.jpg"
+              alt="Guided practice screen with breathing circle"
+              loading="lazy"
+            />
+            <p class="screenshot-caption">Guided practice</p>
+          </div>
+          <div class="screenshot-item" onclick="openLightbox(this)">
+            <img
+              src="/screenshot_5.png"
+              alt="Namaste completion screen with practice summary"
+              loading="lazy"
+            />
+            <p class="screenshot-caption">Practice complete</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         6. FAQ
+    ============================================= -->
+    <section id="faq">
+      <div class="container">
+        <h2>Questions</h2>
+        <div class="faq-list">
+
+          <details>
+            <summary>Is it free?</summary>
+            <div class="faq-answer">
+              Yes. The complete 30-minute practice is always free. There is an optional
+              one-time upgrade (5.99) that lets you steer the sequence yourself: choose
+              "Basics only", take the full series, or pick your own poses.
+            </div>
+          </details>
+
+          <details>
+            <summary>Does it work on iPhone?</summary>
+            <div class="faq-answer">
+              There is no iOS app yet, but the full practice works on iPhone today. Open
+              ashtanga30.com in Safari and choose "Add to Home Screen" to install it. You can
+              practise for free, though the in-app upgrade is not available on iOS.
+            </div>
+          </details>
+
+          <details>
+            <summary>Is the sequence faithful to real Ashtanga?</summary>
+            <div class="faq-answer">
+              Yes. The app always follows the canonical Primary Series order. The Sun Salutations
+              open every session, the fixed frame (shoulderstand, Savasana) closes it, and poses
+              are selected from within their traditional sections. Drishti references follow the
+              KPJAYI / David Swenson convention.
+            </div>
+          </details>
+
+          <details>
+            <summary>Do I need an account?</summary>
+            <div class="faq-answer">
+              No. There are no accounts, no sign-in, and no data ever leaves your device.
+              Everything, including your practice history and preferences, is stored locally.
+            </div>
+          </details>
+
+          <details>
+            <summary>Does it work offline?</summary>
+            <div class="faq-answer">
+              Yes. Once you have opened the app once, it works fully offline, including all
+              audio, voice cues, and ambient sound.
+            </div>
+          </details>
+
+          <details>
+            <summary>What is "Basics only" mode?</summary>
+            <div class="faq-answer">
+              Basics only is part of the one-time upgrade. It narrows the pose pool to 18
+              essential root poses (the core standing and seated postures most teachers introduce
+              first) for a shorter, more accessible practice.
+            </div>
+          </details>
+
+          <details>
+            <summary>Who made this?</summary>
+            <div class="faq-answer">
+              ashtanga30 was built by Roderik Krooneman, an Ashtanga practitioner who wanted a
+              shorter daily practice that actually respects the method. It is an independent
+              project, not affiliated with any school or lineage.
+            </div>
+          </details>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         7. FOOTER
+    ============================================= -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-links">
+          <a href="/privacy.html">Privacy</a>
+          <span class="footer-sep" aria-hidden="true">&middot;</span>
+          <a href="https://github.com/rkrooneman/30masthanga">Source</a>
+          <span class="footer-sep" aria-hidden="true">&middot;</span>
+          <a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Google Play</a>
+        </div>
+        <p class="footer-copy">&copy; 2026 Roderik Krooneman</p>
+      </div>
+    </footer>
+
+    <!-- Lightbox overlay -->
+    <div class="lightbox-overlay" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot enlarged">
+      <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+      <button class="lightbox-prev" id="lightbox-prev" onclick="lightboxNav(-1)" aria-label="Previous screenshot">&#8249;</button>
+      <img id="lightbox-img" src="" alt="" />
+      <button class="lightbox-next" id="lightbox-next" onclick="lightboxNav(1)" aria-label="Next screenshot">&#8250;</button>
+    </div>
+
+    <script>
+      // Smart redirect: if running as installed PWA or TWA, show "Open the app" button
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        document.getElementById('cta-browser').style.display = 'none';
+        document.getElementById('cta-standalone').style.display = '';
+      }
+
+      // Lightbox with prev/next navigation
+      var lbIndex = 0;
+      var lbItems = [];
+
+      function openLightbox(item) {
+        lbItems = Array.from(document.querySelectorAll('.screenshot-item'));
+        lbIndex = lbItems.indexOf(item);
+        showLightboxAt(lbIndex);
+        document.getElementById('lightbox').classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function showLightboxAt(index) {
+        var img = lbItems[index].querySelector('img');
+        var lbImg = document.getElementById('lightbox-img');
+        lbImg.src = img.src;
+        lbImg.alt = img.alt;
+        document.getElementById('lightbox-prev').disabled = index === 0;
+        document.getElementById('lightbox-next').disabled = index === lbItems.length - 1;
+      }
+
+      function lightboxNav(dir) {
+        var next = lbIndex + dir;
+        if (next < 0 || next >= lbItems.length) return;
+        lbIndex = next;
+        showLightboxAt(lbIndex);
+      }
+
+      function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      // Close lightbox on backdrop click or Escape; arrow keys for prev/next
+      document.getElementById('lightbox').addEventListener('click', function(e) {
+        if (e.target === this) closeLightbox();
+      });
+
+      document.addEventListener('keydown', function(e) {
+        var lb = document.getElementById('lightbox');
+        if (!lb.classList.contains('open')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft')  lightboxNav(-1);
+        if (e.key === 'ArrowRight') lightboxNav(1);
+      });
+    </script>
+
+  </body>
+</html>
