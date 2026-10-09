@@ -22,7 +22,7 @@ export default defineConfig({
         short_name: 'ashtanga30',
         description:
           'A calm, guided yoga app for a daily Ashtanga Primary Series practice in about 30 minutes.',
-        start_url: '/app',
+        start_url: '/',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#f5f3ee',
@@ -96,12 +96,12 @@ export default defineConfig({
         additionalManifestEntries: [
           { url: '/app.html', revision: null },
         ],
-        // The React app shell lives at /app. Navigation requests to /app (and
-        // any sub-paths) must be served app.html, not the landing page.
+        // The React app shell is served at both / and /app. Navigation requests
+        // to either path must be served app.html. The allowlist covers both.
+        // /landing, /poses, /privacy etc. are static pages served from the
+        // network and must NOT be caught by the navigate fallback.
         navigateFallback: '/app.html',
-        // Only apply the navigate fallback to the /app path, not to the
-        // landing page or other static HTML pages on the same domain.
-        navigateFallbackAllowlist: [/^\/app/],
+        navigateFallbackAllowlist: [/^\/app/, /^\/$/],
       },
     }),
   ],

@@ -8,6 +8,7 @@
     { "source": "/app", "destination": "/app.html" },
     { "source": "/app/(.*)", "destination": "/app.html" },
     { "source": "/30-minute-ashtanga-yoga-practice", "destination": "/yoga-daily-practice.html" },
-    { "source": "/", "destination": "/landing.html" }
+    { "source": "/landing", "destination": "/landing.html" },
+    { "source": "/", "destination": "/app.html" }
   ]
 }
