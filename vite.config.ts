@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['lotus.svg', 'apple-touch-icon.png'],
+      includeAssets: ['lotus.svg', 'apple-touch-icon.png', 'google-play-badge.png'],
       manifest: {
         name: 'ashtanga30',
         short_name: 'ashtanga30',

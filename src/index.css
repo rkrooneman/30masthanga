@@ -384,16 +384,19 @@ body {
   height: 1.25rem;
 }
 
-/* Footer - small muted copyright, centred at the bottom of the Home screen.
-   Absolutely positioned so the main content stays vertically centred; sits
-   clear of the safe-area inset at the very bottom. */
+/* Footer - small muted copyright (and optional Play Store badge), centred at
+   the bottom of the Home screen. Absolutely positioned so the main content
+   stays vertically centred; sits clear of the safe-area inset at the very
+   bottom. flex-direction: column stacks the badge above the copyright. */
 .home__footer {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .home__copyright {
@@ -401,6 +404,24 @@ body {
   font-size: var(--text-sm);
   letter-spacing: 0.02em;
   color: var(--color-text-muted);
+}
+
+/* Play Store badge: shown only in browser (hidden in standalone TWA/PWA).
+   Block + auto margins centre it; a gentle opacity so it stays calm and
+   unobtrusive; transitions to full opacity on hover. */
+.home__play-badge {
+  display: block;
+  margin: 0 auto 0.5rem;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.home__play-badge:hover {
+  opacity: 1;
+}
+
+.home__play-badge img {
+  display: block;
 }
 
 .home__brand {

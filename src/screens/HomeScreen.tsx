@@ -40,6 +40,10 @@ import {
 import LotusMark from '../components/LotusMark';
 import PracticeWeek from '../components/PracticeWeek';
 
+/** Play Store listing URL for the Ashtanga30 TWA. */
+const PLAY_STORE_URL =
+  'https://play.google.com/store/apps/details?id=com.ashtanga30.twa';
+
 /**
  * Fixed seed for the estimate only. The real "Generate" button uses genuine
  * randomness (Math.random, the generator's default) — this seed is purely so the
@@ -86,6 +90,14 @@ function HomeScreen({
   onSavasanaMinutesChange,
   onGenerate,
 }: HomeScreenProps) {
+  // Detect standalone mode (TWA or installed PWA shortcut). Initialised once at
+  // mount via lazy initialiser so it never changes during the session. When true
+  // the app is running inside the installed shell and the Play Store badge is
+  // hidden; when false the user is in a plain browser and we show the badge.
+  const [isStandalone] = useState<boolean>(
+    () => window.matchMedia('(display-mode: standalone)').matches,
+  );
+
   // Local UI state only: whether the "About this app" dialog is open. Kept here
   // (not in the shell) since it's purely presentational and Home-only.
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -393,6 +405,22 @@ function HomeScreen({
       </button>
 
       <footer className="home__footer">
+        {!isStandalone && (
+          <a
+            href={PLAY_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="home__play-badge"
+            aria-label="Get it on Google Play"
+          >
+            <img
+              src="/google-play-badge.png"
+              alt="Get it on Google Play"
+              width="135"
+              height="40"
+            />
+          </a>
+        )}
         <p className="home__copyright">&copy; 2026 Roderik Krooneman</p>
       </footer>
 
