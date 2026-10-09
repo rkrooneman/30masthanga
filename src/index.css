@@ -435,6 +435,42 @@ body {
   display: block;
 }
 
+/* ---- Lotus fan-in animation (home screen only) ----
+ * Petals start stacked at the leftmost position and sweep clockwise
+ * one by one to their resting place, like a hand fan opening.
+ * The animation plays once on mount and stops at the final frame.
+ * transform-origin is the shared tip point of all petals (32 44 in SVG
+ * coords; because the SVG viewBox is 0 0 64 64 and renders at 72px,
+ * the pixel equivalent is 72*32/64 = 36px 72*44/64 = 49.5px — but
+ * SVG path transforms use SVG user-units so we set the origin in px
+ * matching the rendered size: 36px 49.5px). */
+.home__mark .petal {
+  transform-origin: 36px 49.5px;
+  opacity: 0;
+  animation: homePetalOpen 1s ease-out forwards;
+}
+
+/* Stagger: petal-3 (leftmost spine) first, petal-4 (rightmost) last. */
+.home__mark .petal-3 { animation-delay: 0s;    --petal-start:  0deg; }
+.home__mark .petal-1 { animation-delay: 0.25s; --petal-start: 18deg; }
+.home__mark .petal-0 { animation-delay: 0.5s;  --petal-start: 32deg; }
+.home__mark .petal-2 { animation-delay: 0.75s; --petal-start: 46deg; }
+.home__mark .petal-4 { animation-delay: 1.0s;  --petal-start: 60deg; }
+
+@keyframes homePetalOpen {
+  0%   { opacity: 0; transform: rotate(calc(-1 * var(--petal-start, 0deg))); }
+  40%  { opacity: 1; }
+  100% { opacity: 0.92; transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home__mark .petal {
+    animation: none;
+    opacity: 0.92;
+    transform: rotate(0deg);
+  }
+}
+
 .home__wordmark {
   margin: 0;
   font-size: var(--text-3xl);
