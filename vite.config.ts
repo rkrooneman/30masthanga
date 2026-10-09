@@ -4,6 +4,14 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      // Build the React app entry from app.html so dist/ has no index.html
+      // competing with the static landing page at /. Vercel serves landing.html
+      // at / naturally, and /app rewrites to /app.html.
+      input: 'app.html',
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -14,7 +22,7 @@ export default defineConfig({
         short_name: 'ashtanga30',
         description:
           'A calm, guided yoga app for a daily Ashtanga Primary Series practice in about 30 minutes.',
-        start_url: '/',
+        start_url: '/app',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#f5f3ee',
