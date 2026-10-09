@@ -855,6 +855,105 @@
         grid-row: 2;
         grid-column: 2;
       }
+
+      /* ---- Mobile hamburger nav ---- */
+      .hamburger {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        color: var(--text);
+        font-size: 1.4rem;
+        line-height: 1;
+        margin-left: auto;
+      }
+
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background: var(--bg);
+        flex-direction: column;
+        padding: 1.5rem;
+      }
+
+      .mobile-menu.open {
+        display: flex;
+      }
+
+      .mobile-menu-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+
+      .mobile-menu-close {
+        background: none;
+        border: none;
+        font-size: 1.6rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
+      }
+
+      .mobile-menu-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .mobile-menu-links li {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .mobile-menu-links a,
+      .mobile-menu-links button {
+        display: block;
+        padding: 1rem 0;
+        font-size: 1.1rem;
+        font-family: var(--font-serif);
+        font-weight: 300;
+        color: var(--text);
+        text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        transition: color 0.15s ease;
+      }
+
+      .mobile-menu-links a:hover,
+      .mobile-menu-links button:hover {
+        color: var(--accent-deep);
+      }
+
+      @media (max-width: 639px) {
+        .hamburger {
+          display: block;
+        }
+        /* Hide desktop nav links/CTA on mobile */
+        .nav-links,
+        .nav-cta {
+          display: none;
+        }
+      }
+
+      @media (min-width: 640px) {
+        .hamburger {
+          display: none;
+        }
+        .mobile-menu {
+          display: none !important;
+        }
+      }
     </style>
   </head>
 
@@ -870,8 +969,30 @@
           ashtanga30
         </a>
         <a class="btn btn-primary nav-cta" href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Get the app</a>
+        <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          &#9776;
+        </button>
       </div>
     </nav>
+
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <div class="mobile-menu-header">
+        <a class="nav-logo" href="/">
+          <img src="/lotus.svg" alt="" width="24" height="24">
+          ashtanga30
+        </a>
+        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">&times;</button>
+      </div>
+      <ul class="mobile-menu-links">
+        <li><a href="/poses#sun-salutations" onclick="closeMobileMenu()">Sun Salutations</a></li>
+        <li><a href="/poses#standing" onclick="closeMobileMenu()">Standing</a></li>
+        <li><a href="/poses#seated" onclick="closeMobileMenu()">Seated</a></li>
+        <li><a href="/poses#closing" onclick="closeMobileMenu()">Closing</a></li>
+        <li><a href="/poses#rest" onclick="closeMobileMenu()">Rest</a></li>
+        <li><a href="/poses#pose-faq" onclick="closeMobileMenu()">FAQ</a></li>
+        <li><a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa" target="_blank" rel="noopener noreferrer">Get the app</a></li>
+      </ul>
+    </div>
 
     <!-- =============================================
          HERO
@@ -2873,6 +2994,32 @@
         document.getElementById('pose-search').value = '';
         document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
         applyFilters();
+      });
+
+      // Hamburger menu
+      function openMobileMenu() {
+        document.getElementById('mobile-menu').classList.add('open');
+        document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMobileMenu() {
+        document.getElementById('mobile-menu').classList.remove('open');
+        document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('hamburger-btn').addEventListener('click', openMobileMenu);
+      document.getElementById('mobile-menu-close').addEventListener('click', closeMobileMenu);
+
+      document.getElementById('mobile-menu').addEventListener('click', function(e) {
+        if (e.target === this) closeMobileMenu();
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('mobile-menu').classList.contains('open')) {
+          closeMobileMenu();
+        }
       });
     </script>
 
