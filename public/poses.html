@@ -427,6 +427,166 @@
         width: 100%;
         margin-top: 0.5rem;
       }
+
+      /* ---- Pose cards ---- */
+      .pose-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        border-left: 3px solid var(--accent-soft);
+        transition: border-color 0.15s ease;
+        overflow: hidden;
+      }
+
+      .pose-card[open] {
+        border-left-color: var(--accent);
+      }
+
+      .pose-summary {
+        list-style: none;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .pose-summary::-webkit-details-marker { display: none; }
+
+      .pose-summary-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .pose-sanskrit {
+        font-family: var(--font-serif);
+        font-size: 1.2rem;
+        font-weight: 300;
+        color: var(--text);
+        line-height: 1.2;
+      }
+
+      .pose-phonetic {
+        font-size: 0.78rem;
+        font-style: italic;
+        color: var(--text-muted);
+      }
+
+      .pose-english {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .pose-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+
+      .pose-drishti, .pose-facts {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+      }
+
+      .pose-drishti strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .pose-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        margin-top: 0.25rem;
+      }
+
+      .badge {
+        font-size: 0.68rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 1rem;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .badge-basic { background: var(--accent-soft); color: #5c6b4f; }
+      .badge-always { background: #e8ede4; color: #5c6b4f; }
+      .badge-type { background: #f0ede6; color: var(--text-muted); }
+      .badge-beginner { background: #e8f0e4; color: #4a6741; }
+      .badge-intermediate { background: #f0ead8; color: #7a5a2a; }
+      .badge-advanced { background: #f0e0dc; color: #8a3a30; }
+
+      /* Expanded detail */
+      .pose-detail {
+        padding: 0 1.25rem 1.25rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .pose-description {
+        font-size: 0.92rem;
+        line-height: 1.75;
+        color: var(--text);
+        margin: 0.75rem 0 0.5rem;
+      }
+
+      .pose-modification {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        background: var(--accent-soft);
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        margin: 0.5rem 0;
+        line-height: 1.6;
+      }
+
+      .pose-modification strong { color: var(--accent-deep); }
+
+      .pose-safety {
+        font-size: 0.85rem;
+        color: #8a3a30;
+        background: #f9eded;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        margin: 0.5rem 0;
+        line-height: 1.6;
+        border-left: 3px solid #d48080;
+      }
+
+      .pose-safety strong { color: #8a3a30; }
+
+      .pose-app-cta {
+        display: inline-block;
+        margin: 0.75rem 0 0.5rem;
+        font-size: 0.82rem;
+        color: var(--accent-deep);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+
+      .pose-app-cta:hover { color: var(--text); }
+
+      .pose-nav {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border);
+        gap: 1rem;
+      }
+
+      .pose-nav-prev, .pose-nav-next {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-family: var(--font-serif);
+        font-style: italic;
+      }
+
+      .pose-nav-prev:hover, .pose-nav-next:hover { color: var(--accent-deep); }
+      .pose-nav-next { margin-left: auto; text-align: right; }
     </style>
   </head>
 
@@ -497,7 +657,60 @@
           <h2>Sun Salutations</h2>
           <p class="section-note">Performed at the opening of every practice. Surya Namaskara A three times, then B three times.</p>
           <div class="pose-grid">
-            <!-- Pose cards added in issue #32 -->
+            <details class="pose-card" id="surya_namaskara_a" data-search="Surya Namaskara A Sun Salutation A Nasagrai (tip of the nose) - varies through the flow">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Surya Namaskara A</span>
+                  <span class="pose-phonetic">SOOR-yah nah-mas-KAR-ah AH</span>
+                  <span class="pose-english">Sun Salutation A</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose) - varies through the flow</span>
+                  <span class="pose-facts">3 rounds</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-always">Always included</span>
+                    <span class="badge badge-type">Flow Sequence</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The practice opens here, repeated three times. Sun Salutation A is a rhythmic sequence that links breath to movement across nine positions, with a five-breath hold in Downward Dog at the centre. How you pace your breath in these opening rounds sets the tone for everything that follows. Keep the exhales long and let the body warm gradually rather than forcing it.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#surya_namaskara_b" class="pose-nav-next">Surya Namaskara B &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="surya_namaskara_b" data-search="Surya Namaskara B Sun Salutation B Nasagrai (tip of the nose) - varies through the flow">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Surya Namaskara B</span>
+                  <span class="pose-phonetic">SOOR-yah nah-mas-KAR-ah BEE</span>
+                  <span class="pose-english">Sun Salutation B</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose) - varies through the flow</span>
+                  <span class="pose-facts">3 rounds</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-always">Always included</span>
+                    <span class="badge badge-type">Flow Sequence</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Performed three times after Surya A, adding Utkatasana at the opening and Virabhadrasana A on each side. The sequence is longer and builds more heat. The Warrior steps introduce lateral work and ask the legs to work independently before the standing poses make that demand more fully. This is also where Chaturanga tends to need the most attention early in a practice.</p>
+                <p class="pose-modification"><strong>Modification:</strong> If Chaturanga is too demanding, lower the knees to the floor before pressing up to Upward Dog.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#surya_namaskara_a" class="pose-nav-prev">&larr; Surya Namaskara A</a>
+                  <a href="#padangusthasana" class="pose-nav-next">Padangusthasana &rarr;</a>
+                </div>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -505,7 +718,423 @@
           <h2>Standing Sequence</h2>
           <p class="section-note">The standing sequence builds strength, balance and focus before moving to the floor.</p>
           <div class="pose-grid">
-            <!-- Pose cards added in issue #32 -->
+            <details class="pose-card" id="padangusthasana" data-search="Padangusthasana Big Toe Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Padangusthasana</span>
+                  <span class="pose-phonetic">pah-dahng-goosh-TAH-sah-nah</span>
+                  <span class="pose-english">Big Toe Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The first of two standing forward folds that open the standing sequence. Feet hip-width, hands grasp the big toes, and the fold deepens on each exhale. The hamstrings and lower back respond slowly to early-morning practice, so there is no need to force the depth. The drishti is the tip of the nose, which anchors the mind before the more complex poses begin.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Bend the knees slightly if the hamstrings are tight. The priority is a long spine, not straight legs.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#surya_namaskara_b" class="pose-nav-prev">&larr; Surya Namaskara B</a>
+                  <a href="#padahastasana" class="pose-nav-next">Padahastasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="padahastasana" data-search="Padahastasana Hand Under Foot Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Padahastasana</span>
+                  <span class="pose-phonetic">pah-dah-hahs-TAH-sah-nah</span>
+                  <span class="pose-english">Hand Under Foot Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Follows directly from Padangusthasana with the hands placed under the feet, palms up. The pressure of the feet on the fingers creates a mild counter-traction that helps the spine lengthen. Hold for five breaths in the same quality of attention as the previous pose. Paired together, these two folds act as a gentle opening before the standing sequence proper.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Place just the fingertips under the feet if the full hand is uncomfortable.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#padangusthasana" class="pose-nav-prev">&larr; Padangusthasana</a>
+                  <a href="#utthita_trikonasana" class="pose-nav-next">Utthita Trikonasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="utthita_trikonasana" data-search="Utthita Trikonasana Extended Triangle Pose Hastagrai (fingertips of the top hand)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Utthita Trikonasana</span>
+                  <span class="pose-phonetic">oo-TEE-tah tree-koh-NAH-sah-nah</span>
+                  <span class="pose-english">Extended Triangle Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Hastagrai (fingertips of the top hand)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Lateral Stretch</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The first pose of the standing sequence proper, practised on both sides. Triangle pose develops lateral stability, opens the hamstrings and side body, and trains the gaze upward to the top hand. In the Ashtanga system the hand reaches to the floor or a block beside the foot, and the chest rotates open rather than folding forward. This is a foundational pose that rewards patience.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Rest the lower hand on the shin if the floor is not accessible. Avoid collapsing the waist.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#padahastasana" class="pose-nav-prev">&larr; Padahastasana</a>
+                  <a href="#parivrtta_trikonasana" class="pose-nav-next">Parivrtta Trikonasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="parivrtta_trikonasana" data-search="Parivrtta Trikonasana Revolved Triangle Pose Hastagrai (fingertips of the top hand)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Parivrtta Trikonasana</span>
+                  <span class="pose-phonetic">pah-ree-VREE-tah tree-koh-NAH-sah-nah</span>
+                  <span class="pose-english">Revolved Triangle Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Hastagrai (fingertips of the top hand)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Twist</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The revolved version of Triangle is one of the more demanding poses in the standing sequence, requiring simultaneous hamstring length, thoracic rotation and balance. The opposite hand comes to the floor or the shin while the top arm reaches skyward. Balance often requires a narrower stance than expected. The detoxifying quality of the twist makes it a useful complement to the lateral stretch that precedes it.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Shorten the stance and place the hand on a block outside the front foot to reduce the balance demand.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#utthita_trikonasana" class="pose-nav-prev">&larr; Utthita Trikonasana</a>
+                  <a href="#utthita_parsvakonasana" class="pose-nav-next">Utthita Parsvakonasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="utthita_parsvakonasana" data-search="Utthita Parsvakonasana Extended Side Angle Pose Hastagrai (raised hand)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Utthita Parsvakonasana</span>
+                  <span class="pose-phonetic">oo-TEE-tah parsh-vah-koh-NAH-sah-nah</span>
+                  <span class="pose-english">Extended Side Angle Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Hastagrai (raised hand)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Lateral Stretch</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Extended Side Angle creates a long line from the back heel through the top fingertips, opening the side body and strengthening the legs. The forearm rests on the front thigh in the beginning; the full expression binds the arms beneath the front thigh. Practised on both sides, it builds the lateral strength that will carry into the deeper hip poses of the seated sequence.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Rest the forearm on the thigh rather than reaching the hand to the floor.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#parivrtta_trikonasana" class="pose-nav-prev">&larr; Parivrtta Trikonasana</a>
+                  <a href="#parivrtta_parsvakonasana" class="pose-nav-next">Parivrtta Parsvakonasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="parivrtta_parsvakonasana" data-search="Parivrtta Parsvakonasana Revolved Side Angle Pose Hastagrai (raised hand)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Parivrtta Parsvakonasana</span>
+                  <span class="pose-phonetic">pah-ree-VREE-tah parsh-vah-koh-NAH-sah-nah</span>
+                  <span class="pose-english">Revolved Side Angle Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Hastagrai (raised hand)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Twist</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The revolved side angle requires the deepest twist in the standing sequence. The front knee bends to 90 degrees while the opposite elbow hooks outside the knee, working toward a full bind. Balance, hip flexibility and thoracic rotation all come into play at once. Many practitioners spend years developing the twist before attempting the bind.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Hook the elbow outside the knee without the bind, or place the back knee on the floor to reduce intensity.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#utthita_parsvakonasana" class="pose-nav-prev">&larr; Utthita Parsvakonasana</a>
+                  <a href="#prasarita_padottanasana_a" class="pose-nav-next">Prasarita Padottanasana A &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="prasarita_padottanasana_a" data-search="Prasarita Padottanasana A Wide-Legged Forward Fold A Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Prasarita Padottanasana A</span>
+                  <span class="pose-phonetic">prah-sah-REE-tah pah-doh-tahn-AH-sah-nah AH</span>
+                  <span class="pose-english">Wide-Legged Forward Fold A</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The first of four wide-legged forward folds, each asking something slightly different. In A, hands are placed shoulder-width on the floor and the head comes toward or to the ground. The wide stance decompresses the spine and opens the inner legs. This version is the most accessible for beginners and often produces an immediate sense of relief.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Place hands on blocks if the floor is not reachable with a flat back.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#parivrtta_parsvakonasana" class="pose-nav-prev">&larr; Parivrtta Parsvakonasana</a>
+                  <a href="#prasarita_padottanasana_b" class="pose-nav-next">Prasarita Padottanasana B &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="prasarita_padottanasana_b" data-search="Prasarita Padottanasana B Wide-Legged Forward Fold B Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Prasarita Padottanasana B</span>
+                  <span class="pose-phonetic">prah-sah-REE-tah pah-doh-tahn-AH-sah-nah BEE</span>
+                  <span class="pose-english">Wide-Legged Forward Fold B</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The hands come to the hips in B, and the fold happens without any floor contact for the upper body. This version tests whether the forward fold is driven by genuine spinal length or reliance on arm support. The core engages more actively. Hold for five breaths and resist the urge to place hands down.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#prasarita_padottanasana_a" class="pose-nav-prev">&larr; Prasarita Padottanasana A</a>
+                  <a href="#prasarita_padottanasana_c" class="pose-nav-next">Prasarita Padottanasana C &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="prasarita_padottanasana_c" data-search="Prasarita Padottanasana C Wide-Legged Forward Fold C Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Prasarita Padottanasana C</span>
+                  <span class="pose-phonetic">prah-sah-REE-tah pah-doh-tahn-AH-sah-nah SEE</span>
+                  <span class="pose-english">Wide-Legged Forward Fold C</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">In C, the hands interlace behind the back and the arms lift away from the body as the torso folds. This is the most shoulder-intensive variation, opening the chest and front shoulders in the opposite direction to the forward fold. If the arms cannot straighten behind the back, a strap can bridge the gap until the shoulders open.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Use a strap between the hands if the shoulders are tight and the arms cannot straighten.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#prasarita_padottanasana_b" class="pose-nav-prev">&larr; Prasarita Padottanasana B</a>
+                  <a href="#prasarita_padottanasana_d" class="pose-nav-next">Prasarita Padottanasana D &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="prasarita_padottanasana_d" data-search="Prasarita Padottanasana D Wide-Legged Forward Fold D Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Prasarita Padottanasana D</span>
+                  <span class="pose-phonetic">prah-sah-REE-tah pah-doh-tahn-AH-sah-nah DEE</span>
+                  <span class="pose-english">Wide-Legged Forward Fold D</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">In D, the first two fingers and thumb grip the big toes, similar to Padangusthasana but in a wide-legged stance. The fold deepens as the elbows bend and open sideways. This version combines the toe grip of the earlier standing folds with the wide base, and often produces a deeper stretch than the others once the technique is familiar.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#prasarita_padottanasana_c" class="pose-nav-prev">&larr; Prasarita Padottanasana C</a>
+                  <a href="#parsvottanasana" class="pose-nav-next">Parsvottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="parsvottanasana" data-search="Parsvottanasana Intense Side Stretch Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Parsvottanasana</span>
+                  <span class="pose-phonetic">parsh-voh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Intense Side Stretch Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Intense Side Stretch is a single-legged forward fold with the hands in reverse prayer or holding opposite elbows behind the back. The front leg straightens as the torso folds toward it, targeting the hamstring and hip flexor on that side. The squared hips are the challenge here rather than the depth of the fold.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Hold opposite elbows behind the back instead of reverse prayer if the shoulders are tight.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#prasarita_padottanasana_d" class="pose-nav-prev">&larr; Prasarita Padottanasana D</a>
+                  <a href="#utthita_hasta_padangusthasana" class="pose-nav-next">Utthita Hasta Padangusthasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="utthita_hasta_padangusthasana" data-search="Utthita Hasta Padangusthasana Extended Hand-to-Big-Toe Pose Padhayoragrai (toes) - varies through the flow">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Utthita Hasta Padangusthasana</span>
+                  <span class="pose-phonetic">oo-TEE-tah HAH-stah pah-dahng-goosh-TAH-sah-nah</span>
+                  <span class="pose-english">Extended Hand-to-Big-Toe Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes) - varies through the flow</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Balance</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">A standing balance that extends one leg forward, then to the side, then bends toward the head in the full variation. Each stage is held for five breaths. The sequence asks for hamstring flexibility, hip stability and focus in equal measure. This is the pose where a wandering drishti becomes obvious, because looking away causes the standing leg to wobble almost immediately.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Hold the shin rather than the toe if the hamstring does not allow the leg to straighten.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#parsvottanasana" class="pose-nav-prev">&larr; Parsvottanasana</a>
+                  <a href="#ardha_baddha_padmottanasana" class="pose-nav-next">Ardha Baddha Padmottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="ardha_baddha_padmottanasana" data-search="Ardha Baddha Padmottanasana Half Bound Lotus Forward Fold Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Ardha Baddha Padmottanasana</span>
+                  <span class="pose-phonetic">ARE-dah BAH-dah pahd-moh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Half Bound Lotus Forward Fold</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Balance</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">A demanding combination of half lotus and standing forward fold. The foot of the bent leg is placed into the hip crease of the standing leg, and a bind is taken behind the back before folding forward. Both hip openness and knee health matter here. The pose takes time to approach safely and should not be forced.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice the standing balance without the lotus position until the hip is open enough to place the foot comfortably.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Never force the foot into half lotus. The rotation must come from the hip, not the knee.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#utthita_hasta_padangusthasana" class="pose-nav-prev">&larr; Utthita Hasta Padangusthasana</a>
+                  <a href="#utkatasana" class="pose-nav-next">Utkatasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="utkatasana" data-search="Utkatasana Fierce Pose / Chair Pose Angusthamadhyai / Urdhva (up to the thumbs)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Utkatasana</span>
+                  <span class="pose-phonetic">oot-kah-TAH-sah-nah</span>
+                  <span class="pose-english">Fierce Pose / Chair Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Angusthamadhyai / Urdhva (up to the thumbs)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Strength</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Chair pose appears in Surya Namaskara B and also stands alone in the standing sequence. The thighs aim toward parallel with the floor, the arms extend upward, and the spine stays long. It builds heat and lower body strength quickly. In the Sun Salutations it is held briefly; as a standalone pose it is held for five breaths.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#ardha_baddha_padmottanasana" class="pose-nav-prev">&larr; Ardha Baddha Padmottanasana</a>
+                  <a href="#virabhadrasana_a" class="pose-nav-next">Virabhadrasana A &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="virabhadrasana_a" data-search="Virabhadrasana A Warrior I Angusthamadhyai / Urdhva (up to the thumbs)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Virabhadrasana A</span>
+                  <span class="pose-phonetic">veer-ah-bah-DRAH-sah-nah AH</span>
+                  <span class="pose-english">Warrior I</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Angusthamadhyai / Urdhva (up to the thumbs)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Strength</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Warrior A builds power in the legs and stability through the pelvis. The front knee bends to 90 degrees over the ankle, the back leg presses straight, and the arms reach upward. In the Ashtanga system it appears within Surya B and also as part of the standing sequence on each side. The challenge is squaring the hips toward the front while keeping the back heel grounded.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#utkatasana" class="pose-nav-prev">&larr; Utkatasana</a>
+                  <a href="#virabhadrasana_b" class="pose-nav-next">Virabhadrasana B &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="virabhadrasana_b" data-search="Virabhadrasana B Warrior II Hastagrai (front hand)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Virabhadrasana B</span>
+                  <span class="pose-phonetic">veer-ah-bah-DRAH-sah-nah BEE</span>
+                  <span class="pose-english">Warrior II</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Hastagrai (front hand)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Strength</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Warrior B opens the stance wider than Warrior A and extends the arms horizontally to each side. The gaze follows the front hand. Where Warrior A works on forward power, Warrior B asks for a different kind of steadiness, spreading the effort laterally through the body. Together they develop the full-body stability that the more complex poses of the seated sequence will require.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#virabhadrasana_a" class="pose-nav-prev">&larr; Virabhadrasana A</a>
+                  <a href="#dandasana" class="pose-nav-next">Dandasana &rarr;</a>
+                </div>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -513,7 +1142,669 @@
           <h2>Seated Sequence</h2>
           <p class="section-note">The heart of the practice. Each seated pose is separated by a vinyasa, linking breath to movement.</p>
           <div class="pose-grid">
-            <!-- Pose cards added in issue #32 -->
+            <details class="pose-card" id="dandasana" data-search="Dandasana Staff Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Dandasana</span>
+                  <span class="pose-phonetic">dahn-DAH-sah-nah</span>
+                  <span class="pose-english">Staff Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Seated</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The foundation of the seated sequence. Legs extend straight, hands press into the floor beside the hips, and the spine lifts. Dandasana appears as a transitional pose between vinyasas throughout the seated sequence. It looks simple but asks for genuine engagement of the core and hip flexors to keep the spine from rounding. A moment of reset between more demanding postures.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#virabhadrasana_b" class="pose-nav-prev">&larr; Virabhadrasana B</a>
+                  <a href="#paschimottanasana" class="pose-nav-next">Paschimottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="paschimottanasana" data-search="Paschimottanasana Seated Forward Fold Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Paschimottanasana</span>
+                  <span class="pose-phonetic">pah-shee-moh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Seated Forward Fold</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Paschimottanasana appears again in the closing sequence as a counter-pose to Urdhva Dhanurasana. The same forward fold from the seated sequence, but now the spine and nervous system are in a very different state. This version is held longer and invites a genuine settling of the body after the intensity of the backbends. Let the breath do the work.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#dandasana" class="pose-nav-prev">&larr; Dandasana</a>
+                  <a href="#purvottanasana" class="pose-nav-next">Purvottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="purvottanasana" data-search="Purvottanasana Upward Plank / Intense East Stretch Broomadhya / Nasagrai (third eye / tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Purvottanasana</span>
+                  <span class="pose-phonetic">poor-voh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Upward Plank / Intense East Stretch</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Broomadhya / Nasagrai (third eye / tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Backbend</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The counter-pose to Paschimottanasana, lifting the front body and opening the chest and hip flexors. Hands press into the floor behind the hips, and the body lifts into a reverse plank. The head may drop back in the full expression. It is a relatively accessible backbend that brings a welcome reversal of the forward-folding that dominates the seated sequence.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Bend the knees and place the feet flat on the floor for a supported version if the full expression is too intense.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#paschimottanasana" class="pose-nav-prev">&larr; Paschimottanasana</a>
+                  <a href="#ardha_baddha_padma_paschimottanasana" class="pose-nav-next">Ardha Baddha Padma Paschimottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="ardha_baddha_padma_paschimottanasana" data-search="Ardha Baddha Padma Paschimottanasana Half Bound Lotus Seated Forward Fold Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Ardha Baddha Padma Paschimottanasana</span>
+                  <span class="pose-phonetic">ARE-dah BAH-dah PAHD-mah pah-shee-moh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Half Bound Lotus Seated Forward Fold</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">A half lotus forward fold with a bind behind the back, requiring both hip openness and hamstring length simultaneously. The folded foot sits in the hip crease of the straight leg, the arm reaches behind to bind, and then the torso folds forward to grip the extended foot. Approaching this pose takes time and should not be rushed. The knee of the folded leg is the most vulnerable point.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Fold forward over the straight leg without the half lotus until the hip is ready.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> The rotation for half lotus must come from the hip. If the knee feels any strain, come out and modify.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#purvottanasana" class="pose-nav-prev">&larr; Purvottanasana</a>
+                  <a href="#trianga_mukhaikapada_paschimottanasana" class="pose-nav-next">Trianga Mukhaikapada Paschimottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="trianga_mukhaikapada_paschimottanasana" data-search="Trianga Mukhaikapada Paschimottanasana Three-Limbs-Facing-One-Leg Forward Fold Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Trianga Mukhaikapada Paschimottanasana</span>
+                  <span class="pose-phonetic">tree-AHNG-ah moo-kai-kah-PAH-dah pah-shee-moh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Three-Limbs-Facing-One-Leg Forward Fold</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">One leg folds back into Virasana (hero pose) while the other extends straight. The torso folds forward over the extended leg. This pose introduces the asymmetry of working one hip in flexion and one in extension simultaneously, which asks for careful attention to keeping the pelvis as level as possible despite the unequal demand on each side.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Sit on a folded blanket if the bent-knee side lifts off the floor significantly.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Avoid this pose if there is any knee pain in the bent leg.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#ardha_baddha_padma_paschimottanasana" class="pose-nav-prev">&larr; Ardha Baddha Padma Paschimottanasana</a>
+                  <a href="#janu_sirsasana_a" class="pose-nav-next">Janu Sirsasana A &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="janu_sirsasana_a" data-search="Janu Sirsasana A Head-to-Knee Pose A Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Janu Sirsasana A</span>
+                  <span class="pose-phonetic">JAH-noo shear-SHAH-sah-nah AH</span>
+                  <span class="pose-english">Head-to-Knee Pose A</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The first of three Janu Sirsasana variations. One leg bends to 90 degrees with the foot against the inner thigh, and the torso folds over the extended leg. This is a foundational asymmetric forward fold that most practitioners can approach from the beginning. The bent knee should ideally rest on the floor without being forced there.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Place a blanket under the bent-knee thigh if it lifts significantly from the floor.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#trianga_mukhaikapada_paschimottanasana" class="pose-nav-prev">&larr; Trianga Mukhaikapada Paschimottanasana</a>
+                  <a href="#janu_sirsasana_b" class="pose-nav-next">Janu Sirsasana B &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="janu_sirsasana_b" data-search="Janu Sirsasana B Head-to-Knee Pose B Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Janu Sirsasana B</span>
+                  <span class="pose-phonetic">JAH-noo shear-SHAH-sah-nah BEE</span>
+                  <span class="pose-english">Head-to-Knee Pose B</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">In B, the foot tucks under the sitting bones of the same side with the heel pointing upward, rotating the hip into a more challenging position. The fold over the extended leg happens from this less familiar base. This variation opens the inner groin more deeply than A and asks for more ankle flexibility from the tucked foot.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> The tucked foot position may be uncomfortable for practitioners with ankle sensitivity. Modify as needed.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#janu_sirsasana_a" class="pose-nav-prev">&larr; Janu Sirsasana A</a>
+                  <a href="#janu_sirsasana_c" class="pose-nav-next">Janu Sirsasana C &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="janu_sirsasana_c" data-search="Janu Sirsasana C Head-to-Knee Pose C Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Janu Sirsasana C</span>
+                  <span class="pose-phonetic">JAH-noo shear-SHAH-sah-nah SEE</span>
+                  <span class="pose-english">Head-to-Knee Pose C</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The most demanding of the three variations. The foot of the bent leg rotates further so the toes point forward and the heel lifts. The hip of the bent leg opens in a direction that is genuinely unfamiliar for most Western bodies. Take time to establish the foot position carefully before folding forward. Do not force the knee toward the floor.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> This variation puts significant stress on the knee joint if the hip is not open enough. Approach slowly.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#janu_sirsasana_b" class="pose-nav-prev">&larr; Janu Sirsasana B</a>
+                  <a href="#marichyasana_a" class="pose-nav-next">Marichyasana A &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="marichyasana_a" data-search="Marichyasana A Pose Dedicated to Marichi A Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Marichyasana A</span>
+                  <span class="pose-phonetic">mah-ree-chee-AH-sah-nah AH</span>
+                  <span class="pose-english">Pose Dedicated to Marichi A</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The first of four poses named for the sage Marichi. One knee bends with the foot flat on the floor, and the arm of the same side wraps around the shin as the torso folds forward over the extended leg. A straightforward forward fold with a mild shoulder wrap. It asks for hamstring length in the straight leg and a willingness to fold deeply.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Hold the extended foot with both hands instead of wrapping if the bind is not accessible.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#janu_sirsasana_c" class="pose-nav-prev">&larr; Janu Sirsasana C</a>
+                  <a href="#marichyasana_b" class="pose-nav-next">Marichyasana B &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="marichyasana_b" data-search="Marichyasana B Pose Dedicated to Marichi B Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Marichyasana B</span>
+                  <span class="pose-phonetic">mah-ree-chee-AH-sah-nah BEE</span>
+                  <span class="pose-english">Pose Dedicated to Marichi B</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Combines Marichyasana A with half lotus in the other leg, significantly increasing the hip demand. The lotus leg must be stable before the forward fold is attempted. This is one of the poses where taking a step back and working the components separately is often more productive than pushing for the full shape too soon.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice Marichyasana A until the hip is ready for the added half lotus demand.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> As with all half lotus positions, the rotation comes from the hip. Any knee discomfort signals to modify.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#marichyasana_a" class="pose-nav-prev">&larr; Marichyasana A</a>
+                  <a href="#marichyasana_c" class="pose-nav-next">Marichyasana C &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="marichyasana_c" data-search="Marichyasana C Pose Dedicated to Marichi C Parsva (far to the side)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Marichyasana C</span>
+                  <span class="pose-phonetic">mah-ree-chee-AH-sah-nah SEE</span>
+                  <span class="pose-english">Pose Dedicated to Marichi C</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Parsva (far to the side)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Twist</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The first twist in the Marichyasana series. One knee bends, the opposite arm hooks outside the knee, and the torso rotates away from the bent leg toward a bind behind the back. The twist wrings out the abdominal organs and asks the spine to rotate from the base upward. The drishti turns with the twist, looking behind the shoulder.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Hook the elbow without the full bind, or place the opposite hand on the outside of the bent knee and twist from there.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#marichyasana_b" class="pose-nav-prev">&larr; Marichyasana B</a>
+                  <a href="#marichyasana_d" class="pose-nav-next">Marichyasana D &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="marichyasana_d" data-search="Marichyasana D Pose Dedicated to Marichi D Parsva (far to the side)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Marichyasana D</span>
+                  <span class="pose-phonetic">mah-ree-chee-AH-sah-nah DEE</span>
+                  <span class="pose-english">Pose Dedicated to Marichi D</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Parsva (far to the side)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Twist</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Marichyasana C with the addition of half lotus in the other leg, combining a deep twist with the hip opening of lotus. This is one of the benchmark poses of the Primary Series for advanced practitioners. Both hip flexibility for the lotus and thoracic rotation for the twist must be in place for the bind to come without strain. Years of practice, not weeks.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice Marichyasana C until both the twist and the hip openness are established.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Never force the lotus position. The knee follows the hip, not the other way around.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#marichyasana_c" class="pose-nav-prev">&larr; Marichyasana C</a>
+                  <a href="#navasana" class="pose-nav-next">Navasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="navasana" data-search="Navasana Boat Pose Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Navasana</span>
+                  <span class="pose-phonetic">nah-VAH-sah-nah</span>
+                  <span class="pose-english">Boat Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths &middot; &times;5</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Core Strength</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Boat pose is repeated five times with a brief lift (Lolasana) between each round. Legs extend at 45 degrees, arms reach forward parallel to the floor, and the spine lifts rather than collapses. The core must work actively; the temptation to round the lower back is where most of the challenge lives. Five rounds makes it one of the more sustained strength demands in the seated sequence.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Bend the knees and hold the backs of the thighs to reduce the load while building core strength.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#marichyasana_d" class="pose-nav-prev">&larr; Marichyasana D</a>
+                  <a href="#bhujapidasana" class="pose-nav-next">Bhujapidasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="bhujapidasana" data-search="Bhujapidasana Shoulder-Pressing Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Bhujapidasana</span>
+                  <span class="pose-phonetic">boo-jah-pee-DAH-sah-nah</span>
+                  <span class="pose-english">Shoulder-Pressing Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Arm Balance</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The first arm balance of the Primary Series. The legs wrap around the upper arms and the body lifts off the floor. Entering requires a jump through with the legs outside the arms, and the exit often involves a transition into Bakasana (crow pose) before the vinyasa. Wrist strength and core engagement are essential. A humbling pose for many practitioners, and a rewarding one over time.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice the leg position on the floor first, then work toward lifting without the full jump.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Build wrist strength before attempting this. Rest if the wrists feel strained.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#navasana" class="pose-nav-prev">&larr; Navasana</a>
+                  <a href="#kurmasana" class="pose-nav-next">Kurmasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="kurmasana" data-search="Kurmasana Tortoise Pose Broomadhya / Nasagrai (third eye / tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Kurmasana</span>
+                  <span class="pose-phonetic">koor-MAH-sah-nah</span>
+                  <span class="pose-english">Tortoise Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Broomadhya / Nasagrai (third eye / tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Tortoise pose involves sliding the arms under the legs until the shoulders pass beneath the knees, and then folding the torso toward the floor. The legs extend over the shoulders. A deep hip opener that works the inner groin and challenges the lower back. The full expression sees the chin or forehead resting on the floor with the arms extended behind the body.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Work with the arms under the knees rather than fully extending if the hips are not yet open enough.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#bhujapidasana" class="pose-nav-prev">&larr; Bhujapidasana</a>
+                  <a href="#supta_kurmasana" class="pose-nav-next">Supta Kurmasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="supta_kurmasana" data-search="Supta Kurmasana Sleeping Tortoise Pose Broomadhya / Nasagrai (third eye / tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Supta Kurmasana</span>
+                  <span class="pose-phonetic">SOOP-tah koor-MAH-sah-nah</span>
+                  <span class="pose-english">Sleeping Tortoise Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Broomadhya / Nasagrai (third eye / tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">The reclined version of Tortoise, adding a bind of the hands behind the back and crossing the feet behind the head. This is one of the deepest hip-opening poses in the Primary Series and one that requires teacher guidance to approach safely. It often develops slowly over years of consistent practice. The transition into the full pose from Kurmasana is itself a learning process.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Remain in Kurmasana until Supta Kurmasana can be approached with teacher support.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Do not force the feet behind the head. This pose requires patient, gradual preparation.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#kurmasana" class="pose-nav-prev">&larr; Kurmasana</a>
+                  <a href="#garbha_pindasana" class="pose-nav-next">Garbha Pindasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="garbha_pindasana" data-search="Garbha Pindasana Embryo-in-the-Womb Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Garbha Pindasana</span>
+                  <span class="pose-phonetic">GAR-bah pin-DAH-sah-nah</span>
+                  <span class="pose-english">Embryo-in-the-Womb Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Balance</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Womb Embryo pose threads the arms through the legs in full lotus and brings the hands to the face. The practitioner then rolls in a circle nine times before coming to Kukkutasana. It is one of the most distinctive poses of the Primary Series and also one that requires lotus to be fully stable before it can be approached. Moisture on the arms from practice helps with the threading.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice full lotus stability before attempting to thread the arms.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> The lotus position must be stable and comfortable. Do not thread if lotus causes any knee discomfort.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#supta_kurmasana" class="pose-nav-prev">&larr; Supta Kurmasana</a>
+                  <a href="#kukkutasana" class="pose-nav-next">Kukkutasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="kukkutasana" data-search="Kukkutasana Rooster Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Kukkutasana</span>
+                  <span class="pose-phonetic">koo-koo-TAH-sah-nah</span>
+                  <span class="pose-english">Rooster Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Arm Balance</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Rooster pose lifts the body off the floor with the arms threaded through the lotus legs and the hands pressing into the floor. It requires core strength, wrist stability and the ability to remain in full lotus while bearing weight. It follows directly from Garbha Pindasana in the sequence. The lift, even if brief, is the goal.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice the lotus position with hands threading through before attempting the lift.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#garbha_pindasana" class="pose-nav-prev">&larr; Garbha Pindasana</a>
+                  <a href="#baddha_konasana" class="pose-nav-next">Baddha Konasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="baddha_konasana" data-search="Baddha Konasana Bound Angle Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Baddha Konasana</span>
+                  <span class="pose-phonetic">BAH-dah koh-NAH-sah-nah</span>
+                  <span class="pose-english">Bound Angle Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Hip Opener</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Bound Angle pose brings the soles of the feet together with the heels drawn toward the pelvis. The knees release toward the floor through gravity and gentle effort. Three variations are practised: sitting upright, then folding forward with a flat back, then folding further with the chin toward the floor. This is a deep groin opener that many find both accessible and revealing of where the hips are holding tension.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Sit on a folded blanket if the lower back rounds significantly when upright.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#kukkutasana" class="pose-nav-prev">&larr; Kukkutasana</a>
+                  <a href="#upavistha_konasana" class="pose-nav-next">Upavistha Konasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="upavistha_konasana" data-search="Upavistha Konasana Wide-Angle Seated Forward Fold Urdhva / Antara Drishti (up to the sky)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Upavistha Konasana</span>
+                  <span class="pose-phonetic">oo-pah-VEESH-tah koh-NAH-sah-nah</span>
+                  <span class="pose-english">Wide-Angle Seated Forward Fold</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Urdhva / Antara Drishti (up to the sky)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Wide-angle seated forward fold with the legs extended wide apart. The torso folds forward between the legs, aiming the chin toward the floor in the full expression. Two variations are practised, one folding forward and one lifting the legs and balancing on the sitting bones. Both versions work the inner hamstrings and groins from a different angle than the earlier forward folds.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Hold the calves instead of the feet and fold only as far as the spine stays relatively long.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#baddha_konasana" class="pose-nav-prev">&larr; Baddha Konasana</a>
+                  <a href="#supta_konasana" class="pose-nav-next">Supta Konasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="supta_konasana" data-search="Supta Konasana Reclining Angle Pose Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Supta Konasana</span>
+                  <span class="pose-phonetic">SOOP-tah koh-NAH-sah-nah</span>
+                  <span class="pose-english">Reclining Angle Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Inversion</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Reclining Angle pose rolls the legs overhead with the feet wide apart, toes touching the floor behind the head. The hands grip the big toes. The pose then rolls back up to a balanced seated position. The rolling motion requires core engagement and a certain willingness to trust momentum. It is a transitional pose between the wide-legged work and the reclined poses that follow.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Keep a slight bend in the knees when rolling overhead if the hamstrings are tight.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#upavistha_konasana" class="pose-nav-prev">&larr; Upavistha Konasana</a>
+                  <a href="#supta_padangusthasana" class="pose-nav-next">Supta Padangusthasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="supta_padangusthasana" data-search="Supta Padangusthasana Reclining Big Toe Pose Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Supta Padangusthasana</span>
+                  <span class="pose-phonetic">SOOP-tah pah-dahng-goosh-TAH-sah-nah</span>
+                  <span class="pose-english">Reclining Big Toe Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths, both sides</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Supine Stretch</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Reclining Hand-to-Big-Toe pose reclines on the back and extends one leg toward the ceiling, holding the big toe with the first two fingers and thumb. Practised in three stages: leg vertical, leg to the side, then leg drawn toward the head. It is among the most accessible poses of the sequence and offers a clear measure of hamstring development over time.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Use a strap around the foot if the toe cannot be held with the leg straight.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#supta_konasana" class="pose-nav-prev">&larr; Supta Konasana</a>
+                  <a href="#ubhaya_padangusthasana" class="pose-nav-next">Ubhaya Padangusthasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="ubhaya_padangusthasana" data-search="Ubhaya Padangusthasana Both Big Toes Pose Urdhva / Antara Drishti (up to the sky)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Ubhaya Padangusthasana</span>
+                  <span class="pose-phonetic">oo-BHAH-yah pah-dahng-goosh-TAH-sah-nah</span>
+                  <span class="pose-english">Both Big Toes Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Urdhva / Antara Drishti (up to the sky)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Balance</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Both legs extend upward from a seated balance while the hands grip the big toes. The balance point is the tailbone, and the spine must lift to prevent the body from collapsing backward. The entry typically involves rolling up from a reclined position with the legs overhead. Finding the balance takes practice; maintaining it with both legs straight is the measure of progress.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Bend the knees slightly to find the balance before working toward straight legs.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#supta_padangusthasana" class="pose-nav-prev">&larr; Supta Padangusthasana</a>
+                  <a href="#urdhva_mukha_paschimottanasana" class="pose-nav-next">Urdhva Mukha Paschimottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="urdhva_mukha_paschimottanasana" data-search="Urdhva Mukha Paschimottanasana Upward-Facing Forward Fold Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Urdhva Mukha Paschimottanasana</span>
+                  <span class="pose-phonetic">OORD-vah MOO-kah pah-shee-moh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Upward-Facing Forward Fold</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">A seated balance similar to Ubhaya Padangusthasana but with the torso folding toward the legs rather than staying upright. The hands hold the feet or outer edges of the feet as the torso draws forward. The challenge is simultaneously balancing, keeping the legs straight and folding. It appears near the end of the seated sequence and often marks where fatigue starts to become a factor.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Hold the ankles rather than the feet if the full forward fold compromises balance.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#ubhaya_padangusthasana" class="pose-nav-prev">&larr; Ubhaya Padangusthasana</a>
+                  <a href="#setu_bandhasana" class="pose-nav-next">Setu Bandhasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="setu_bandhasana" data-search="Setu Bandhasana Bridge Pose (Primary Series variant) Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Setu Bandhasana</span>
+                  <span class="pose-phonetic">SEH-too bahn-DHAH-sah-nah</span>
+                  <span class="pose-english">Bridge Pose (Primary Series variant)</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths &middot; &times;3</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Backbend</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Bridge pose in the Ashtanga tradition involves more arch than the restorative version familiar from other styles. From a reclined position, the feet press down with the toes pointing forward and the body arches up, sometimes with the hands interlaced beneath the torso. It is a preparation for the deeper backbends of the closing sequence and a counter to the forward-folding that has dominated the seated poses.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Keep the hands beside the hips pressing into the floor if the interlaced version is too intense.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Avoid if there is significant lower back sensitivity. Build toward this pose gradually.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#urdhva_mukha_paschimottanasana" class="pose-nav-prev">&larr; Urdhva Mukha Paschimottanasana</a>
+                  <a href="#urdhva_dhanurasana" class="pose-nav-next">Urdhva Dhanurasana &rarr;</a>
+                </div>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -521,7 +1812,376 @@
           <h2>Closing Sequence</h2>
           <p class="section-note">The closing sequence is fixed and the same in every practice: backbends, inversions, and a gradual return to stillness.</p>
           <div class="pose-grid">
-            <!-- Pose cards added in issue #32 -->
+            <details class="pose-card" id="urdhva_dhanurasana" data-search="Urdhva Dhanurasana Upward Bow / Wheel Pose Nasagrai (tip of the nose / between the hands)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Urdhva Dhanurasana</span>
+                  <span class="pose-phonetic">OORD-vah dah-noor-AH-sah-nah</span>
+                  <span class="pose-english">Upward Bow / Wheel Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose / between the hands)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Backbend</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Wheel pose (Full Backbend) opens the closing sequence. Hands and feet press into the floor as the body arches into a full backbend. Practised three times, each held for five breaths. It asks for shoulder flexibility, wrist strength and the willingness to open the chest fully. The three repetitions allow each round to go a little deeper as the spine warms to the shape.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice Bridge pose until the shoulder and wrist strength are ready for the full backbend.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Do not compress the lower back. Press firmly through all four limbs and let the chest open upward.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#setu_bandhasana" class="pose-nav-prev">&larr; Setu Bandhasana</a>
+                  <a href="#paschimottanasana_closing" class="pose-nav-next">Paschimottanasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="paschimottanasana_closing" data-search="Paschimottanasana Seated Forward Fold (closing counter) Padhayoragrai (toes)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Paschimottanasana</span>
+                  <span class="pose-phonetic">pah-shee-moh-tahn-AH-sah-nah</span>
+                  <span class="pose-english">Seated Forward Fold (closing counter)</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Padhayoragrai (toes)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description"></p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#urdhva_dhanurasana" class="pose-nav-prev">&larr; Urdhva Dhanurasana</a>
+                  <a href="#salamba_sarvangasana" class="pose-nav-next">Salamba Sarvangasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="salamba_sarvangasana" data-search="Salamba Sarvangasana Supported Shoulderstand Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Salamba Sarvangasana</span>
+                  <span class="pose-phonetic">sah-LAHM-bah sar-vahn-GAH-sah-nah</span>
+                  <span class="pose-english">Supported Shoulderstand</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">10 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-always">Always included</span>
+                    <span class="badge badge-type">Inversion</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Shoulderstand is the queen of the closing sequence inversions, held for a longer count than most poses. The body is supported on the shoulders and upper arms with the legs extending straight overhead. It reverses the relationship between the heart and the head, calms the nervous system and stimulates the thyroid. The chin lock (Jalandhara Bandha) is applied here, drawing the chin toward the sternum.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Use a folded blanket under the shoulders to reduce pressure on the cervical spine.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Do not turn the head while in Shoulderstand. Set up carefully and maintain the position.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#paschimottanasana_closing" class="pose-nav-prev">&larr; Paschimottanasana</a>
+                  <a href="#halasana" class="pose-nav-next">Halasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="halasana" data-search="Halasana Plough Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Halasana</span>
+                  <span class="pose-phonetic">hah-LAH-sah-nah</span>
+                  <span class="pose-english">Plough Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Inversion</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Plow pose follows Shoulderstand, lowering the legs behind the head to the floor. The hands may interlace behind the back or rest on the lower back. It deepens the shoulder and upper back stretch while maintaining the inverted position. The transition from Shoulderstand to Halasana and back is done with control, using the core rather than momentum.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Rest the feet on a chair behind you if they do not reach the floor comfortably.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Never force the feet to the floor. The cervical spine is compressed in this position and should not be strained.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#salamba_sarvangasana" class="pose-nav-prev">&larr; Salamba Sarvangasana</a>
+                  <a href="#karnapidasana" class="pose-nav-next">Karnapidasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="karnapidasana" data-search="Karnapidasana Ear-Pressure Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Karnapidasana</span>
+                  <span class="pose-phonetic">kar-nah-pee-DAH-sah-nah</span>
+                  <span class="pose-english">Ear-Pressure Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Inversion</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Ear Pressure pose takes the legs further overhead with the knees bending beside the ears. The arms may wrap around the back of the knees. It is a quieter pose than the preceding inversions, creating a sense of withdrawal from external sensation that fits its position near the end of the practice. The pressure on the ears naturally reduces sound and encourages an inward focus.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> As with Halasana, protect the cervical spine and do not turn the head.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#halasana" class="pose-nav-prev">&larr; Halasana</a>
+                  <a href="#urdhva_padmasana" class="pose-nav-next">Urdhva Padmasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="urdhva_padmasana" data-search="Urdhva Padmasana Upward Lotus Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Urdhva Padmasana</span>
+                  <span class="pose-phonetic">OORD-vah pahd-MAH-sah-nah</span>
+                  <span class="pose-english">Upward Lotus Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Inversion</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Inverted Lotus combines Shoulderstand with full lotus. From Shoulderstand, the legs move into lotus position overhead while the hands support the thighs or hips. It requires both lotus stability and the shoulder strength of the inversion. The pose looks striking and is genuinely difficult to enter and exit cleanly.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice Shoulderstand and lotus separately before combining them.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> The lotus must be comfortable on the ground before it can be approached in inversion.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#karnapidasana" class="pose-nav-prev">&larr; Karnapidasana</a>
+                  <a href="#pindasana" class="pose-nav-next">Pindasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="pindasana" data-search="Pindasana Embryo Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Pindasana</span>
+                  <span class="pose-phonetic">pin-DAH-sah-nah</span>
+                  <span class="pose-english">Embryo Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Inversion</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Embryo pose in Shoulderstand draws the lotus legs toward the chest, wrapping the arms around them. The body curls into a compact shape overhead. The transition from Urdhva Padmasana to Pindasana happens with control, and the challenge is maintaining balance on the shoulders as the legs fold in.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#urdhva_padmasana" class="pose-nav-prev">&larr; Urdhva Padmasana</a>
+                  <a href="#matsyasana" class="pose-nav-next">Matsyasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="matsyasana" data-search="Matsyasana Fish Pose Broomadhya (third eye / between the eyebrows)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Matsyasana</span>
+                  <span class="pose-phonetic">maht-see-AH-sah-nah</span>
+                  <span class="pose-english">Fish Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Broomadhya (third eye / between the eyebrows)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Backbend</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Fish pose is the counter-pose to the preceding inversions, opening the chest and throat in the opposite direction. In the Ashtanga version, the legs are in lotus and the back arches until the crown of the head rests on the floor. The arms may hold the feet or extend forward. It is a brief but important counter to the sustained forward compression of the neck in Shoulderstand.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice the non-lotus version (legs extended) if lotus is not accessible.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#pindasana" class="pose-nav-prev">&larr; Pindasana</a>
+                  <a href="#uttana_padasana" class="pose-nav-next">Uttana Padasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="uttana_padasana" data-search="Uttana Padasana Extended Leg Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Uttana Padasana</span>
+                  <span class="pose-phonetic">oo-TAH-nah pah-DAH-sah-nah</span>
+                  <span class="pose-english">Extended Leg Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Backbend</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Extended Leg pose lifts the legs to 45 degrees while arching the upper back, with the crown of the head on the floor and the arms extended toward the feet. It is similar to Matsyasana but with the legs long and the arms working more actively. A brief, intense counter-pose before the final inversion of the sequence.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#matsyasana" class="pose-nav-prev">&larr; Matsyasana</a>
+                  <a href="#sirsasana" class="pose-nav-next">Sirsasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="sirsasana" data-search="Sirsasana Headstand Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Sirsasana</span>
+                  <span class="pose-phonetic">shear-SHAH-sah-nah</span>
+                  <span class="pose-english">Headstand</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">10 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-type">Inversion</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Headstand is the king of the inversions and often held for the longest count in the closing sequence, sometimes up to 25 breaths as the practice matures. The forearms press into the floor in a triangle shape, the crown of the head rests on the floor, and the legs extend straight overhead. Building core and shoulder strength before moving to this pose reduces the load on the neck significantly.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Practice at a wall until the balance and strength are established to hold freely.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Never jump into headstand. Build the entry slowly, keeping the core engaged throughout. Skip if there is any neck injury.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#uttana_padasana" class="pose-nav-prev">&larr; Uttana Padasana</a>
+                  <a href="#baddha_padmasana" class="pose-nav-next">Baddha Padmasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="baddha_padmasana" data-search="Baddha Padmasana Bound Lotus Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Baddha Padmasana</span>
+                  <span class="pose-phonetic">BAH-dah pahd-MAH-sah-nah</span>
+                  <span class="pose-english">Bound Lotus Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Seated</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Bound Lotus crosses the arms behind the back to bind opposite feet while seated in full lotus. The shape asks for both deep hip opening for the lotus and shoulder flexibility for the bind. It appears as a transition between Sirsasana and Yoga Mudra in the closing sequence. The bind is held briefly before moving into the forward fold of Yoga Mudra.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Sit in lotus without the bind until the shoulders allow it.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> As always with lotus, protect the knees. The rotation comes from the hips.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#sirsasana" class="pose-nav-prev">&larr; Sirsasana</a>
+                  <a href="#yoga_mudra" class="pose-nav-next">Yoga Mudra &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="yoga_mudra" data-search="Yoga Mudra Yoga Seal Broomadhya / Nasagrai (third eye / tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Yoga Mudra</span>
+                  <span class="pose-phonetic">YOH-gah moo-DRAH</span>
+                  <span class="pose-english">Yoga Seal</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Broomadhya / Nasagrai (third eye / tip of the nose)</span>
+                  <span class="pose-facts">5 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Forward Fold</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Yoga Seal takes the bound lotus position of Baddha Padmasana and folds the torso forward until the forehead or chin reaches the floor. It is a deeply inward pose that closes the physical sequence before Padmasana and Utpluthih. The forward fold compresses the abdominal organs gently and invites a quality of stillness after the intensity of what has come before.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Fold forward with hands on the floor beside the hips if the bind is not accessible.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#baddha_padmasana" class="pose-nav-prev">&larr; Baddha Padmasana</a>
+                  <a href="#padmasana" class="pose-nav-next">Padmasana &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="padmasana" data-search="Padmasana Lotus Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Padmasana</span>
+                  <span class="pose-phonetic">pahd-MAH-sah-nah</span>
+                  <span class="pose-english">Lotus Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">10 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Seated</span>
+                    <span class="badge badge-intermediate">intermediate</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Full Lotus is the meditation seat that closes the practice before the final lift. The legs cross fully with each foot resting on the opposite thigh. In the Ashtanga system it is held here as a moment of seated stillness, Nasagrai drishti, and breath awareness before Utpluthih. For many practitioners it takes years of preparation before full lotus is a genuinely comfortable seat.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Sit in half lotus or a simple cross-legged position if full lotus is not yet accessible.</p>
+                <p class="pose-safety"><strong>Safety note:</strong> Never force the lotus position. Hip openness must precede it.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#yoga_mudra" class="pose-nav-prev">&larr; Yoga Mudra</a>
+                  <a href="#utpluthih" class="pose-nav-next">Utpluthih (Tolasana) &rarr;</a>
+                </div>
+              </div>
+            </details>
+            <details class="pose-card" id="utpluthih" data-search="Utpluthih (Tolasana) Scales / Lifted Lotus Pose Nasagrai (tip of the nose)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Utpluthih (Tolasana)</span>
+                  <span class="pose-phonetic">oot-PLOO-tee</span>
+                  <span class="pose-english">Scales / Lifted Lotus Pose</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> Nasagrai (tip of the nose)</span>
+                  <span class="pose-facts">10 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-type">Arm Balance</span>
+                    <span class="badge badge-advanced">advanced</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Scales pose is the final effort before Savasana. In full lotus, the hands press into the floor and the body lifts completely off the ground, held for ten to twenty-five breaths. It asks for everything the practice has built: wrist strength, core engagement, lotus stability and the mental stamina to stay through the burn. It is traditionally the last point of active effort before surrender.</p>
+                <p class="pose-modification"><strong>Modification:</strong> Keep the feet on the floor and simply press the hands down if the full lift is not yet possible.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#padmasana" class="pose-nav-prev">&larr; Padmasana</a>
+                  <a href="#savasana" class="pose-nav-next">Savasana &rarr;</a>
+                </div>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -529,7 +2189,32 @@
           <h2>Rest</h2>
           <p class="section-note">Savasana closes every practice. It is not optional.</p>
           <div class="pose-grid">
-            <!-- Pose cards added in issue #32 -->
+            <details class="pose-card" id="savasana" data-search="Savasana Corpse Pose (Final Rest) eyes closed (inner gaze)">
+              <summary class="pose-summary">
+                <div class="pose-summary-main">
+                  <span class="pose-sanskrit">Savasana</span>
+                  <span class="pose-phonetic">shah-VAH-sah-nah</span>
+                  <span class="pose-english">Corpse Pose (Final Rest)</span>
+                </div>
+                <div class="pose-meta">
+                  <span class="pose-drishti"><strong>Drishti:</strong> eyes closed (inner gaze)</span>
+                  <span class="pose-facts">30 breaths</span>
+                  <div class="pose-badges">
+                    <span class="badge badge-basic">Foundation pose</span>
+                    <span class="badge badge-always">Always included</span>
+                    <span class="badge badge-type">Rest</span>
+                    <span class="badge badge-beginner">beginner</span>
+                  </div>
+                </div>
+              </summary>
+              <div class="pose-detail">
+                <p class="pose-description">Corpse pose closes every practice. The body lies completely still on the back with the arms slightly away from the sides and the feet falling open. It is not optional and it is not passive. Savasana is the integration of everything that came before. Stay for at least five minutes. The practice is not complete without it.</p>
+                <a class="pose-app-cta" href="/app">Practise this in context with Ashtanga30 &rarr;</a>
+                <div class="pose-nav">
+                  <a href="#utpluthih" class="pose-nav-prev">&larr; Utpluthih (Tolasana)</a>
+                </div>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -559,6 +2244,19 @@
           document.getElementById(pill.dataset.target).scrollIntoView({behavior: 'smooth', block: 'start'});
         });
       });
+
+      // Pose search
+      (function() {
+        var input = document.getElementById('pose-search');
+        if (!input) return;
+        input.addEventListener('input', function() {
+          var q = input.value.toLowerCase().trim();
+          document.querySelectorAll('.pose-card').forEach(function(card) {
+            var text = (card.dataset.search || '').toLowerCase();
+            card.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+          });
+        });
+      })();
     </script>
 
   </body>
