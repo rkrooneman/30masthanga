@@ -287,6 +287,7 @@
         padding-top: 0.75rem;
         padding-bottom: 0.75rem;
         gap: 1rem;
+        min-height: 3.25rem;
       }
 
       .nav-logo {
@@ -309,9 +310,16 @@
       }
 
       .nav-cta {
-        padding: 0.45rem 1rem;
         font-size: 0.82rem;
-        font-weight: 500;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s ease;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+      }
+
+      .nav-cta:hover {
+        color: var(--accent-deep);
       }
 
       /* ========================================
@@ -968,7 +976,7 @@
           <img src="/lotus.svg" alt="" width="24" height="24" />
           ashtanga30
         </a>
-        <a class="btn btn-primary nav-cta" href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Get the app</a>
+        <a class="nav-cta" href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Get the app</a>
         <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
           &#9776;
         </button>
