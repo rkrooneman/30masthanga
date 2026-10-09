@@ -577,7 +577,13 @@
         font-size: 0.85rem;
       }
 
-      /* Bottom CTA buttons */
+      /* Bottom CTA */
+      .bottom-badge-link {
+        display: inline-flex;
+        transition: opacity 0.15s ease;
+      }
+      .bottom-badge-link:hover { opacity: 0.85; }
+
       .bottom-cta-btn {
         display: inline-block;
         padding: 0.75rem 1.5rem;
@@ -865,9 +871,11 @@
       <div class="container">
         <h2 style="font-family:var(--font-serif);font-weight:300;font-size:1.9rem;margin:0 0 0.75rem;">Ready to practise today?</h2>
         <p style="color:var(--text-muted);font-size:1rem;max-width:44ch;margin:0 auto 1.75rem;line-height:1.7;">Open Ashtanga30 and start a guided 30-minute Ashtanga practice.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;align-items:center;">
+        <div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;align-items:center;">
+          <a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa" target="_blank" rel="noopener noreferrer" class="bottom-badge-link" aria-label="Get it on Google Play">
+            <img src="/google-play-badge.png" alt="Get it on Google Play" height="52" style="display:block;">
+          </a>
           <a href="/app" class="bottom-cta-btn bottom-cta-ghost">Try it in your browser &rarr;</a>
-          <a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa" target="_blank" rel="noopener noreferrer" class="bottom-cta-btn bottom-cta-primary">Get it on Google Play</a>
         </div>
       </div>
     </section>
