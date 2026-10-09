@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>How to Build a Daily Ashtanga Practice | Ashtanga30</title>
+    <meta
+      name="description"
+      content="Why daily Ashtanga practice is hard and how to make it stick. A guide to 30-minute home practice, beginner tips, common mistakes, and how to build real consistency."
+    />
+    <link rel="canonical" href="https://ashtanga30.com/yoga-daily-practice" />
+    <link rel="icon" type="image/svg+xml" href="/lotus.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="How to Build a Daily Ashtanga Practice | Ashtanga30" />
+    <meta
+      property="og:description"
+      content="Why daily Ashtanga practice is hard and how to make it stick. A guide to 30-minute home practice, beginner tips, common mistakes, and how to build real consistency."
+    />
+    <meta property="og:url" content="https://ashtanga30.com/yoga-daily-practice" />
+    <meta property="og:image" content="https://ashtanga30.com/ashtanga30_og.png" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="How to Build a Daily Ashtanga Practice | Ashtanga30" />
+    <meta
+      name="twitter:description"
+      content="Why daily Ashtanga practice is hard and how to make it stick. A guide to 30-minute home practice, beginner tips, common mistakes, and how to build real consistency."
+    />
+    <meta name="twitter:image" content="https://ashtanga30.com/ashtanga30_og.png" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "How to Build a Daily Ashtanga Practice",
+      "description": "Why daily Ashtanga practice is hard and how to make it stick. A guide to 30-minute home practice, beginner tips, common mistakes, and how to build real consistency.",
+      "url": "https://ashtanga30.com/yoga-daily-practice",
+      "image": "https://ashtanga30.com/ashtanga30_og.png",
+      "author": { "@type": "Person", "name": "Roderik Krooneman" },
+      "publisher": { "@type": "Organization", "name": "Ashtanga30", "url": "https://ashtanga30.com" }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Can I practise Ashtanga for only 30 minutes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The full Primary Series is not a minimum requirement for a legitimate practice. A shorter sequence that respects the canonical order, opens with Sun Salutations and closes with Savasana is a complete practice. Thirty minutes done consistently will do more for you than ninety minutes done occasionally."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is 30 minutes enough to build a habit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It is more than enough. Research on habit formation consistently shows that shorter, more reliable sessions build stronger habits than longer, less consistent ones. The goal is to roll out the mat, not to maximise the duration."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Should I do the Primary Series every day?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Traditionally, Ashtanga is practised six days a week with one rest day. In practice, three to five sessions per week is a realistic and sustainable frequency for most people. Consistency over weeks and months matters more than daily perfection."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What should beginners focus on?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Breath, structure and repetition. Learn the Sun Salutations well before adding more. Get familiar with the basic standing poses. Do not rush toward advanced postures. The foundations of the practice are not temporary stops on the way to something else. They are the thing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I practise without a teacher?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For a home practice based on the Foundation poses, yes. For the more advanced poses of the Primary Series, a teacher adds significant value and reduces injury risk. Think of home practice as maintaining and deepening what a teacher has already shown you, rather than a replacement for instruction."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What if I miss a day?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Come back tomorrow. That is the complete answer. The practice is not a streak to protect. It is a relationship to maintain. Relationships survive gaps."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts: Cormorant Garamond -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ---- Design tokens ---- */
+      :root {
+        --bg:           #f5f3ee;
+        --surface:      #fbfaf7;
+        --text:         #2f3330;
+        --text-muted:   #6b7169;
+        --accent:       #8a9a7b;
+        --accent-deep:  #7d8d6f;
+        --accent-soft:  #dfe4d7;
+        --border:       #e4e1d8;
+        --font-serif:   'Cormorant Garamond', Georgia, serif;
+        --font-sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --max-w:        860px;
+        color-scheme: light;
+      }
+
+      /* ---- Reset ---- */
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      img, video {
+        display: block;
+        max-width: 100%;
+      }
+
+      a {
+        color: var(--accent-deep);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--text);
+      }
+
+      /* ---- Layout shell ---- */
+      .container {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      /* ---- Typography ---- */
+      h2 {
+        font-family: var(--font-serif);
+        font-size: 2rem;
+        font-weight: 300;
+        color: var(--text);
+        margin: 0 0 1.5rem;
+        line-height: 1.2;
+      }
+
+      p {
+        margin: 0 0 1rem;
+        color: var(--text);
+      }
+
+      /* ---- Utility ---- */
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      /* ========================================
+         NAV
+      ======================================== */
+      .site-nav {
+        position: sticky;
+        top: 0;
+        z-index: 300;
+        background: rgba(245, 243, 238, 0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .site-nav .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        gap: 1rem;
+        min-height: 3.25rem;
+      }
+
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-serif);
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--text);
+        text-decoration: none;
+        flex-shrink: 0;
+      }
+
+      .nav-logo img {
+        display: block;
+        width: 24px;
+        height: 24px;
+        opacity: 0.85;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .nav-links a {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s ease;
+        letter-spacing: 0.01em;
+      }
+
+      .nav-links a:hover {
+        color: var(--accent-deep);
+      }
+
+      /* ---- Mobile hamburger nav ---- */
+      .hamburger {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        color: var(--text);
+        font-size: 1.4rem;
+        line-height: 1;
+        margin-left: auto;
+      }
+
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 200;
+        background: var(--bg);
+        flex-direction: column;
+        padding: 1.5rem;
+        padding-top: calc(3.25rem + 1.5rem);
+      }
+
+      .mobile-menu.open {
+        display: flex;
+      }
+
+      .mobile-menu-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .mobile-menu-links li {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .mobile-menu-links a,
+      .mobile-menu-links button {
+        display: block;
+        padding: 1rem 0;
+        font-size: 1.1rem;
+        font-family: var(--font-serif);
+        font-weight: 300;
+        color: var(--text);
+        text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        transition: color 0.15s ease;
+      }
+
+      .mobile-menu-links a:hover,
+      .mobile-menu-links button:hover {
+        color: var(--accent-deep);
+      }
+
+      @media (max-width: 639px) {
+        .hamburger {
+          display: block;
+        }
+        .nav-links,
+        .nav-cta {
+          display: none;
+        }
+      }
+
+      @media (min-width: 640px) {
+        .hamburger {
+          display: none;
+        }
+        .mobile-menu {
+          display: none !important;
+        }
+      }
+
+      /* ========================================
+         ARTICLE HERO
+      ======================================== */
+      .article-hero {
+        padding: 3rem 0 2.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .article-hero h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        font-weight: 300;
+        margin: 0 0 0.75rem;
+        line-height: 1.15;
+        color: var(--text);
+      }
+
+      .article-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        margin: 0 0 1.5rem;
+        max-width: 52ch;
+        line-height: 1.6;
+      }
+
+      .article-cta {
+        font-size: 0.9rem;
+        color: var(--accent-deep);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+
+      .article-cta:hover { color: var(--text); }
+
+      /* ========================================
+         ARTICLE SECTIONS
+      ======================================== */
+      .article-section {
+        padding: 3rem 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .article-section h2 {
+        font-family: var(--font-serif);
+        font-size: 1.9rem;
+        font-weight: 300;
+        margin: 0 0 1.5rem;
+        color: var(--text);
+        line-height: 1.2;
+      }
+
+      .article-section p {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: var(--text);
+        max-width: 66ch;
+        margin: 0 0 1rem;
+      }
+
+      /* ========================================
+         STRUCTURE TABLE
+      ======================================== */
+      .structure-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        font-size: 0.92rem;
+        overflow-x: auto;
+        display: block;
+      }
+
+      .structure-table th {
+        text-align: left;
+        padding: 0.6rem 1rem;
+        background: var(--accent-soft);
+        color: var(--text);
+        font-weight: 600;
+        font-family: var(--font-sans);
+        border-bottom: 2px solid var(--border);
+        white-space: nowrap;
+      }
+
+      .structure-table td {
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        vertical-align: top;
+      }
+
+      .structure-table td:first-child {
+        font-weight: 500;
+        white-space: nowrap;
+        color: var(--accent-deep);
+      }
+
+      .structure-table tr:last-child td { border-bottom: none; }
+      .structure-table tbody tr:hover td { background: var(--surface); }
+
+      /* ========================================
+         CTA CALLOUT
+      ======================================== */
+      .callout {
+        background: var(--surface);
+        border-left: 3px solid var(--accent);
+        border-radius: 0 0.5rem 0.5rem 0;
+        padding: 1.25rem 1.5rem;
+        margin: 1.5rem 0;
+        font-size: 0.95rem;
+        color: var(--text);
+        line-height: 1.7;
+      }
+
+      .callout a {
+        color: var(--accent-deep);
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .callout a:hover { color: var(--text); }
+
+      /* ========================================
+         ASIDE
+      ======================================== */
+      .aside {
+        background: var(--surface);
+        border-left: 3px solid var(--accent-soft);
+        border-radius: 0 0.5rem 0.5rem 0;
+        padding: 1rem 1.25rem;
+        margin: 1.25rem 0;
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      /* ========================================
+         ACCORDION (Mistakes / FAQ)
+      ======================================== */
+      .accordion-item {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .accordion-item:first-of-type { border-top: 1px solid var(--border); }
+
+      .accordion-item summary {
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text);
+        user-select: none;
+        gap: 1rem;
+        transition: color 0.15s ease;
+      }
+
+      .accordion-item summary::-webkit-details-marker { display: none; }
+      .accordion-item summary:hover { color: var(--accent-deep); }
+
+      .accordion-item summary::after {
+        content: '+';
+        font-size: 1.1rem;
+        font-weight: 400;
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+
+      .accordion-item[open] summary::after { content: '-'; }
+      .accordion-item[open] summary { color: var(--accent-deep); }
+
+      .accordion-answer {
+        padding: 0 0 1.25rem;
+        font-size: 0.92rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+        max-width: 62ch;
+      }
+
+      /* ========================================
+         FOOTER
+      ======================================== */
+      .site-footer {
+        border-top: 1px solid var(--border);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+      }
+
+      .site-footer .container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem 1rem;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .site-footer a {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        transition: color 0.15s ease;
+      }
+
+      .site-footer a:hover {
+        color: var(--accent-deep);
+      }
+
+      .footer-copy {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+
+      .footer-sep {
+        color: var(--border);
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- =============================================
+         NAV
+    ============================================= -->
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="container">
+        <a class="nav-logo" href="/">
+          <img src="/lotus.svg" alt="" width="24" height="24" />
+          ashtanga30
+        </a>
+        <ul class="nav-links">
+          <li><a href="/poses">Pose Catalog</a></li>
+          <li><a href="/yoga-daily-practice">Daily Practice</a></li>
+        </ul>
+        <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          &#9776;
+        </button>
+      </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <ul class="mobile-menu-links">
+        <li><a href="/" onclick="closeMobileMenu()">Home</a></li>
+        <li><a href="/poses" onclick="closeMobileMenu()">Pose Catalog</a></li>
+        <li><a href="/yoga-daily-practice" onclick="closeMobileMenu()">Daily Practice</a></li>
+        <li><a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa" target="_blank" rel="noopener noreferrer">Get the app</a></li>
+      </ul>
+    </div>
+
+    <!-- =============================================
+         1. HERO
+    ============================================= -->
+    <div class="article-hero">
+      <div class="container">
+        <h1>How to Build a Daily Ashtanga Practice</h1>
+        <p class="article-subtitle">Why 30 minutes is enough, what actually counts as a real practice, and how to stop starting over.</p>
+        <a class="article-cta" href="/app">Try a 30-minute practice now &rarr;</a>
+      </div>
+    </div>
+
+    <!-- =============================================
+         2. WHY DAILY PRACTICE IS HARD
+    ============================================= -->
+    <div class="article-section" id="why-hard">
+      <div class="container">
+        <h2>Why daily practice is hard</h2>
+        <p>The full Primary Series takes well over an hour. For most people with work, family, other sport or just low energy, that is not a realistic daily commitment. And when the choice is between a full practice or nothing, nothing usually wins.</p>
+        <p>All-or-nothing thinking is probably the single biggest obstacle to consistency in Ashtanga. The tradition itself has something to answer for here: the Primary Series is a long, demanding sequence that implies a certain level of daily dedication that few modern lives can actually support. Practitioners end up measuring their home practice against an ideal they can rarely meet.</p>
+        <p>The result is familiar: a few weeks of discipline, then a gap, then guilt about the gap, then starting over. The practice becomes associated with failure rather than with the actual sensation of moving and breathing.</p>
+        <p>There is another way to think about it.</p>
+      </div>
+    </div>
+
+    <!-- =============================================
+         3. WHAT COUNTS AS A REAL PRACTICE
+    ============================================= -->
+    <div class="article-section" id="what-counts">
+      <div class="container">
+        <h2>What counts as a real practice</h2>
+        <p>A real practice is not defined by its length. It is defined by the quality of attention you bring to it. Breath. Presence. The willingness to roll out the mat.</p>
+        <p>The structure of Ashtanga gives you a framework that scales. The Sun Salutations, a handful of standing poses, a few seated ones, the closing sequence and Savasana: that is a complete practice. It has a beginning, a middle and an end. It respects the method. And it can be done in thirty minutes.</p>
+        <p>Savasana is not optional. Not even in a short practice. The body needs the integration. Skipping it because you are busy is the same as eating and running from the table before the meal has settled.</p>
+        <p>What matters is repetition over time. A thirty-minute practice three times a week will do more for you than a ninety-minute practice you cannot sustain.</p>
+      </div>
+    </div>
+
+    <!-- =============================================
+         4. A SIMPLE 30-MINUTE STRUCTURE
+    ============================================= -->
+    <div class="article-section" id="structure">
+      <div class="container">
+        <h2>A simple 30-minute Ashtanga structure</h2>
+        <p>The following breakdown gives you a complete, faithful practice within a realistic time frame. Adjust the balance to suit your energy on a given day.</p>
+
+        <table class="structure-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Time</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sun Salutations</td>
+              <td>5 min</td>
+              <td>Surya A x3, Surya B x3</td>
+            </tr>
+            <tr>
+              <td>Standing poses</td>
+              <td>8 min</td>
+              <td>4-6 poses from the standing sequence</td>
+            </tr>
+            <tr>
+              <td>Seated poses</td>
+              <td>10 min</td>
+              <td>4-6 poses from the seated sequence</td>
+            </tr>
+            <tr>
+              <td>Closing / inversions</td>
+              <td>5 min</td>
+              <td>Shoulderstand, bridge or wheel, counter-pose</td>
+            </tr>
+            <tr>
+              <td>Savasana</td>
+              <td>2+ min</td>
+              <td>Not optional</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>The total is closer to 30 minutes than a clock. Some days it will be 25. Some days 35. That is fine. The point is the structure, not the stopwatch.</p>
+
+        <div class="callout">
+          Ashtanga30 generates a practice in this structure automatically, adapted to the time you have. <a href="/app">&rarr; Try it free</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         5. BEGINNER VERSION
+    ============================================= -->
+    <div class="article-section" id="beginners">
+      <div class="container">
+        <h2>For beginners: less is more</h2>
+        <p>Beginners should resist the urge to do everything. The Primary Series was not designed to be learned in a month. The standing poses alone contain enough material for a year of focused practice.</p>
+        <p>A good beginner thirty-minute practice keeps to the Foundation poses: the Sun Salutations, the basic standing forward folds, Triangle, Side Angle, a handful of seated poses like Paschimottanasana and Janu Sirsasana A, Bridge pose and Savasana. These poses appear in every practice anyway. Mastering them is not a step toward the real practice. They are the real practice.</p>
+        <p>Skip advanced binds and inversions without teacher guidance. Marichyasana D, Supta Kurmasana, Headstand: these poses require preparation and feedback that a video or an app cannot provide. They are worth working toward with a teacher. In a home practice without guidance, they are a good way to get hurt.</p>
+        <p>Focus on breath count over depth. Five slow breaths in Triangle is more useful than ten rushed ones. The breath is the practice.</p>
+
+        <div class="aside">
+          Ashtanga30 has a Foundation poses mode that automatically limits the sequence to the core beginner-friendly poses. It is part of the optional upgrade.
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         6. COMMON MISTAKES
+    ============================================= -->
+    <div class="article-section" id="mistakes">
+      <div class="container">
+        <h2>Common mistakes</h2>
+
+        <details class="accordion-item">
+          <summary>Trying to do too much</summary>
+          <div class="accordion-answer">
+            Starting with the full Primary Series and burning out by week two. The practice compounds slowly. Start smaller than you think you need to.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Skipping Savasana</summary>
+          <div class="accordion-answer">
+            Savasana is not the reward for finishing. It is part of the practice. The nervous system needs it. Skip it and you have done most of the work but missed the point.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Forcing advanced poses</summary>
+          <div class="accordion-answer">
+            Depth comes from consistent, long-term practice, not from pushing further in today's session. Advanced poses approached without preparation are how injuries happen.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Treating missed days as failure</summary>
+          <div class="accordion-answer">
+            Missing a day is not the problem. The story you tell yourself about missing a day is the problem. Come back. That is the whole instruction.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Practising pain instead of awareness</summary>
+          <div class="accordion-answer">
+            Discomfort is normal. Pain is a signal. The distinction matters and it is your responsibility to notice it. Ashtanga asks for intensity, not damage.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Waiting for the perfect conditions</summary>
+          <div class="accordion-answer">
+            The mat does not need to be in a studio. The time does not need to be 6am. The practice does not need to be witnessed. Roll it out where you are.
+          </div>
+        </details>
+
+      </div>
+    </div>
+
+    <!-- =============================================
+         7. FAQ
+    ============================================= -->
+    <div class="article-section" id="daily-practice-faq">
+      <div class="container">
+        <h2>Questions</h2>
+
+        <details class="accordion-item">
+          <summary>Can I practise Ashtanga for only 30 minutes?</summary>
+          <div class="accordion-answer">
+            Yes. The full Primary Series is not a minimum requirement for a legitimate practice. A shorter sequence that respects the canonical order, opens with Sun Salutations and closes with Savasana is a complete practice. Thirty minutes done consistently will do more for you than ninety minutes done occasionally.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Is 30 minutes enough to build a habit?</summary>
+          <div class="accordion-answer">
+            It is more than enough. Research on habit formation consistently shows that shorter, more reliable sessions build stronger habits than longer, less consistent ones. The goal is to roll out the mat, not to maximise the duration.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Should I do the Primary Series every day?</summary>
+          <div class="accordion-answer">
+            Traditionally, Ashtanga is practised six days a week with one rest day. In practice, three to five sessions per week is a realistic and sustainable frequency for most people. Consistency over weeks and months matters more than daily perfection.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>What should beginners focus on?</summary>
+          <div class="accordion-answer">
+            Breath, structure and repetition. Learn the Sun Salutations well before adding more. Get familiar with the basic standing poses. Do not rush toward advanced postures. The foundations of the practice are not temporary stops on the way to something else. They are the thing.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>Can I practise without a teacher?</summary>
+          <div class="accordion-answer">
+            For a home practice based on the Foundation poses, yes. For the more advanced poses of the Primary Series, a teacher adds significant value and reduces injury risk. Think of home practice as maintaining and deepening what a teacher has already shown you, rather than a replacement for instruction.
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary>What if I miss a day?</summary>
+          <div class="accordion-answer">
+            Come back tomorrow. That is the complete answer. The practice is not a streak to protect. It is a relationship to maintain. Relationships survive gaps.
+          </div>
+        </details>
+
+      </div>
+    </div>
+
+    <!-- =============================================
+         8. FOOTER
+    ============================================= -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-links">
+          <a href="/privacy.html">Privacy</a>
+          <span class="footer-sep" aria-hidden="true">&middot;</span>
+          <a href="https://github.com/rkrooneman/30masthanga">Source</a>
+          <span class="footer-sep" aria-hidden="true">&middot;</span>
+          <a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Google Play</a>
+        </div>
+        <p class="footer-copy">&copy; 2026 Roderik Krooneman</p>
+      </div>
+    </footer>
+
+    <script>
+      // Hamburger menu
+      function openMobileMenu() {
+        document.getElementById('mobile-menu').classList.add('open');
+        var btn = document.getElementById('hamburger-btn');
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Close menu');
+        btn.innerHTML = '&times;';
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMobileMenu() {
+        document.getElementById('mobile-menu').classList.remove('open');
+        var btn = document.getElementById('hamburger-btn');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Open menu');
+        btn.innerHTML = '&#9776;';
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('hamburger-btn').addEventListener('click', function() {
+        if (document.getElementById('mobile-menu').classList.contains('open')) {
+          closeMobileMenu();
+        } else {
+          openMobileMenu();
+        }
+      });
+
+      document.getElementById('mobile-menu').addEventListener('click', function(e) {
+        if (e.target === this) closeMobileMenu();
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('mobile-menu').classList.contains('open')) {
+          closeMobileMenu();
+        }
+      });
+    </script>
+
+  </body>
+</html>
