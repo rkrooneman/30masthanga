@@ -3007,13 +3007,19 @@
       // Hamburger menu
       function openMobileMenu() {
         document.getElementById('mobile-menu').classList.add('open');
-        document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'true');
+        var btn = document.getElementById('hamburger-btn');
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Close menu');
+        btn.innerHTML = '&times;';
         document.body.style.overflow = 'hidden';
       }
 
       function closeMobileMenu() {
         document.getElementById('mobile-menu').classList.remove('open');
-        document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
+        var btn = document.getElementById('hamburger-btn');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Open menu');
+        btn.innerHTML = '&#9776;';
         document.body.style.overflow = '';
       }
 
