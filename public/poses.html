@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ashtanga Primary Series Pose Catalog | Ashtanga30</title>
+    <meta
+      name="description"
+      content="Explore the Ashtanga Primary Series poses in practice order, with Sanskrit names, English names, drishti, pose types and beginner-friendly notes."
+    />
+    <link rel="canonical" href="https://ashtanga30.com/poses" />
+    <link rel="icon" type="image/svg+xml" href="/lotus.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ashtanga Primary Series Pose Catalog | Ashtanga30" />
+    <meta
+      property="og:description"
+      content="Explore the Ashtanga Primary Series poses in practice order, with Sanskrit names, English names, drishti, pose types and beginner-friendly notes."
+    />
+    <meta property="og:url" content="https://ashtanga30.com/poses" />
+    <meta property="og:image" content="https://ashtanga30.com/ashtanga30_og.png" />
+
+    <!-- Schema: ItemList skeleton (to be completed in issue #35) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Ashtanga Primary Series Poses",
+      "description": "All 58 poses of the Ashtanga Primary Series in canonical practice order",
+      "url": "https://ashtanga30.com/poses",
+      "numberOfItems": 58
+    }
+    </script>
+
+    <!-- Schema: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ashtanga30.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Primary Series Poses", "item": "https://ashtanga30.com/poses" }
+      ]
+    }
+    </script>
+
+    <!-- Schema: FAQPage skeleton (questions to be added in issue #35) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": []
+    }
+    </script>
+
+    <!-- Google Fonts: Cormorant Garamond -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ---- Design tokens ---- */
+      :root {
+        --bg:           #f5f3ee;
+        --surface:      #fbfaf7;
+        --text:         #2f3330;
+        --text-muted:   #6b7169;
+        --accent:       #8a9a7b;
+        --accent-deep:  #7d8d6f;
+        --accent-soft:  #dfe4d7;
+        --border:       #e4e1d8;
+        --font-serif:   'Cormorant Garamond', Georgia, serif;
+        --font-sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --max-w:        860px;
+        color-scheme: light;
+      }
+
+      /* ---- Reset ---- */
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      a {
+        color: var(--accent-deep);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--text);
+      }
+
+      p {
+        margin: 0 0 1rem;
+        color: var(--text);
+      }
+
+      /* ---- Layout shell ---- */
+      .container {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      /* ---- Buttons ---- */
+      .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        font-family: var(--font-sans);
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        line-height: 1.4;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        border: 1.5px solid var(--accent);
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-deep);
+        border-color: var(--accent-deep);
+        color: #fff;
+      }
+
+      /* ========================================
+         NAV
+      ======================================== */
+      .site-nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(245, 243, 238, 0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .site-nav .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        gap: 1rem;
+      }
+
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-serif);
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--text);
+        text-decoration: none;
+        flex-shrink: 0;
+      }
+
+      .nav-logo img {
+        display: block;
+        width: 24px;
+        height: 24px;
+        opacity: 0.85;
+      }
+
+      .nav-cta {
+        padding: 0.45rem 1rem;
+        font-size: 0.82rem;
+        font-weight: 500;
+      }
+
+      /* ========================================
+         HERO
+      ======================================== */
+      .poses-hero {
+        background: var(--bg);
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .poses-hero h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        font-weight: 300;
+        color: var(--text);
+        margin: 0 0 0.75rem;
+        line-height: 1.2;
+      }
+
+      .hero-subtitle {
+        font-family: var(--font-sans);
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin: 0 0 1.5rem;
+        max-width: 58ch;
+        line-height: 1.7;
+      }
+
+      .hero-cta {
+        display: inline-block;
+        font-size: 0.9rem;
+        color: var(--accent-deep);
+        text-decoration: none;
+        border-bottom: 1px solid var(--accent-soft);
+        padding-bottom: 1px;
+        transition: border-color 0.15s ease, color 0.15s ease;
+      }
+
+      .hero-cta:hover {
+        color: var(--text);
+        border-color: var(--accent);
+      }
+
+      /* ========================================
+         INTRO SECTION
+      ======================================== */
+      .intro-section {
+        border-top: 1px solid var(--border);
+        padding: 2.5rem 0;
+      }
+
+      .intro-section p {
+        font-size: 1rem;
+        line-height: 1.8;
+        max-width: 62ch;
+        color: var(--text-muted);
+        margin: 0;
+      }
+
+      /* ========================================
+         CONTROLS (search + section pills)
+      ======================================== */
+      .poses-controls {
+        position: sticky;
+        top: 57px;
+        z-index: 90;
+        background: rgba(245, 243, 238, 0.96);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 0;
+      }
+
+      .poses-controls .container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .pose-search {
+        width: 100%;
+        max-width: 480px;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 0.65rem 1rem;
+        background: var(--surface);
+        font-size: 1rem;
+        font-family: var(--font-sans);
+        color: var(--text);
+        outline: none;
+        transition: border-color 0.15s ease;
+        appearance: none;
+      }
+
+      .pose-search::placeholder {
+        color: var(--text-muted);
+      }
+
+      .pose-search:focus {
+        border-color: var(--accent);
+      }
+
+      .section-pills {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.5rem;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .section-pills::-webkit-scrollbar {
+        display: none;
+      }
+
+      .section-pill {
+        flex-shrink: 0;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 2rem;
+        padding: 0.4rem 1rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-family: var(--font-sans);
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        white-space: nowrap;
+      }
+
+      .section-pill:hover,
+      .section-pill:focus-visible {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent-deep);
+        outline: none;
+      }
+
+      .section-pill:active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent-deep);
+      }
+
+      /* ========================================
+         POSE SECTIONS
+      ======================================== */
+      .poses-main {
+        padding-bottom: 4rem;
+      }
+
+      .pose-section {
+        padding: 3rem 0;
+      }
+
+      .pose-section + .pose-section {
+        border-top: 1px solid var(--border);
+      }
+
+      .pose-section h2 {
+        font-family: var(--font-serif);
+        font-size: 1.75rem;
+        font-weight: 300;
+        color: var(--text);
+        margin: 0 0 1rem;
+        line-height: 1.2;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+      }
+
+      .section-note {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        font-style: italic;
+        line-height: 1.6;
+      }
+
+      .pose-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      @media (min-width: 560px) {
+        .pose-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      /* ========================================
+         FOOTER
+      ======================================== */
+      .site-footer {
+        border-top: 1px solid var(--border);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+      }
+
+      .site-footer .container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem 1rem;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .site-footer a {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        transition: color 0.15s ease;
+      }
+
+      .site-footer a:hover {
+        color: var(--accent-deep);
+      }
+
+      .footer-copy {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- =============================================
+         NAV
+    ============================================= -->
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="container">
+        <a class="nav-logo" href="/">
+          <img src="/lotus.svg" alt="" width="24" height="24" />
+          ashtanga30
+        </a>
+        <a class="btn btn-primary nav-cta" href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Get the app</a>
+      </div>
+    </nav>
+
+    <!-- =============================================
+         HERO
+    ============================================= -->
+    <header class="poses-hero">
+      <div class="container">
+        <h1>Ashtanga Primary Series Pose Catalog</h1>
+        <p class="hero-subtitle">All 58 poses in canonical practice order, with Sanskrit names, English names, drishti and beginner-friendly notes.</p>
+        <a href="/app" class="hero-cta">Practise with Ashtanga30 &rarr;</a>
+      </div>
+    </header>
+
+    <!-- =============================================
+         INTRO
+    ============================================= -->
+    <section id="intro" class="intro-section">
+      <div class="container">
+        <p>The Ashtanga Primary Series (Yoga Chikitsa, meaning "yoga therapy") is a fixed sequence of poses practised in a set order, connecting each movement to a breath. Traditionally practised six days a week under the guidance of a teacher, it builds strength, flexibility and focus over time. Ashtanga30 uses the traditional order as the foundation for shorter, guided home practices of around 30 minutes. This page is an educational reference; it is not a substitute for learning from a qualified Ashtanga teacher.</p>
+      </div>
+    </section>
+
+    <!-- =============================================
+         CONTROLS: SEARCH + SECTION PILLS
+    ============================================= -->
+    <div class="poses-controls" id="controls">
+      <div class="container">
+        <input
+          type="search"
+          id="pose-search"
+          class="pose-search"
+          placeholder="Search poses in Sanskrit or English..."
+          aria-label="Search poses"
+        />
+        <div class="section-pills" role="list">
+          <button class="section-pill" data-target="sun-salutations" role="listitem">Sun Salutations</button>
+          <button class="section-pill" data-target="standing" role="listitem">Standing</button>
+          <button class="section-pill" data-target="seated" role="listitem">Seated</button>
+          <button class="section-pill" data-target="closing" role="listitem">Closing</button>
+          <button class="section-pill" data-target="rest" role="listitem">Rest</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         POSE SECTIONS
+    ============================================= -->
+    <main class="poses-main">
+      <div class="container">
+
+        <section class="pose-section" id="sun-salutations">
+          <h2>Sun Salutations</h2>
+          <p class="section-note">Performed at the opening of every practice. Surya Namaskara A three times, then B three times.</p>
+          <div class="pose-grid">
+            <!-- Pose cards added in issue #32 -->
+          </div>
+        </section>
+
+        <section class="pose-section" id="standing">
+          <h2>Standing Sequence</h2>
+          <p class="section-note">The standing sequence builds strength, balance and focus before moving to the floor.</p>
+          <div class="pose-grid">
+            <!-- Pose cards added in issue #32 -->
+          </div>
+        </section>
+
+        <section class="pose-section" id="seated">
+          <h2>Seated Sequence</h2>
+          <p class="section-note">The heart of the practice. Each seated pose is separated by a vinyasa, linking breath to movement.</p>
+          <div class="pose-grid">
+            <!-- Pose cards added in issue #32 -->
+          </div>
+        </section>
+
+        <section class="pose-section" id="closing">
+          <h2>Closing Sequence</h2>
+          <p class="section-note">The closing sequence is fixed and the same in every practice: backbends, inversions, and a gradual return to stillness.</p>
+          <div class="pose-grid">
+            <!-- Pose cards added in issue #32 -->
+          </div>
+        </section>
+
+        <section class="pose-section" id="rest">
+          <h2>Rest</h2>
+          <p class="section-note">Savasana closes every practice. It is not optional.</p>
+          <div class="pose-grid">
+            <!-- Pose cards added in issue #32 -->
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- =============================================
+         FOOTER
+    ============================================= -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-links">
+          <a href="/privacy.html">Privacy</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="https://github.com/rkrooneman/30masthanga">Source</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Google Play</a>
+        </div>
+        <p class="footer-copy">&copy; 2026 Roderik Krooneman</p>
+      </div>
+    </footer>
+
+    <script>
+      // Section pill scroll
+      document.querySelectorAll('.section-pill').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+          document.getElementById(pill.dataset.target).scrollIntoView({behavior: 'smooth', block: 'start'});
+        });
+      });
+    </script>
+
+  </body>
+</html>
