@@ -47,17 +47,17 @@ function LotusMark({ size = 64, className }: LotusMarkProps) {
       <circle cx="32" cy="32" r="27" strokeWidth="1" opacity="0.55" />
 
       {/* Centre petal: upright teardrop rising from the base to a rounded tip. */}
-      <path d="M32 44 C27 36 27 26 32 19 C37 26 37 36 32 44 Z" />
+      <path className="petal petal-0" d="M32 44 C27 36 27 26 32 19 C37 26 37 36 32 44 Z" />
 
       {/* Inner side petals — mirrored pair leaning gently outward from the base.
           Left and right share identical control offsets reflected about x = 32. */}
-      <path d="M32 44 C24 39 19 31 19 23 C27 25 32 33 32 44 Z" />
-      <path d="M32 44 C40 39 45 31 45 23 C37 25 32 33 32 44 Z" />
+      <path className="petal petal-1" d="M32 44 C24 39 19 31 19 23 C27 25 32 33 32 44 Z" />
+      <path className="petal petal-2" d="M32 44 C40 39 45 31 45 23 C37 25 32 33 32 44 Z" />
 
       {/* Outer side petals — mirrored pair leaning further outward, shorter and
           lower, so the flower fans open. Again reflected about x = 32. */}
-      <path d="M32 44 C22 43 15 39 12 32 C19 30 27 35 32 44 Z" />
-      <path d="M32 44 C42 43 49 39 52 32 C45 30 37 35 32 44 Z" />
+      <path className="petal petal-3" d="M32 44 C22 43 15 39 12 32 C19 30 27 35 32 44 Z" />
+      <path className="petal petal-4" d="M32 44 C42 43 49 39 52 32 C45 30 37 35 32 44 Z" />
 
       {/* Short base line the petals rise from. */}
       <path d="M23 45 C27 47 37 47 41 45" />
