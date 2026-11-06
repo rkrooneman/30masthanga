@@ -66,19 +66,16 @@ export default defineConfig({
         // CacheFirst runtimeCaching rule for /ambient/ was redundant and has
         // been removed.
         globPatterns: [
+          // The React app shell HTML must be revisioned by Workbox because it
+          // contains hashed JS/CSS asset URLs. Do not add it with revision:null:
+          // stale app.html can otherwise keep pointing at deleted chunks and show
+          // a blank screen after deploys. Keep other static HTML pages out of the
+          // precache so /, /poses, /privacy, etc. stay network-fetched.
+          'app.html',
           // JS, CSS, and non-HTML assets for the React app shell.
-          // HTML is excluded here -- we add only app.html explicitly below
-          // via additionalManifestEntries, so landing.html, poses.html, etc.
-          // are never precached. Precaching those static pages caused the SW
-          // to serve landing.html for TWA navigations to /app on devices with
-          // a stale cache from an older SW version.
           '**/*.{js,css,svg,png,ico,woff2}',
           'audio/**/*.mp3',
           'ambient/**/*.mp3',
-        ],
-        // Explicitly precache only the React app shell HTML.
-        additionalManifestEntries: [
-          { url: '/app.html', revision: null },
         ],
         // The React app shell lives at /app. The SW serves app.html for any
         // navigation under /app. Other paths (/, /landing, /poses, /privacy)
