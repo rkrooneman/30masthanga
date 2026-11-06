@@ -9,8 +9,8 @@
 
 import type { GeneratedPractice } from '../lib/generatePractice';
 
-/** The three screens the app can show. Default screen is 'home'. */
-export type Screen = 'home' | 'overview' | 'guided';
+/** The screens the app can show. Default screen is 'home'. */
+export type Screen = 'home' | 'catalog' | 'overview' | 'guided';
 
 /** Props for the Home screen (breath-pace picker + generate). */
 export interface HomeScreenProps {
@@ -28,6 +28,8 @@ export interface HomeScreenProps {
   onSavasanaMinutesChange: (minutes: number) => void;
   /** Generate a real (randomised) practice at the given pace and advance. */
   onGenerate: (breathSeconds: number) => void;
+  /** Open the free read-only pose catalog. */
+  onOpenCatalog: () => void;
 }
 
 /** Props for the Overview screen (a user-editable selection over the catalog). */

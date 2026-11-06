@@ -46,6 +46,8 @@ interface PoseCarouselProps {
   onBackToMap: () => void;
   /** Advance to the Guided screen. */
   onStartGuided: () => void;
+  /** Label for the persistent bottom action. Defaults to Start practice. */
+  actionLabel?: string;
 }
 
 function PoseCarousel({
@@ -54,6 +56,7 @@ function PoseCarousel({
   startIndex,
   onBackToMap,
   onStartGuided,
+  actionLabel = 'Start practice',
 }: PoseCarouselProps) {
   const count = poses.length;
 
@@ -315,7 +318,7 @@ function PoseCarousel({
         className="button button--primary"
         onClick={onStartGuided}
       >
-        Start practice
+        {actionLabel}
       </button>
     </section>
   );

@@ -89,6 +89,7 @@ function HomeScreen({
   savasanaMinutes,
   onSavasanaMinutesChange,
   onGenerate,
+  onOpenCatalog,
 }: HomeScreenProps) {
   // Detect standalone mode (TWA or installed PWA shortcut). Initialised once at
   // mount via lazy initialiser so it never changes during the session. When true
@@ -402,6 +403,14 @@ function HomeScreen({
         onClick={() => onGenerate(breathSeconds)}
       >
         Generate my next practice
+      </button>
+
+      <button
+        type="button"
+        className="button button--outline home__catalog-button"
+        onClick={onOpenCatalog}
+      >
+        Browse pose catalog
       </button>
 
       <footer className="home__footer">
