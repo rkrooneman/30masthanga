@@ -161,7 +161,7 @@ function UnlockSheet({
           </p>
           <ul className="unlock-sheet__list">
             <li>
-              Choose <strong>Basics only</strong> for the essential root poses
+              Choose <strong>Foundation</strong> for the essential root poses
             </li>
             <li>
               Take the <strong>Full series</strong>

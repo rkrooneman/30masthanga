@@ -1106,7 +1106,7 @@ body {
 .pose-map__sections {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 
 /* Regenerate feedback: when a fresh practice is generated the sections grid is
@@ -1169,7 +1169,7 @@ body {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-2);
   /* Icons stroke with currentColor; set sage once here for every thumbnail. */
   color: var(--color-accent);
 }
@@ -1293,7 +1293,7 @@ body {
   align-items: center;
   gap: 0.4rem;
   min-height: var(--tap-target);
-  padding: 0.6rem 0.4rem;
+  padding: 0.65rem 0.35rem 0.55rem;
   font: inherit;
   text-align: center;
   color: inherit;
@@ -1494,7 +1494,24 @@ body {
 }
 
 .pose-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
   margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.pose-card__meta span {
+  padding: 0.15rem 0.5rem;
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-pill);
+}
+
+.pose-card__note {
+  max-width: 18rem;
+  margin: calc(-1 * var(--space-2)) 0 0;
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
