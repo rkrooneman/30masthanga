@@ -8,10 +8,11 @@
  * back/forward navigation resolve to?
  *
  * === the screen model ===
- * The app is a router-free three-screen shell (see `../types/navigation`):
+ * The app is a router-free shell (see `../types/navigation`):
  *
  *   home  ->  overview  ->  guided        (forward flow)
  *   guided  ->  overview  ->  home        (back flow)
+ *   home  ->  catalog  ->  home           (read-only catalog branch)
  *
  * Forward navigations PUSH a history entry (home->overview, overview->guided).
  * Back pops one step:
@@ -53,6 +54,7 @@ export const ROOT_SCREEN: Screen = 'home';
  */
 const FORWARD_OF: Readonly<Record<Screen, Screen | null>> = {
   home: 'overview',
+  catalog: null,
   overview: 'guided',
   guided: null,
 };
@@ -63,6 +65,7 @@ const FORWARD_OF: Readonly<Record<Screen, Screen | null>> = {
  */
 const BACK_OF: Readonly<Record<Screen, Screen | null>> = {
   home: null,
+  catalog: 'home',
   overview: 'home',
   guided: 'overview',
 };

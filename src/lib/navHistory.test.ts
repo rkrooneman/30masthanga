@@ -4,7 +4,7 @@
  * Run with:  npx tsx src/lib/navHistory.test.ts
  *
  * No test framework, no deps. Verifies the pure back/forward flow:
- *   - back from each of the three screens, incl. EXIT (null) from home
+ *   - back from each screen, incl. EXIT (null) from home
  *   - the two forward transitions (home->overview, overview->guided) push
  *   - forward from guided has no target (null)
  *   - screenForward / resolveBack agree with the fixed flow on the canonical path
@@ -44,6 +44,10 @@ function check(condition: boolean, message: string): void {
     `back: guided must step back to overview (got ${screenBack('guided')})`,
   );
   check(
+    screenBack('catalog') === 'home',
+    `back: catalog must step back to home (got ${screenBack('catalog')})`,
+  );
+  check(
     screenBack('overview') === 'home',
     `back: overview must step back to home (got ${screenBack('overview')})`,
   );
@@ -79,6 +83,11 @@ function check(condition: boolean, message: string): void {
   );
 
   check(
+    screenForward('catalog') === null,
+    `forward: catalog has no fixed forward target`,
+  );
+
+  check(
     screenForward('guided') === null,
     `forward: guided is the end of the flow (no forward target)`,
   );
@@ -105,7 +114,7 @@ function check(condition: boolean, message: string): void {
 // 4. resolveBack with NO stack falls through to the fixed screenBack flow.
 // ---------------------------------------------------------------------------
 {
-  for (const s of ['home', 'overview', 'guided'] as const) {
+  for (const s of ['home', 'catalog', 'overview', 'guided'] as const) {
     check(
       resolveBack(s) === screenBack(s),
       `resolveBack(no stack): must equal screenBack for ${s} ` +

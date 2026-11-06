@@ -82,6 +82,11 @@ import MusicPanel from './components/MusicPanel';
 // default export, which React.lazy requires.
 const OverviewScreen = lazy(() => import('./screens/OverviewScreen'));
 
+// CatalogScreen imports PoseGraphic and the ordered pose catalog, so keep it out
+// of the Home bundle just like Overview. It is only opened from the quiet Home
+// secondary action and does not need to load up front.
+const CatalogScreen = lazy(() => import('./screens/CatalogScreen'));
+
 // GuidedScreen is heavy (buildGuidedPlan, BreathingCircle, PoseGraphic + its 58
 // pose-icon SVGs, voice/chime, etc.) and is only needed once a practice starts
 // (screen === 'guided', or the DEV-only `?complete` hatch). Lazy-loading it lets
@@ -369,6 +374,11 @@ function App() {
     setScreen('overview');
   };
 
+  const handleOpenCatalog = () => {
+    window.history.pushState({ screen: 'catalog' }, '');
+    setScreen('catalog');
+  };
+
   // "New sequence": wipe the current selection and generate a fresh <=30-min set
   // at the same breath pace (re-seeding the selected set), turning Full series
   // off. Manual customisation is discarded - this is a clean regenerate.
@@ -557,7 +567,25 @@ function App() {
             savasanaMinutes={savasanaMinutes}
             onSavasanaMinutesChange={handleSavasanaMinutesChange}
             onGenerate={handleGenerate}
+            onOpenCatalog={handleOpenCatalog}
           />
+        )}
+
+        {screen === 'catalog' && (
+          <Suspense
+            fallback={
+              <section
+                className="screen overview catalog"
+                aria-busy="true"
+                aria-label="Loading pose catalog"
+              />
+            }
+          >
+            <CatalogScreen
+              breathSeconds={breathSeconds}
+              onBackHome={handleBackHome}
+            />
+          </Suspense>
         )}
 
         {screen === 'overview' && practice && selectedIds && (
