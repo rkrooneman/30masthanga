@@ -856,6 +856,7 @@ function GuidedScreen({
   // sequenced so the two cues don't collide.
   const bellPlayedRef = useRef(false);
   const namastePlayedRef = useRef(false);
+  const namasteTimerRef = useRef<number | null>(null);
   // Records the completed practice to the on-device practice log exactly once,
   // for the calm "last 7 days" row on Home. Guarded by its own ref so it fires
   // only on the first real completion. Deliberately EXCLUDES the DEV-only
@@ -875,6 +876,13 @@ function GuidedScreen({
   useEffect(() => {
     if (!complete || bellPlayedRef.current) return;
 
+    const clearNamasteTimer = () => {
+      if (namasteTimerRef.current !== null) {
+        window.clearTimeout(namasteTimerRef.current);
+        namasteTimerRef.current = null;
+      }
+    };
+
     const playCompletionSounds = () => {
       if (bellPlayedRef.current) return;
       bellPlayedRef.current = true;
@@ -882,7 +890,10 @@ function GuidedScreen({
       if (!namastePlayedRef.current) {
         namastePlayedRef.current = true;
         // Let the bell establish first, then speak Namaste over its tail.
-        window.setTimeout(() => speakNamaste(), 1400);
+        namasteTimerRef.current = window.setTimeout(() => {
+          namasteTimerRef.current = null;
+          speakNamaste();
+        }, 1400);
       }
     };
 
@@ -890,7 +901,7 @@ function GuidedScreen({
       // Normal completion: the user tapped "Start practice" earlier, so audio is
       // already unlocked. Play the completion sounds right away.
       playCompletionSounds();
-      return;
+      return clearNamasteTimer;
     }
 
     // DEV-only `?complete` hatch: the screen mounts straight into completion with
@@ -903,6 +914,7 @@ function GuidedScreen({
     return () => {
       window.removeEventListener('pointerdown', onFirstGesture);
       window.removeEventListener('keydown', onFirstGesture);
+      clearNamasteTimer();
     };
   }, [complete, startComplete]);
 
