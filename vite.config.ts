@@ -52,22 +52,6 @@ export default defineConfig({
             type: 'image/svg+xml',
           },
         ],
-        shortcuts: [
-          {
-            name: 'Start practice',
-            short_name: 'Practice',
-            description: 'Generate and start a 30-minute Ashtanga practice',
-            url: '/?action=start',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
-          },
-          {
-            name: 'Overview',
-            short_name: 'Overview',
-            description: 'Browse the full pose sequence',
-            url: '/?action=overview',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
-          },
-        ],
       },
       workbox: {
         // Precache the app shell plus the SMALL, essential audio: the spoken

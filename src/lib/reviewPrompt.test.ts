@@ -118,14 +118,14 @@ function reset(): void {
 }
 
 // ---------------------------------------------------------------------------
-// 3. requestReviewIfEligible with count >= 5 marks the flag.
+// 3. requestReviewIfEligible with count >= 5 but no requestReview does NOT mark.
 // ---------------------------------------------------------------------------
 {
   reset();
   await requestReviewIfEligible(5);
   check(
-    hasReviewBeenRequested() === true,
-    'count 5: must mark the flag after triggering',
+    hasReviewBeenRequested() === false,
+    'unsupported browser: must not mark when requestReview is absent',
   );
 }
 
@@ -160,6 +160,10 @@ function reset(): void {
   check(
     callCount === 1,
     'TWA: must call window.requestReview once when it is available',
+  );
+  check(
+    hasReviewBeenRequested() === true,
+    'TWA: must mark the flag after triggering',
   );
   // Calling again must NOT re-invoke (already marked).
   await requestReviewIfEligible(5);
