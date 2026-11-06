@@ -428,6 +428,169 @@
       }
 
       /* ========================================
+         1b. TRUST STRIP
+      ======================================== */
+      .trust-strip {
+        padding: 3rem 0;
+        background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+      }
+
+      .trust-shell {
+        border: 1px solid var(--border);
+        border-radius: 1.25rem;
+        padding: 1.25rem;
+        background: #fffdf9;
+        box-shadow: 0 18px 48px rgba(47, 51, 48, 0.05);
+      }
+
+      .trust-kicker {
+        margin: 0 0 0.45rem;
+        color: var(--accent-deep);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .trust-heading {
+        margin: 0 0 0.65rem;
+        font-size: 1.75rem;
+      }
+
+      .trust-copy,
+      .unlock-copy {
+        margin: 0;
+        color: var(--text);
+      }
+
+      .trust-copy {
+        max-width: 54ch;
+      }
+
+      .unlock-section {
+        padding: 2.75rem 0;
+        background: var(--bg);
+      }
+
+      .unlock-card {
+        display: grid;
+        gap: 0.9rem;
+        border: 1px solid var(--border);
+        border-radius: 1.1rem;
+        padding: 1.25rem;
+        background: var(--surface);
+      }
+
+      .unlock-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 0.35rem;
+        color: var(--accent-deep);
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .unlock-label::before {
+        content: "";
+        display: inline-block;
+        width: 0.65rem;
+        height: 0.65rem;
+        border: 1.5px solid var(--accent);
+        border-radius: 50%;
+        opacity: 0.75;
+      }
+
+      .unlock-card h2 {
+        margin: 0;
+        font-size: 1.55rem;
+      }
+
+      .unlock-copy {
+        max-width: 58ch;
+        color: var(--text-muted);
+      }
+
+      .trust-signals {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        margin: 1rem 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .trust-signals li {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.75rem;
+        align-items: start;
+        border: 1px solid var(--border);
+        border-radius: 0.8rem;
+        padding: 0.75rem 0.8rem;
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        line-height: 1.45;
+        background: var(--surface);
+      }
+
+      .signal-icon {
+        display: block;
+        width: 2rem;
+        height: 2rem;
+        border: 1px solid var(--accent-soft);
+        border-radius: 50%;
+        background: #fffdf9;
+        color: var(--accent-deep);
+        padding: 0.32rem;
+        stroke: currentColor;
+        stroke-width: 1.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .signal-text {
+        min-width: 0;
+      }
+
+      .trust-signals strong {
+        display: block;
+        margin-bottom: 0.1rem;
+        color: var(--text);
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+
+      @media (min-width: 560px) {
+        .trust-signals {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 760px) {
+        .trust-shell {
+          padding: 1.5rem;
+        }
+
+        .trust-signals {
+          grid-template-columns: repeat(5, 1fr);
+        }
+
+        .unlock-card {
+          grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr);
+          align-items: center;
+          padding: 1.4rem 1.5rem;
+        }
+      }
+
+      .text-link {
+        color: var(--accent-deep);
+        text-decoration: none;
+      }
+
+      /* ========================================
          2. WHAT IT IS
       ======================================== */
       .what-it-is p {
@@ -435,6 +598,66 @@
         line-height: 1.8;
         max-width: 62ch;
         color: var(--text);
+      }
+
+      /* ========================================
+         2a. FIRST PRACTICE
+      ======================================== */
+      .practice-flow {
+        display: grid;
+        gap: 0.75rem;
+        margin: 0.5rem 0 1.25rem;
+        padding: 0;
+        list-style: none;
+        counter-reset: practice-step;
+      }
+
+      .practice-flow li {
+        counter-increment: practice-step;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.75rem;
+        align-items: start;
+        padding: 1rem 1.1rem;
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent-soft);
+        border-radius: 0 0.6rem 0.6rem 0;
+        background: var(--surface);
+      }
+
+      .practice-flow li::before {
+        content: counter(practice-step);
+        display: inline-grid;
+        place-items: center;
+        width: 1.8rem;
+        height: 1.8rem;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent-deep);
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      .practice-flow strong {
+        display: block;
+        color: var(--text);
+        font-size: 0.95rem;
+        margin-bottom: 0.15rem;
+      }
+
+      .practice-flow span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .section-note {
+        max-width: 62ch;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.7;
       }
 
       /* ========================================
@@ -1125,6 +1348,81 @@
     </section>
 
     <!-- =============================================
+         1b. TRUST STRIP
+    ============================================= -->
+    <section class="trust-strip" aria-label="Practice-first trust">
+      <div class="container">
+        <div class="trust-shell">
+          <p class="trust-kicker">Independent, practice-first</p>
+          <h2 class="trust-heading">A quiet companion for real practice.</h2>
+          <p class="trust-copy">
+            ashtanga30 is an independent, practitioner-built home practice companion:
+            teacher-respecting, faithful to the method, and focused on helping you return
+            to the mat without turning practice into another noisy app.
+          </p>
+          <ul class="trust-signals" aria-label="Privacy and trust signals">
+            <li>
+              <svg class="signal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="8" r="3" fill="none" />
+                <path d="M6.5 19c1.1-3 3-4.5 5.5-4.5s4.4 1.5 5.5 4.5" fill="none" />
+                <path d="M19 5 5 19" fill="none" />
+              </svg>
+              <span class="signal-text"><strong>No account</strong> Practise without signing in.</span>
+            </li>
+            <li>
+              <svg class="signal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M4 12s3-4.5 8-4.5 8 4.5 8 4.5-3 4.5-8 4.5S4 12 4 12Z" fill="none" />
+                <path d="M8 16 16 8" fill="none" />
+              </svg>
+              <span class="signal-text"><strong>No tracking</strong> No analytics tied to your practice.</span>
+            </li>
+            <li>
+              <svg class="signal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="5" y="7" width="14" height="9" rx="2" fill="none" />
+                <path d="M8.5 16 6.5 19M15.5 16l2 3M8.5 11.5h7" fill="none" />
+              </svg>
+              <span class="signal-text"><strong>No ads</strong> Nothing competing for attention.</span>
+            </li>
+            <li>
+              <svg class="signal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 13a6 6 0 0 1 12 0" fill="none" />
+                <path d="M9 16h6" fill="none" />
+                <path d="M12 4v4" fill="none" />
+              </svg>
+              <span class="signal-text"><strong>Offline ready</strong> Works after first load.</span>
+            </li>
+            <li>
+              <svg class="signal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="8" y="4" width="8" height="16" rx="2" fill="none" />
+                <path d="M11 17h2" fill="none" />
+              </svg>
+              <span class="signal-text"><strong>On device</strong> State and settings stay local.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         1c. FREE PRACTICE
+    ============================================= -->
+    <section class="unlock-section" aria-label="Free practice and optional unlock">
+      <div class="container">
+        <div class="unlock-card">
+          <div>
+            <p class="unlock-label">Free practice, optional unlock</p>
+            <h2>Start with the full daily practice.</h2>
+          </div>
+          <p class="unlock-copy">
+            The complete guided 30-minute practice is free in your browser or from
+            <a class="text-link" href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Google Play</a>.
+            A one-time unlock adds Foundation, Full series, and pose selection. No subscription.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
          2. WHAT IT IS
     ============================================= -->
     <section class="what-it-is" id="what">
@@ -1142,6 +1440,51 @@
           <a href="/poses" style="color:var(--accent-deep);text-decoration:none;font-size:0.9rem;">Browse the full Primary Series pose catalog &rarr;</a>
           &nbsp;&nbsp;
           <a href="/30-minute-ashtanga-yoga-practice" style="color:var(--accent-deep);text-decoration:none;font-size:0.9rem;">How to build a daily practice &rarr;</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- =============================================
+         2a. FIRST PRACTICE
+    ============================================= -->
+    <section class="first-practice" id="first-practice">
+      <div class="container">
+        <h2>What your first practice feels like</h2>
+        <ol class="practice-flow">
+          <li>
+            <div>
+              <strong>Open and begin.</strong>
+              <span>Tap <a class="text-link" href="/app">Try it in your browser</a> or install from Google Play. No sign-in, setup, or account.</span>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Settle into the breath.</strong>
+              <span>A soft breathing circle and voice cues lead the Sun Salutations hands-free.</span>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Move through a faithful sequence.</strong>
+              <span>The app selects from the <a class="text-link" href="/poses">Primary Series pose catalog</a> while keeping the traditional order intact.</span>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Finish cleanly.</strong>
+              <span>Every session closes with the fixed finishing frame and Savasana, so a short practice still feels complete.</span>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Return tomorrow.</strong>
+              <span>Keep the free guided practice, or use the optional unlock to choose <a class="text-link" href="/ashtanga-foundation-poses">Foundation poses</a>, Full series, or your own selection.</span>
+            </div>
+          </li>
+        </ol>
+        <p class="section-note">
+          New to the rhythm? Read the short guide to a
+          <a class="text-link" href="/30-minute-ashtanga-yoga-practice">30-minute Ashtanga yoga practice</a>.
         </p>
       </div>
     </section>
@@ -1384,9 +1727,8 @@
           <details>
             <summary>Who made this?</summary>
             <div class="faq-answer">
-              ashtanga30 was built by Roderik Krooneman, an Ashtanga practitioner who wanted a
-              shorter daily practice that actually respects the method. It is an independent
-              project, not affiliated with any school or lineage.
+              ashtanga30 is an independent, practitioner-built project for shorter daily
+              practice that respects the method. It is not affiliated with any school or lineage.
             </div>
           </details>
 
@@ -1422,7 +1764,7 @@
           <span class="footer-sep" aria-hidden="true">&middot;</span>
           <a href="https://play.google.com/store/apps/details?id=com.ashtanga30.twa">Google Play</a>
         </div>
-        <p class="footer-copy">&copy; 2026 Roderik Krooneman</p>
+        <p class="footer-copy">&copy; 2026 ashtanga30</p>
       </div>
     </footer>
 
