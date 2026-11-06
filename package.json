@@ -8,29 +8,35 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "validate:poses": "tsx src/data/validate-poses.ts",
+    "test:generator": "tsx src/lib/generatePractice.test.ts",
+    "test:guided-plan": "tsx src/lib/guidedPlan.test.ts",
+    "verify:pose-icons": "tsx src/components/poses/verify-coverage.ts",
+    "test:standalone": "tsx src/lib/entitlement.test.ts && tsx src/lib/billing.test.ts && tsx src/lib/reviewPrompt.test.ts && tsx src/lib/ambient.test.ts && tsx src/lib/counterPose.test.ts && tsx src/components/poses/flowIcons.test.ts && tsx src/lib/guidance.test.ts && tsx src/lib/navHistory.test.ts && tsx src/lib/practiceLog.test.ts && tsx src/lib/selectedPractice.test.ts",
+    "check": "npm run lint && npm run build && npm run validate:poses && npm run test:generator && npm run test:guided-plan && npm run verify:pose-icons && npm run test:standalone"
   },
   "dependencies": {
     "@vercel/analytics": "2.0.1",
-    "@vercel/speed-insights": "2.0.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@vercel/speed-insights": "2.1.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.25.0",
-    "@types/node": "^26.1.2",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "eslint": "^9.25.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^16.0.0",
-    "sharp": "^0.35.3",
-    "tsx": "^4.23.1",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.30.1",
-    "vite": "^6.3.5",
-    "vite-plugin-pwa": "^1.3.0"
+    "@eslint/js": "9.39.5",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "4.7.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "0.4.26",
+    "globals": "16.5.0",
+    "sharp": "0.35.5",
+    "tsx": "4.23.15",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "6.4.5",
+    "vite-plugin-pwa": "1.3.0"
   }
 }
