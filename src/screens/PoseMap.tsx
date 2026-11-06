@@ -225,7 +225,7 @@ function PoseMap({
       >
         <label className="basics-toggle__label" htmlFor="basics-only-switch">
           <span className="basics-toggle__text">
-            Basics only
+            Foundation
             {!unlocked && (
               <LockGlyph className="basics-toggle__lock" />
             )}
@@ -477,12 +477,12 @@ function PoseMap({
           disabled={basicsOnly}
           aria-label={
             basicsOnly
-              ? 'New sequence is unavailable in Basics only, which always uses the same essential poses'
+              ? 'New sequence is unavailable in Foundation, which always uses the same essential poses'
               : 'Generate a different practice'
           }
           title={
             basicsOnly
-              ? 'Basics only always uses the same essential poses'
+              ? 'Foundation always uses the same essential poses'
               : undefined
           }
         >

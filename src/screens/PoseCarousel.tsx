@@ -22,6 +22,11 @@ import type { TouchEvent } from 'react';
 import type { Pose } from '../types/pose';
 import PoseGraphic from '../components/PoseGraphic';
 import { Chevron } from '../components/icons/NavArrow';
+import {
+  formatPoseDurationContext,
+  posePracticeNote,
+  sectionLabelForPose,
+} from '../lib/poseContext';
 import { speakPoseName } from '../lib/voice';
 
 /** Sentinel value marking a drishti the human still needs to confirm. */
@@ -161,6 +166,7 @@ function PoseCarousel({
   }
 
   const verified = pose.drishti !== UNVERIFIED;
+  const practiceNote = posePracticeNote(pose);
 
   // Enter-animation class for the card. On first paint we use a plain fade-in
   // ('--enter-initial'); after that, a directional slide+fade keyed on the last
@@ -239,12 +245,12 @@ function PoseCarousel({
         </div>
 
         <p className="pose-card__meta">
-          {pose.category}
-          {' · '}
-          {pose.breaths} breaths
-          {pose.sides > 1 && ` · ×${pose.sides} sides`}
-          {pose.repeat > 1 && ` · ×${pose.repeat}`}
+          <span>{sectionLabelForPose(pose)}</span>
+          <span>{formatPoseDurationContext(pose)}</span>
+          {pose.isBasic && <span>Foundation</span>}
         </p>
+
+        {practiceNote && <p className="pose-card__note">{practiceNote}</p>}
 
         <div className="pose-card__drishti">
           <span className="pose-card__drishti-label">Drishti</span>

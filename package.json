@@ -13,7 +13,7 @@
     "test:generator": "tsx src/lib/generatePractice.test.ts",
     "test:guided-plan": "tsx src/lib/guidedPlan.test.ts",
     "verify:pose-icons": "tsx src/components/poses/verify-coverage.ts",
-    "test:standalone": "tsx src/lib/entitlement.test.ts && tsx src/lib/billing.test.ts && tsx src/lib/reviewPrompt.test.ts && tsx src/lib/ambient.test.ts && tsx src/lib/counterPose.test.ts && tsx src/components/poses/flowIcons.test.ts && tsx src/lib/guidance.test.ts && tsx src/lib/navHistory.test.ts && tsx src/lib/practiceLog.test.ts && tsx src/lib/selectedPractice.test.ts",
+    "test:standalone": "tsx src/lib/entitlement.test.ts && tsx src/lib/billing.test.ts && tsx src/lib/reviewPrompt.test.ts && tsx src/lib/ambient.test.ts && tsx src/lib/counterPose.test.ts && tsx src/lib/poseContext.test.ts && tsx src/components/poses/flowIcons.test.ts && tsx src/lib/guidance.test.ts && tsx src/lib/navHistory.test.ts && tsx src/lib/practiceLog.test.ts && tsx src/lib/selectedPractice.test.ts",
     "check": "npm run lint && npm run build && npm run validate:poses && npm run test:generator && npm run test:guided-plan && npm run verify:pose-icons && npm run test:standalone"
   },
   "dependencies": {
