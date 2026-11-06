@@ -18,7 +18,7 @@ The full Ashtanga Primary Series takes well over an hour, which makes a daily pr
 - **Optional sound, your way.** A Pose cues slider on Home sets how each pose change is announced: Silent (nothing), Bell (a soft bell on every change), or Voice (the pose name is spoken, in place of the bell). A separate Breath cues toggle adds soft inhale/exhale tones, and an Ambient slider chooses a calm nature bed to practice to: Off, Forest, Rain, or Ocean (CC0 loops, played gaplessly via the Web Audio API and kept quiet under the cues). At the end, Voice closes with a bell and a spoken "Namaste", Bell closes with the bell alone, and Silent with neither. Every setting persists on-device, and the layers mix gracefully: breath tones blend with the ambient bed, and a voice or bell cue dips the ambient politely, then it returns.
 - **A gentle record of your week.** Home shows the last seven days as small leaves that fill in sage on the days you practice: a quiet, pressure-free nudge rather than a streak counter. Everything stays on-device.
 - **Back where you expect.** The system Back gesture (and the browser Back button) steps back one screen, Guided to Overview to Home, rather than exiting. Backing out of a practice in progress asks for confirmation first.
-- **Made to keep.** Sanskrit-first pose names with English, drishti, and a tap-to-hear pronunciation button, original hand-drawn pose art, and an installable, offline-capable PWA.
+- **Made to keep.** Sanskrit-first pose names with English, drishti, tap-to-hear pronunciation, a read-only in-app pose catalog, original hand-drawn pose art, and an installable, offline-capable PWA.
 - **Free to practice, one-time upgrade to steer.** The app is free, and every free user gets a complete, faithful, guided 30-minute practice: the auto-generated sequence from the full pose pool, vinyasas, all sound, and all Home settings. A single one-time in-app unlock ("Steer your practice") adds the ability to steer the sequence yourself: "Foundation" mode, "Full series" mode, and per-pose selection. The paywall gates control, never the practice. The unlock is purchased through Google Play Billing (via the Digital Goods API inside the TWA) and the entitlement is stored on-device, with a "Restore purchase" option for the same Google account. Outside a supporting browser the purchase is simply not offered and the app stays the complete free tier.
 
 ## Tech stack
@@ -33,6 +33,7 @@ The full Ashtanga Primary Series takes well over an hour, which makes a daily pr
 ```sh
 npm install    # install dependencies
 npm run dev    # start the local dev server
+npm run check  # run lint, build, validation, and all standalone tests
 npm run build  # type-check and build for production
 npm run lint   # lint
 npm run icons  # regenerate the PWA PNG icons from the lotus SVG
@@ -67,16 +68,16 @@ Visit `/?pilot` in dev to see the pose-icon contact sheet, `/?complete` to rende
 - `src/components/MusicPanel.tsx`: the shell-level ambient player. It loops the chosen nature track gaplessly through the Web Audio API (an `AudioBufferSourceNode` with `loop = true` feeding a `GainNode`), which the native `<audio loop>` could not do without an audible seam. The gain node also carries the duck ramp and the corner mute/unmute button; `off` stops playback.
 - `src/lib/audioContext.ts`: a single shared `AudioContext` for all Web Audio consumers (the bell and the ambient), created lazily so one user gesture unlocks both (and so iOS is not asked to juggle multiple contexts).
 - `src/lib/ambientPref.ts`: the ambient-choice preference, a tiny pub/sub shared between the Home slider and the shell-level `MusicPanel`.
-- `src/lib/navHistory.ts`: the pure reducer backing browser-history and Back-gesture navigation between the three screens.
+- `src/lib/navHistory.ts`: the pure reducer backing browser-history and Back-gesture navigation between Home, the read-only Catalog, Overview, and Guided.
 - `src/lib/practiceLog.ts`: the on-device log of days a practice was completed, powering the last-7-days row on Home.
 - `src/lib/entitlement.ts`: the on-device "steer" unlock entitlement (a tiny, try/catch-wrapped localStorage flag), decoupled from any billing code so the gating logic is unit-testable without Play.
 - `src/lib/billing.ts`: the only Play-touching code. Wraps the Digital Goods API and a Play Billing `PaymentRequest` for the one-time `steer_unlock` product: `isBillingAvailable()`, `isProductAvailable()` (a `getDetails` precheck before launching the flow), `purchaseUnlock()`, and `restoreEntitlement()`. Every function is feature-detected and degrades gracefully (resolves false, never throws) outside a supporting TWA browser.
-- `src/lib/reviewPrompt.ts`: the on-device in-app review prompt. After a user completes their 5th practice, calls `window.requestReview` (injected by android-browser-helper inside the TWA) to trigger Google Play's native rating sheet. Shown at most once; the flag is written before calling the API so a throw cannot allow a retry. Silent no-op outside the TWA.
+- `src/lib/reviewPrompt.ts`: the on-device in-app review prompt. After the user's 5th practised day, calls `window.requestReview` (injected by android-browser-helper inside the TWA) to trigger Google Play's native rating sheet. In unsupported browsers it no-ops without burning the one-time flag; in supported environments it is attempted at most once.
 - `src/components/UnlockSheet.tsx`: the single calm unlock sheet, shown only when a free user taps a locked steer control. Shows the purchase (Unlock / Restore) when billing is available, or a gentle "needs Chrome" explanation when it is not (never a launch-time popup or a nag).
 - `src/lib/entitlement.test.ts`, `src/lib/billing.test.ts`, `src/lib/reviewPrompt.test.ts`: dependency-free standalone test scripts (run via `npx tsx <file>`, no test framework) covering the on-device persistence, billing gate logic, and review eligibility respectively.
 - `src/components/PracticeWeek.tsx` / `src/components/PetalMark.tsx`: the last-7-days leaf row and the single leaf marker (empty outline or filled sage).
 - `public/audio/voice/`: prerecorded pose-name clips plus `namaste.mp3`, `switch_sides.mp3`, and the salutation cues `last_breath.mp3`, `step_jump_forward.mp3`, and `samasthiti.mp3`; `public/audio/effects/` holds `bell.mp3` (the completion bell) and the breath-cue tones `inhale.mp3` and `exhale.mp3`.
-- `src/screens/`: Home, Overview (map + carousel), and the Guided player.
+- `src/screens/`: Home, read-only Catalog, Overview (editable map + carousel), and the Guided player.
 - `src/components/NamasteMark.tsx`: the completion Namaste mark (original traced SVG vector art).
 - `src/components/FlowMark.tsx`: the abstract flow glyph shown in place of a pose icon during a half-vinyasa.
 - `src/components/FlowStrip.tsx`: the live salutation/UHP flow strip shown in place of a pose icon, with the current position centered and highlighted.
